@@ -2,48 +2,52 @@
 
 # 1.反转
 
-### 1.1.链表反转
+### 1.1.[206] 反转链表
 
-- 链表逆序(递归版本) https://zhuanlan.zhihu.com/p/86745433
+递归版本
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* reverseList(ListNode* head) {
-        if (!head || !head->next) // 递归条件: 最少有2个节点
+        if (!head || !head->next) { // 至少有2个元素才递归
             return head;
+        }
         // 递归后半段
         ListNode* newHead = reverseList(head->next);
         // 处理前半段
         head->next->next = head;
         head->next = nullptr;
-
         return newHead;
     }
 };
 ```
 
-- 非递归版本
+非递归版本
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* reverseList(ListNode* head) {
-        ListNode* pre = NULL; // 不需要伪头节点, pre设为NULL
+        ListNode* pre = nullptr;
         ListNode* cur = head;
-        while(cur){
-            ListNode* post = cur->next; // 保存后继
-            cur->next = pre;            // 逆序: 反指
-            pre = cur; cur = post;      // pre,cur向后移动
+        while (cur) {
+            // 保存后继
+            ListNode* post = cur->next;
+            // 逆序: 反指
+            cur->next = pre;
+            // 向后遍历
+            pre = cur;
+            cur = post;
         }
-        return pre;  // 返回的是pre，不是head
+        return pre;
     }
 };
 ```
 
 ### 1.2. 逆序打印链表
 
-```c++
+```cpp
 class Solution {
 public:
     vector<int> ret;
@@ -65,19 +69,19 @@ public:
 
 ### 1.3. 两两交换链表中的节点
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* swapPairs(ListNode* head) {
-        if (!head || !head->next) // 递归条件：至少有2个节点
+        if (!head || !head->next) { // 递归条件: 至少有2个节点
             return head;
-        
-        // 递归后半段
-        ListNode* part2 = swapPairs(head->next->next); 
-        // 处理前半段
+        }
+        // 递归后半部分
+        ListNode* postHead = swapPairs(head->next->next);
+        // 处理前半部分
         ListNode* newHead = head->next;
         newHead->next = head;
-        head->next = part2;
+        newHead->next->next = postHead;
 
         return newHead;
     }
@@ -85,52 +89,54 @@ public:
 ```
 
 
-### 1.4. [反转从位置m到n的链表](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+### 1.4. [92. 反转从位置m到n的链表](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
 
 要求：一趟扫描完成反转
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        ListNode* pre = nullptr;
-        ListNode* cur = head;
+        if (!head) {
+            return head;
+        }
         
-        // 查询开始翻转的点
+        ListNode dummy;
+        dummy.next = head;
+
+        ListNode* pre = &dummy;
+        ListNode* cur = head;
+
         int i = 1;
-        for (; i < left; i++) { // 循环退出后，cur指向第left个节点
-            pre = cur;
+        // 查询开始翻转的点
+        for (; i < left; i++) {
+            pre = pre->next;
             cur = cur->next;
         }
-
-        ListNode* sPre = pre;
-        ListNode* sCur = cur;
+        ListNode* tpre = pre;
+        ListNode* tcur = cur;
 
         // 边遍历，边翻转: 翻转[left,right]区间内的节点，所以，循环退出条件: i<(right+1)
-        for (; i < right+1; i++) {  // 循环退出后，cur指向第right+1个节点
+        for (; i <= right; i++) {
             ListNode* post = cur->next;
             cur->next = pre;
             pre = cur; cur = post;
         }
 
-        // 连接
-        if (sPre){
-            sPre->next = pre;
-        } else { // 当left=1时，特殊处理，此时head是pre
-            head = pre;
-        }
-        sCur->next = cur;
+        // 重新连接
+        tpre->next = pre;
+        tcur->next = cur;
 
-        return head;
+        return dummy.next;
     }
 };
 ```
 
-### 1.5. [K个一组反转链表](https://leetcode-cn.com/problems/reverse-nodes-in-k-group/)
+### 1.5. 😭[25] K 个一组翻转链表
 
 解法1: 递归
 
-```c++
+```cpp
 class Solution {
 public:
     // 将[head, tail]翻转，返回新的头结点
@@ -172,7 +178,7 @@ public:
 
 解法2: 非递归
 
-```c++
+```cpp
 class Solution {
 public:
     // 翻转[head, tail]区间内的链表, 返回新的{头, 尾}
@@ -231,55 +237,49 @@ public:
 ```
 
 
-### 1.6. [回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/) **
+### 1.6. [234] 回文链表
 
 > 1. 找中间节点（一定要通过fast，判断链表奇/偶）
 > 2. 后半部分入栈
 > 3. 出栈比较
 
-```c++
-
+```cpp
 class Solution {
 public:
-    ListNode* getlistmid(ListNode* head){
+    ListNode* getMidNode(ListNode* head) {
         ListNode* fast = head;
         ListNode* slow = head;
-        
-        while(fast && fast->next){
+        while (fast && fast->next) {
             fast = fast->next->next;
             slow = slow->next;
         }
-        
-        // 判断奇数偶数的技巧：使用fast
-        //        fast不为NULL ==> 奇数 ==> 返回mid->next
-        //        fast  为NULL ==> 偶数 ==> 返回mid
-        return (fast) ? slow->next : slow;
+        return fast ? slow->next : slow;
     }
 
-    // 核心难点：奇数偶数要区分开来！
     bool isPalindrome(ListNode* head) {
-        if(!head)
+        if (!head) {
             return true;
-
+        }
+        // 查询中间节点
+        ListNode* midNode = getMidNode(head); 
+        
+        // 将后半部分放入栈
         stack<int> s;
-
-        ListNode* mid = getlistmid(head);
-        ListNode* cur = mid;
-
-        // 将后半段(值), 入栈
-        while(cur){
-            s.push(cur->val);
-            cur = cur->next;
+        while (midNode) {
+            s.push(midNode->val);
+            midNode = midNode->next;
         }
 
-        // 栈中的元素(后半部分)与前半部分对比
-        cur = head;
-        while(cur != mid && !s.empty()){
-            if(s.top() != cur->val)
-                return false; 
+        // cmp: 出栈元素、前半部分
+        ListNode* cur = head;
+        while (!s.empty() ) {
+            if (s.top() != cur->val) {
+                return false;
+            }
+            cur = cur->next;
             s.pop();
-            cur = cur->next;
         }
+
         return true;
     }
 };
@@ -287,7 +287,7 @@ public:
 
 # 2. 链表与【小技巧】
 
-### 2.1. 相交链表
+### 2.1. [160] 相交链表
 
 - 求两个相交链表的交点
 
@@ -295,7 +295,7 @@ public:
 1. 循环条件：p != q
 2. p、q分别遍历L1+L2、L2+L1
 
-```c++
+```cpp
 class Solution {
 public:
     // 思想：L1+L2 == L2+L1
@@ -308,7 +308,7 @@ public:
         ListNode* p = headA;
         ListNode* q = headB;
 
-        while (p != q) { // 循环退出条件: p和q走到同一个点
+        while (p != q) { // 循环退出条件: p和q走到同一个点(循环结束时，要么是交点，要么是null)
             p = p ? p->next : headB; // pA,pB走到链表尾部, 就切换到对方的链表头
             q = q ? q->next : headA;
         }
@@ -319,8 +319,7 @@ public:
 ```
 
 
-### 2.2. [删除链表的倒数第K个节点](https://leetcode-cn.com/problems/SLwz0R/submissions/)
-
+### 2.2. [19] 删除链表的倒数第 N 个结点
 
 解题思路
 1. 快指针先走K步
@@ -330,33 +329,32 @@ public:
 注意事项：因为第一个节点可能会被删除，所以要增加伪头结点
 
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
-        if (!head)
-            return head;
-        
         // 伪头结点: 因为第一个元素可能会被删除
-        ListNode dummy; 
+        ListNode dummy;
         dummy.next = head;
 
-        // fast指向第N+1个节点（快指针向前走N步）
-        ListNode* fast = head;
-        for (int i=1; i<n+1; i++){ 
-            fast = fast->next;
+        ListNode* fast_cur = head;
+
+        // 快指针先向前走n补
+        for (int i=1; i<=n; i++) {
+            fast_cur = fast_cur->next;
         }
 
-        ListNode* pre = &dummy;
-        ListNode* cur = dummy.next;
+        // 快慢指针一起走: 当快指针走到null时，慢指针指向待删除节点
+        ListNode* slow_pre = &dummy;
+        ListNode* slow_cur = head;
 
-        // 快指针和慢指针一起走，当快指针为null时，慢指针指向被删节点
-        while (fast) {
-            fast = fast->next;
-            pre = cur; cur = cur->next;
+        while (fast_cur) {
+            slow_pre = slow_pre->next;
+            slow_cur = slow_cur->next;
+            fast_cur = fast_cur->next;
         }
 
-        pre->next = cur->next;
+        slow_pre->next = slow_pre->next->next;
 
         return dummy.next;
     }
@@ -365,31 +363,34 @@ public:
 
 ### 2.3. 链表有环？环的入口节点
 
-#### 2.3.1.环形链表①
+#### 2.3.1. [141] 环形链表
 
 - 判断链表是否有环
 
-```c++
+```cpp
 class Solution {
 public:
     bool hasCycle(ListNode *head) {
+        if (!head) {
+            return false;
+        }
         ListNode* fast = head;
         ListNode* slow = head;
 
         while (fast && fast->next) {
             fast = fast->next->next;
             slow = slow->next;
-            if (slow == fast) {
+            if (fast == slow) {
                 return true;
             }
         }
-        
+
         return false;
     }
 };
 ```
 
-#### 2.3.2.环形链表②
+#### 2.3.2. [142] 环形链表 II
 
 - 返回环形链表的第一个交点
 
@@ -397,72 +398,30 @@ public:
 2. 有环: fast && fast->next
 3. 环入口: 快指针移动到head，快慢指针一起走，第一次相遇节点就是入口
 
-```c++
-class Solution {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        ListNode* fast = head;
-        ListNode* slow = head;
-
-        bool hasCycle = false;
-        while (fast && fast->next) {
-            fast = fast->next->next;
-            slow = slow->next;
-            if (fast == slow) {
-                hasCycle = true;
-                break;
-            }
-        }
-
-        if (!hasCycle) {
-            return NULL;
-        }
-
-        fast = head;
-
-        while (slow != fast) {
-            fast = fast->next;
-            slow = slow->next;
-        }
-        
-        return slow;
-    }
-};
-```
-
-### 2.4. 旋转链表
-
-解题思路：
-1. 先将链表首位相连，并统计链表总结点数cnt
-2. 找规律：
-    1. 规律：链表总结点数cnt = 向右旋转k次 + 最后一个节点的下标
-    2. 结论：最后一个节点的下标 = 链表总结点数cnt - 向右旋转k次 = cnt - (k % cnt)
-3. 处理
-    1. 找到最后一个节点：找到第 cnt - (k % cnt) 个节点，断开
-    2. 返回新的头结点：最后一个节点的后继
-
-```c++
+```cpp
 class Solution {
 public:
     ListNode* rotateRight(ListNode* head, int k) {
-        
-        if (!head)
+        if (!head || k == 0) {
             return head;
+        }
+
+        ListNode* pre = nullptr;
+        ListNode* cur = head;
 
         int cnt = 0;
-        ListNode* cur = head;
-        ListNode* pre = nullptr;
         while (cur) {
             pre = cur;
             cur = cur->next;
             cnt++;
         }
-        pre->next = head; // 首尾相连
+        
+        // 首位相连
+        pre->next = head; 
 
-        int lastNodeIndex = cnt - (k % cnt); // 最后一个节点的下标 + 旋转k次数 = 总节点数cnt
-
+        k = cnt - (k % cnt); 
         cur = head;
-        for (int i=1; i<lastNodeIndex; i++) { // 找到最后一个节点
+        for (int i=1; i<k; i++) {
             cur = cur->next;
         }
 
@@ -474,64 +433,55 @@ public:
 };
 ```
 
-### 2.5. [237] 删除链表中的节点
+### 2.4. [237] 删除链表中的节点
 
 技巧：将node节点的值，改为node->next->val，删除node->next
 
-```c++
+```cpp
 class Solution {
 public:
     void deleteNode(ListNode* node) {
-        node->val = node->next->val;   
-        node->next = node->next->next; 
+       node->val = node->next->val;
+       node->next = node->next->next;
     }
 };
 ```
 
-### 2.6. [2]两数相加
+### 2.5. [2] 两数相加
 
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        if (!l1)
-            return l2;
-        if (!l2) 
-            return l1;
-
         ListNode* p = l1;
         ListNode* q = l2;
 
+        int summry = 0;
 
         ListNode dummy;
         ListNode* cur = &dummy;
 
-        int carry = 0;
         while (p || q) {
-            int pval=0, qval=0;
-            if (p) {
-                pval = p->val;
-                p = p->next;
-            }
-            if (q) {
-                qval = q->val;
-                q = q->next;
-            }
+            int pval = p ? p->val : 0;
+            int qval = q ? q->val : 0;
+            int val = summry + pval + qval;
+            int low = val % 10;
+            summry = val / 10;
 
-            int sum = pval + qval + carry;
-            int val = sum % 10;
-            carry = sum / 10;
-
-            cur->next = new ListNode(val);
+            ListNode* newNode = new ListNode(low);
+            cur->next = newNode;
 
             cur = cur->next;
+            if (p) p = p->next;
+            if (q) q = q->next;
         }
 
-        if (carry > 0) {
-            cur->next = new ListNode(carry);
+        if (summry > 0) {
+            ListNode* newNode = new ListNode(summry);
+            cur->next = newNode;
         }
-
+        
         return dummy.next;
     }
 };
@@ -543,7 +493,7 @@ public:
 2. 再给random指针赋值
 3. 拆分
 
-```c++
+```cpp
 class Solution {
 public:
     Node* copyRandomList(Node* head) {
@@ -593,13 +543,11 @@ public:
 
 # 3. 链表与【排序/有序】
 
-### 3.1. 删除排序链表中重复的元素
+### 3.1. 😭 [83] 删除排序链表中的重复元素 easy
 
-题1： 83 easy
+给定一个已排序的链表的头 head ， 删除所有重复的元素，使每个元素只出现一次 。返回 已排序的链表 。
 
-- 删除排序链表中的重复元素，相同元素只出现一次
-
-```c++
+```cpp
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
@@ -624,13 +572,85 @@ public:
 };
 ```
 
-题2： 82  mid 😄
+```cpp
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (!head || !head->next) {
+            return head;
+        }
 
-- 给定一个已排序的链表的头 head ， 删除原始链表中所有重复数字的节点，只留下不同的数字 。返回 已排序的链表 。
+        ListNode dummy(-101);
+        dummy.next = head;
 
-### 3.1. [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+        ListNode* pre = &dummy;
+        ListNode* cur = head;
 
-```c++
+        while (cur) {
+            ListNode* post = cur->next;
+            if (pre->val != cur->val) { // 不相等，向后遍历
+                pre = cur;
+                cur = post;
+            } else { // 相等，删除节点cur
+                pre->next = post;
+                cur = post;
+            }
+        }
+        return dummy.next;
+    }
+};
+```
+
+### 3.2. 😭 [82] 删除排序链表中的重复元素 II  --- mid
+
+给定一个已排序的链表的头 head ， 删除原始链表中所有重复数字的节点，只留下不同的数字 。返回 已排序的链表 。
+
+```cpp
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (!head || !head->next)
+            return head;
+        
+        // 增加伪头结点
+        ListNode dummy(-1000);
+        dummy.next = head;
+
+        ListNode* pre = &dummy;
+        ListNode* cur = head;
+
+        while (cur) {
+            // if (pre->val != cur->val) { // 确保: 不让pre和cur相等
+                ListNode* tpre = cur;
+                ListNode* tcur = cur->next;
+                bool flag = false;
+                while (tcur) {
+                    if (tpre->val == tcur->val) {
+                        tpre = tpre->next;
+                        tcur = tcur->next;
+                        flag = true;
+                    } else {
+                        break;
+                    }
+                }
+                if (flag) {
+                    pre->next = tcur;
+                    cur = tcur;
+                } else {
+                    pre = tpre;
+                    cur = tcur;
+                }
+            // }
+        }
+        return dummy.next;
+    }
+};
+```
+
+
+### 3.3. [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+
+```cpp
 class Solution {
 public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
@@ -666,7 +686,7 @@ public:
 };
 ```
 
-### 3.2. [86] 分隔链表
+### 3.4. [86] 分隔链表
 
 给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。
 
@@ -676,7 +696,7 @@ public:
 2. 将大于x的值，挂在big链表
 3. 链表连接：small + big
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* partition(ListNode* head, int x) {
@@ -713,9 +733,9 @@ public:
 };
 ```
 
-### 3.2. 奇偶链表
+### 3.5. 奇偶链表
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* oddEvenList(ListNode* head) {
@@ -750,7 +770,7 @@ public:
 };
 ```
 
-### 3.2. 奇数位升序，偶数位降序链表排序
+### 3.6. 奇数位升序，偶数位降序链表排序
 
 一个链表，奇数位升序偶数位降序，让链表变成升序的。
 
@@ -762,7 +782,7 @@ public:
 
 
 
-### 3.3. [23. 合并K个`升序链表`😄](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+### 3.7. [23. 合并K个`升序链表`😄](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
 
 > 给你一个链表数组，每个链表都已经按升序排列。
 >
@@ -813,11 +833,11 @@ public:
 ```
 
 
-### 3.4. [148. 排序链表😄](https://leetcode-cn.com/problems/sort-list/)
+### 3.8. [148. 排序链表😄](https://leetcode-cn.com/problems/sort-list/)
 
 1-插入排序 （会超时）
 
-```c++
+```cpp
 class Solution {
 public:
     ListNode* sortList(ListNode* head) {
@@ -849,7 +869,7 @@ public:
 
 2-链表排序(归并)
 
-```c++
+```cpp
 class Solution {
 public:
     // 找中间节点(顺便将链表一分为二)  [head, mid], [mid->next, 末尾节点]
@@ -902,105 +922,3 @@ public:
 };
 ```
 
----
-
-# 4. 应用题
-
-### 4.1. [146]. LRU 缓存
-
-```go
-type DLinkedNode struct {
-	prev *DLinkedNode
-	next *DLinkedNode
-	key  int
-	val  int
-}
-
-func NewDLinkedNode(key int, val int) *DLinkedNode {
-	return &DLinkedNode{
-		key: key,
-		val: val,
-	}
-}
-
-type LRUCache struct {
-	// 双向链表
-	head           *DLinkedNode
-	tail           *DLinkedNode
-	size, capacity int
-	// 哈希表
-	hash map[int]*DLinkedNode
-}
-
-func Constructor(capacity int) LRUCache {
-	head := NewDLinkedNode(0, 0)
-	tail := NewDLinkedNode(0, 0)
-	head.next = tail
-	// head.prev = tail
-	// tail.next = head
-	tail.prev = head
-	return LRUCache{
-		head:     head,
-		tail:     tail,
-		size:     0,
-		capacity: capacity,
-		hash:     make(map[int]*DLinkedNode),
-	}
-}
-
-func (this *LRUCache) Get(key int) int {
-	node, ok := this.hash[key]
-	if !ok {
-		return -1
-	}
-	this.moveToHead(node)
-	return node.val
-}
-
-func (this *LRUCache) Put(key int, value int) {
-	node, ok := this.hash[key]
-	if ok { // 存在
-		node.val = value
-		this.moveToHead(node)
-		return
-	} else { // 不存在
-		// 头插
-		this.size++
-		newNode := NewDLinkedNode(key, value)
-		this.insertToHead(newNode)
-		this.hash[key] = newNode
-		if this.size > this.capacity {
-			// 尾删
-			this.size--
-			deleteNode := this.deleteTail()
-			delete(this.hash, deleteNode.key)
-		}
-	}
-}
-
-func (this *LRUCache) deleteNode(node *DLinkedNode) {
-	prev := node.prev
-	post := node.next
-	prev.next = post
-	post.prev = prev
-}
-
-func (this *LRUCache) insertToHead(node *DLinkedNode) {
-	post := this.head.next
-	this.head.next = node
-	node.prev = this.head
-	node.next = post
-	post.prev = node
-}
-
-func (this *LRUCache) moveToHead(node *DLinkedNode) {
-	this.deleteNode(node)
-	this.insertToHead(node)
-}
-
-func (this *LRUCache) deleteTail() *DLinkedNode {
-	deleteNode := this.tail.prev
-	this.deleteNode(deleteNode)
-	return deleteNode
-}
-```
