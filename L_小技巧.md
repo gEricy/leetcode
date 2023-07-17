@@ -395,3 +395,48 @@ class Solution(object):
         return ans
 ```
 
+# 5. TODO
+
+[567]字符串的排列 (mid)
+
+给你两个字符串 s1 和 s2 ，写一个函数来判断 s2 是否包含 s1 的排列。如果是，返回 true ；否则，返回 false 。
+
+换句话说，s1 的排列之一是 s2 的 子串 。
+
+
+常用的技巧：统计每个字母出现的次数，无需使用map<char, int> char2CntMap，直接使用一个int数组 vector<int> cnt(26, 0)
+
+- 字母ch
+- 字母的次数保存在数组中的位置: ch-'a'
+- 获取字母ch出现的次数: cnt[ch-'a']
+
+```c++
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        int len1 = s1.size(), len2 = s2.size();
+        if (len1 > len2) {
+            return false;
+        }
+
+        vector<int> cnt1(26, 0),cnt2(26, 0);
+
+        for (int i = 0; i < len1; i++) {
+            ++cnt1[s1[i] - 'a'];
+            ++cnt2[s2[i] - 'a'];
+        }
+        if (cnt1 == cnt2) {
+            return true;
+        }
+
+        for (int i = len1; i < len2; i++) {
+            ++cnt2[s2[i] - 'a'];
+            --cnt2[s2[i - len1] - 'a'];
+            if (cnt1 == cnt2) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+```
