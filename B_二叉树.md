@@ -1184,7 +1184,50 @@ public:
 
 ### 6.4. 😄[662] 二叉树最大宽度
 
+层序遍历，queue中保存的元素是 <TreeNode*, index>
 
+```cpp
+struct QNode {
+    TreeNode* node;
+    unsigned int idx;
+    QNode(TreeNode* node, unsigned int idx) : node(node), idx(idx) {}
+};
+
+class Solution {
+public:
+    int widthOfBinaryTree(TreeNode* root) {
+        if (!root)
+            return 0;
+        
+        unsigned int ans;
+
+        queue<QNode*> Q;
+        Q.push(new QNode(root, 1));
+
+        while (!Q.empty()) {
+            int size = Q.size();
+            bool flag = false;
+            unsigned int leftIndex;
+            while (size--) {
+                QNode* cur = Q.front(); Q.pop();
+                if (!flag) {
+                    leftIndex = cur->idx;
+                    flag = true;
+                }
+                if (cur->node->left) {
+                    Q.push(new QNode(cur->node->left, 2*cur->idx));
+                }
+                if (cur->node->right) {
+                    Q.push(new QNode(cur->node->right, 2*cur->idx+1));
+                }
+                ans = max(ans, cur->idx - leftIndex + 1);
+            }
+        }
+
+        return int(ans);
+    }
+};
+```
 
 ### 6.5. [958. 二叉树的完全性检验](https://leetcode-cn.com/problems/check-completeness-of-a-binary-tree/)
 
