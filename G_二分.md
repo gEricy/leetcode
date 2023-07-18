@@ -86,10 +86,12 @@ class Solution(object):
                 l = mid
             else:
                 r = mid
+
         if matrix[l / n][l % n] == target:
             return True
         if matrix[r / n][r % n] == target:
             return True
+
         return False
 ```
 
@@ -163,7 +165,7 @@ class Solution(object):
             l, r = 0, size-1
             while l+1 < r:
                 mid = (l+r)/2
-                if nums[mid] == target:
+                if nums[mid] == target: # 差异点
                     r = mid
                 elif nums[mid] > target:
                     r = mid
@@ -179,7 +181,7 @@ class Solution(object):
             l, r = 0, size-1
             while l+1 < r:
                 mid = (l+r)/2
-                if nums[mid] == target:
+                if nums[mid] == target: # 差异点
                     l = mid
                 elif nums[mid] > target:
                     r = mid
@@ -271,27 +273,27 @@ class Solution(object):
     def search(self, nums, target):
         size = len(nums)
 
-        l, r = 0, size-1
+        l, r = 0, size - 1
 
-        while l+1 < r:
-            mid = (l+r)/2
-            # 先判断mid,l,r是否是target
+        while l + 1 < r:
+            mid = (l + r) / 2
+
             if nums[mid] == target:
                 return mid
             if nums[l] == target:
                 return l
             if nums[r] == target:
                 return r
-            # 缩小区间
+
             if nums[l] < nums[mid]:  # [l,mid]是单调区间
-                if nums[l] < target and target < nums[mid]:  # target在单调区间[l,mid]内
+                if nums[l] < target < nums[mid]: # target在区间内
                     r = mid
-                else:                                        # target不在单调区间[l,mid]内
+                else:
                     l = mid
-            else:                   # [mid,r]是单调区间
-                if nums[mid] < target and target < nums[r]:  # target在单调区间[mid,r]内
+            else:  # [mid,r]是单调区间
+                if nums[mid] < target < nums[r]: # target在区间内
                     l = mid
-                else:                                        # target不在单调区间[mid,r]内
+                else:
                     r = mid
 
         if nums[l] == target:
