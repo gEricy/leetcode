@@ -49,6 +49,7 @@ class Solution(object):
 ```
 
 ```python
+# 模板1
 class Solution(object):
     def searchMatrix(self, matrix, target):
         m = len(matrix)     # m行n列
@@ -65,6 +66,30 @@ class Solution(object):
             else:
                 l = mid+1
 
+        return False
+```
+
+```python
+# 模板2
+class Solution(object):
+    def searchMatrix(self, matrix, target):
+        m = len(matrix)  # m行n列
+        n = len(matrix[0])
+
+        l, r = 0, m * n - 1
+
+        while l + 1 < r:
+            mid = (l + r) / 2
+            if matrix[mid / n][mid % n] == target:
+                return True
+            elif matrix[mid / n][mid % n] < target:
+                l = mid
+            else:
+                r = mid
+        if matrix[l / n][l % n] == target:
+            return True
+        if matrix[r / n][r % n] == target:
+            return True
         return False
 ```
 
@@ -117,7 +142,7 @@ class Solution(object):
 
 - 循环条件: while l+1 < r:
 - 缩小区间: l、r都只变更为mid
-- 当不满足while循环条件时，<u>**l、r的状态一定是l+1=r（此时，只剩下两个位置l, r）**</u>，要判断l、r是否满足条件
+- 当不满足while循环条件时，<u>**l、r的状态一定是l+1>=r（此时，只剩下两个位置l, r）**</u>，要判断l、r是否满足条件
   - if nums[l] 满足条件 ？
   - if nums[r] 满足条件 ？
 
@@ -169,7 +194,7 @@ class Solution(object):
         return [searchFirst(), searchLast()]
 ```
 
-### 2.1.2. [35] 搜索插入位置
+### 2.1.2. 😭 [35] 搜索插入位置
 
 给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
 
@@ -277,7 +302,7 @@ class Solution(object):
         return -1
 ```
 
-### 2.2.2. 😄寻找旋转排序数组中的最小值
+### 2.2.2. 😄 寻找旋转排序数组中的最小值
 
 下面2个题目，答案是一个
 
@@ -345,20 +370,16 @@ class Solution(object):
 ```python
 class Solution(object):
     def findMin(self, nums):
-        size = len(nums)
-
-        l, r = 0,  size-1
-
-        while l+1 < r:
+        l,r = 0,len(nums)-1
+        while l+1<r:
             mid = (l+r)/2
-            if nums[mid] < nums[r]:   # 小于
-                r = mid
-            elif nums[mid] > nums[r]: # 大于
-                l = mid
-            else:                     # 等于，忽略nums[r]
-                r -= 1
-
-        return min(nums[l], nums[r])
+            if nums[mid] < nums[r]:
+                r=mid
+            elif nums[mid]==nums[r]:
+                r=mid
+            else:
+                l=mid
+        return min(nums[l],nums[r])
 ```
 
 ## 2.3. 变种题
@@ -367,23 +388,35 @@ class Solution(object):
 
 给定一个输入数组 `nums`，其中 `nums[i] ≠ nums[i+1]`，返回任何一个峰值元素的索引。
 
+
+解题思路: 相邻的两个元素 `nums[mid],nums[mid-1]` 或 `nums[mid],nums[mid+1]`，判断是否出现逆序
+
 ```python
 class Solution(object):
     def findPeakElement(self, nums):
-        size = len(nums)
-
-        l, r = 0, size-1
-
-        while l+1 < r:
-            mid = (l+r)/2
-            if nums[mid] > nums[mid-1]:
-                l = mid
+        l,r = 0,len(nums)-1
+        while l+1<r:
+            mid=(l+r)/2
+            if nums[mid] < nums[mid-1]:
+                r=mid
             else:
-                r = mid
-
-        # 剩下的两个元素, 最大的肯定就是峰值
-        return l if nums[l] > nums[r] else r
+                l=mid
+        return l if nums[l]>nums[r] else r
 ```
+
+```python
+class Solution(object):
+    def findPeakElement(self, nums):
+        l,r = 0,len(nums)-1
+        while l+1<r:
+            mid=(l+r)/2
+            if nums[mid] > nums[mid+1]:
+                r=mid
+            else:
+                l=mid
+        return l if nums[l]>nums[r] else r
+```
+
 
 
 ### 2.3.2. 😄[69] x 的平方根 
@@ -457,4 +490,6 @@ class Solution(object):
 ```
 
 ```
+
+
 
