@@ -11,21 +11,13 @@
 class Solution {
 public:
     int removeDuplicates(vector<int>& nums) {
-        int size = nums.size();
-        if (size < 2)
-            return size;
-
-        int l = 0, r = 1;
-        while (r < size) {
-            if (nums[l] == nums[r]) {
-                r++;
-            } else {
-                nums[l] = nums[r];
-                l++;
-                r++;
+        int j = 0;
+        for (int i=1;i<nums.size();i++) {
+            if(nums[i] != nums[j]) {
+                nums[++j] = nums[i];
             }
         }
-        return l+1;
+        return j+1;
     }
 };
 ````
@@ -60,11 +52,6 @@ public:
 };
 ```
 
-1.3. [82] 删除排序链表中的重复元素 II
-
-
-
-
 ### 2. [27] 移除元素
 
 给你一个数组 nums 和一个值 val，你需要 原地 移除所有数值等于 val 的元素，并返回移除后数组的新长度。
@@ -77,19 +64,13 @@ public:
 class Solution {
 public:
     int removeElement(vector<int>& nums, int val) {
-        int size = nums.size();
-        int l = 0, r = 0;
-
-        while (r < size) {
-            if (nums[r] == val) {
-                r++;
-            } else {
-                nums[l] = nums[r];
-                l++;
-                r++;
+        int j=0;
+        for (int i=0; i<nums.size(); i++) {
+            if (nums[i] != val) {
+                nums[j++] = nums[i];
             }
         }
-        return l;
+        return j;
     }
 };
 ```
@@ -105,19 +86,14 @@ public:
 class Solution {
 public:
     void moveZeroes(vector<int>& nums) {
-        int size = nums.size();
-        int l = 0, r = 0;
-
-        while (r < size) {
-            if (nums[r] != 0) {
-                nums[l] = nums[r];
-                l++;
+        int j=0;
+        for (int i=0; i<nums.size(); i++) {
+            if (nums[i] != 0) {
+                nums[j++] = nums[i];
             }
-            r++;
         }
-        while (l < size) {
-            nums[l] = 0;
-            l++;
+        for (; j<nums.size(); j++) {
+            nums[j] = 0;
         }
     }
 };
@@ -143,21 +119,15 @@ nums2 = [2,5,6],       n = 3
 class Solution {
 public:
     void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
-        int k = m+n-1; // 保存结果: 从后向前赋值
-        
+        int k = m+n-1;
         int i = m-1, j = n-1;
         while (i>=0 && j>=0) {
-            int maxval;
             if (nums1[i] > nums2[j]) {
-                maxval = nums1[i];
-                i--;
+                nums1[k--] = nums1[i--];
             } else {
-                maxval = nums2[j];
-                j--;
+                nums1[k--] = nums2[j--];
             }
-            nums1[k--] = maxval;
         }
-
         while (j>=0) {
             nums1[k--] = nums2[j--];
         }
@@ -177,9 +147,8 @@ public:
 class Solution {
 public:
     void sortColors(vector<int>& nums) {
-        int i = 0;
-        int l = 0, r = nums.size()-1;
-
+        int l=0, r=nums.size()-1;
+        int i=0;
         while (i <= r) {
             switch (nums[i]) {
                 case 0:
@@ -246,24 +215,25 @@ public:
 class Solution {
 public:
     int trap(vector<int>& height) {
-        int size = height.size();
-
-        vector<int> leftMax(size, 0), rightMax(size, 0);
+        int n = height.size();
         
+        vector<int> lMax(n, 0);
+        vector<int> rMax(n, 0);
+
         // 从左向右看，最大值
-        leftMax[0] = height[0];
-        for (int i=1; i<size; i++) {
-            leftMax[i] = max(leftMax[i-1], height[i]);
+        lMax[0] = height[0];
+        for (int i=1; i<n; i++) {
+            lMax[i] = max(height[i], lMax[i-1]);
         }
         // 从右向左看，最大值
-        rightMax[size-1] = height[size-1];
-        for (int i=size-2; i>=0; i--) {
-            rightMax[i] = max(rightMax[i+1], height[i]);
+        rMax[n-1] = height[n-1];
+        for (int i=n-2; i>=0; i--) {
+            rMax[i] = max(height[i], rMax[i+1]);
         }
 
         int ans = 0;
-        for (int i=0; i<size; i++) {
-            ans += min(leftMax[i], rightMax[i]) - height[i];
+        for (int i=0; i<n; i++) {
+            ans += min(lMax[i], rMax[i]) - height[i];
         }
 
         return ans;
@@ -281,14 +251,26 @@ public:
 ```python
 class Solution(object):
     def twoSum(self, nums, target):
-        hash = {} # hash表中存放的是 [nums[i], i], 即 [元素值, 下标]
-
+        hash = {}  # hash表中存放的是(元素, 下标)，即: (nums[i], i)
         for i in range(len(nums)):
-            diff = target-nums[i] # 差值
+            diff = target - nums[i]
             if diff in hash:
                 return [i, hash[diff]]
-            hash[nums[i]] = i
-        return []
+            else:
+                hash[nums[i]] = i
+        return [-1, -1]
+```
+
+```python
+class Solution(object):
+    def twoSum(self, nums, target):
+        hash = {}  # hash表中存放的是(diff,下标)，即: (target-nums[i], i)
+        for i in range(len(nums)):
+            if nums[i] in hash:
+                return [i, hash[nums[i]]]
+            else:
+                hash[target - nums[i]] = i
+        return [-1, -1]
 ```
 
 8.2. [167] 两数之和 II - 输入有序数组
@@ -301,24 +283,19 @@ class Solution(object):
 解释：2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。返回 [1, 2] 。
 ```
 
-```c++
-class Solution {
-public:
-    vector<int> twoSum(vector<int>& numbers, int target) {
-        int l = 0, r = numbers.size()-1;
-        while (l < r) {
-            int sum = numbers[l]+numbers[r];
-            if (sum == target) {
-                return vector<int>{l+1, r+1};
-            } else if (sum > target) {
-                r--;
-            } else {
-                l++;
-            }
-        }
-        return vector<int>{-1, -1};
-    }
-};
+```python
+class Solution(object):
+    def twoSum(self, numbers, target):
+        l,r = 0,len(numbers)-1
+        while l<r:
+            sum = numbers[l]+numbers[r]
+            if sum == target:
+                return [l+1,r+1]
+            elif sum > target:
+                r-=1
+            else:
+                l+=1
+        return [-1,-1]
 ```
 
 ### 9. 😄 [15] 三数之和
@@ -341,6 +318,36 @@ public:
 1. 去重1：固定的数不为同一个，i>0 and nums[i]==nums[i-1]，如：[-1],-1,0,1，消除多次-1,-1
 2. 去重2：当sum=nums[i]+nums[l]+nums[r]=0时，l<r and nums[l]!=nums[l-1]，如：[-1],0,0,0,1。消除多次0,0,0
 
+```python
+class Solution(object):
+    def threeSum(self, nums):
+        n = len(nums)
+        ans = []
+
+        nums.sort()
+
+        # 固定一个值nums[i]
+        for i in range(n - 2):
+            if i > 0 and nums[i] == nums[i - 1]:  # 1.去重
+                continue
+            # 双指针[l,r]锁定后面的区间
+            l = i + 1
+            r = n - 1
+            while l < r:
+                sum = nums[i] + nums[l] + nums[r]
+                if sum == 0:
+                    ans.append([nums[i], nums[l], nums[r]])
+                    l += 1 # 相等时，l要++，继续寻找下一个符合条件的元素
+                    while l < r and nums[l] == nums[l - 1]:  # 2.去重
+                        l += 1
+                elif sum > 0:
+                    r -= 1
+                else:
+                    l += 1
+
+        return ans
+```
+
 ```c++
 class Solution {
 public:
@@ -356,7 +363,7 @@ public:
 
         sort(nums.begin(), nums.end());
 
-        // 固定一个值
+        // 固定一个值nums[i]
         for (int i=0; i < size-2; i++) {
             if (i>0 && nums[i] == nums[i-1]) { // 去重
                 continue;
