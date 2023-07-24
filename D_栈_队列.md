@@ -108,7 +108,7 @@ public:
 
 ```
 
-### 1.3. 😄[155] 最小栈
+### 1.3. 😄最小栈
 
 ---
 
@@ -144,25 +144,20 @@ class Solution(object):
 ```python
 class Solution(object):
     def isValid(self, s):
-        m = {
-            ')': '(',
-            '}': '{',
-            ']': '['
-        }
-
         stack = []
-
+        hash = {
+            "}": "{",
+            ")": "(",
+            "]": "[",
+        }
         for ch in s:
-            if ch in m.values():  # ch是左括弧
+            if ch in hash.values():
                 stack.append(ch)
-            else:  # ch是右括弧
-                if not stack:
-                    return False
-                if stack.pop(-1) == m[ch]:  # ch对应的左括弧，是否和栈顶元素一致
+            else:
+                if stack and hash[ch] == stack.pop(-1):
                     continue
                 else:
                     return False
-
         return len(stack) == 0
 ```
 
@@ -176,18 +171,17 @@ class Solution(object):
 
 ```python
 class Solution(object):
-    def backspace(self, s):
-        stack = []
-        for ch in s:
-            if ch == '#':
-                if stack:
-                    stack.pop(-1)
-            else:
-                stack.append(ch)
-        return ''.join(stack)
-
     def backspaceCompare(self, s, t):
-        return self.backspace(s) == self.backspace(t)
+        def deal(s):
+            stack = []
+            for ch in s:
+                if ch != "#":
+                    stack.append(ch)
+                else:
+                    if stack:
+                        stack.pop(-1)
+            return stack
+        return deal(s) == deal(t)
 ```
 
 
@@ -199,11 +193,11 @@ class Solution(object):
     def makeGood(self, s):
         stack = []
         for ch in s:
-            if stack and abs(ord(stack[-1]) - ord(ch)) == ord('a')-ord('A'):
+            if stack and abs(ord(stack[-1])-ord(ch)) == abs(ord('a')-ord('A')):
                 stack.pop(-1)
             else:
                 stack.append(ch)
-        return ''.join(stack)
+        return "".join(stack)
 ```
 
 ### 2.5. [1047. 删除字符串中的所有相邻重复项](https://leetcode-cn.com/problems/remove-all-adjacent-duplicates-in-string/)
@@ -221,14 +215,14 @@ class Solution(object):
     def removeDuplicates(self, s):
         stack = []
         for ch in s:
-            if stack != [] and stack[-1] == ch:
+            if stack and stack[-1] == ch:
                 stack.pop(-1)
             else:
                 stack.append(ch)
         return "".join(stack)
 ```
 
-### 2.6. 😄 [1209. 删除字符串中的所有相邻重复项 II](https://leetcode-cn.com/problems/remove-all-adjacent-duplicates-in-string-ii/)
+### 2.6. [1209. 删除字符串中的所有相邻重复项 II](https://leetcode-cn.com/problems/remove-all-adjacent-duplicates-in-string-ii/)
 
 
 输入：s = "deeedbbcccbdaa", k = 3
@@ -245,24 +239,23 @@ class Solution(object):
 ```python
 class Solution(object):
     def removeDuplicates(self, s, k):
-        stack = [] # 栈中元素是[], 即 [ch, ch出现次数]
+        stack = [] # [ch, 次数]
         for ch in s:
-            if not stack:
-                stack.append([ch, 1])
-            else:
+            if stack:
                 char, cnt = stack[-1]
-                if char != ch:
-                    stack.append([ch, 1])
-                else:
-                    cnt += 1
-                    if cnt == k:
+                if ch == char:
+                    if cnt == k-1:
                         stack.pop(-1)
                     else:
-                        stack[-1][1] = cnt
-        ans = ""
-        for [ch, cnt] in stack:
-            ans += ch * cnt
+                        stack[-1][1] += 1
+                else:
+                    stack.append([ch, 1])
+            else:
+                stack.append([ch, 1])
 
+        ans = ""
+        for (ch, cnt) in stack:
+            ans += ch*cnt
         return ans
 ```
 
@@ -323,66 +316,8 @@ class Solution(object):
 	4.1. 当进入 单调[] 后，可能需要(更新结果 + 更新条件)
 ```
 
-## 3.1. 单调队列
 
-### 3.1.1. 😄[239]滑动窗口最大值
-
-```python
-class Solution(object):
-    def maxSlidingWindow(self, nums, k):
-        ans = []
-        queue = []  # 窗口，保存了下标
-
-        for r in range(len(nums)):
-            # 1.出窗口，保证队列单调
-            while queue and nums[r] > nums[queue[-1]]:
-                queue.pop(-1)
-            # 2.r入窗口
-            queue.append(r)
-            # 3.确保窗口中的元素个数，不超过窗口大小
-            if r-queue[0]+1 > k:
-                queue.pop(0)
-            # 4.当r+1 >= k时，必然形成窗口，保存结果
-            if r+1 >= k:
-                ans.append(nums[queue[0]])
-
-        return ans
-```
-
-### 3.1.2. 😄面试题59 - II. 队列的最大值
-
-请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数max_value、push_back 和 pop_front 的均摊时间复杂度都是O(1)。
-
-若队列为空，pop_front 和 max_value 需要返回 -1
-
-```python
-class MaxQueue:
-
-    def __init__(self):
-        queue = []     # 原队列
-        max_queue = [] # 单调递减队列
-
-    def max_value(self) -> int:
-        return self.max_queue[0] if len(max_queue) > 0 else -1
-
-    def push_back(self, value: int) -> None:
-        # 保证单调递减队列的性质
-		while len(max_queue) > 0 and value > max_queue[-1]:
-            max_queue.pop(-1)
-        max_queue.append(value)
-        # 原始队列
-		queue.append(value)
-
-    def pop_front(self) -> int:
-        if not self.queue:
-            return -1
-        popVal = queue.pop(0) # 待弹出元素
-        if popVal == max_queue[0]: # max_queue的首元素 == 待弹出元素，将其弹出
-            max_queue.pop(0)
-        return res
-```
-
-## 3.2. 单调栈
+## 3.1. 单调栈
 
 ### 3.2.1. 😄[739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)
 
