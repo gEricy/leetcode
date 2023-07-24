@@ -12,72 +12,15 @@
   - int ret = data.front();   data.pop();
 
 
-### 1.1. 两个栈实现一个队列
+### 1.1. [232] 用栈实现队列
 
 ```c++
 class MyQueue {
-public:
-    /** Initialize your data structure here. */
     stack<int> data;
     stack<int> help;
+public:
     MyQueue() {
 
-    }
-    
-    void push(int x) {
-        data.push(x);  // 一直进入data
-    }
-    
-    int pop() {
-        if (empty())
-            return -1;
-
-        if(!help.empty()){  // 返回时，如果help有值，就返回help栈顶
-            int top = help.top(); help.pop();
-            return top;
-        }
-        // 如果help没有值，就先将data中的数据[“全部”“倒入”help]
-        while(!data.empty()){
-            int top = data.top(); data.pop();
-            help.push(top);
-        }
-        // 最后，弹出&&返回help的栈顶
-        int top = help.top(); help.pop();
-        return top;  
-    }
-    
-    int peek() {
-        if (empty())
-            return -1;
-        if(!help.empty()){
-            int top = help.top();
-            return top;
-        }
-        while(!data.empty()){
-            int top = data.top(); data.pop();
-            help.push(top);
-        }
-        // 最后，只是返回help的栈顶
-        return help.top();
-    }
-    
-    bool empty() {
-        if (help.empty() && data.empty())
-            return true;
-        return false;
-    }
-};
-```
-
-### 1.2. 两个队列实现一个栈
-
-```c++
-class MyStack {
-public:
-    queue<int> data;
-    queue<int> help;
-
-    MyStack() {
     }
     
     void push(int x) {
@@ -85,34 +28,84 @@ public:
     }
     
     int pop() {
-        if (empty())
+        if (this->empty()) {
             return -1;
-        while(data.size() > 1){
-            int f = data.front(); data.pop();
-            help.push(f);
         }
-        int ret = data.front(); data.pop();
-        swap(data, help);
-        return ret;
+        if (help.empty()) {
+            while (!data.empty()) {
+                int top = data.top(); data.pop();
+                help.push(top);
+            }
+        }
+        int top = help.top(); help.pop();
+        return top;
     }
     
-    int top() {
-        if (empty())
+    int peek() {
+        if (this->empty()) {
             return -1;
-        while(data.size() > 1){
-            int f = data.front(); data.pop();
-            help.push(f);
         }
-        int ret = data.front(); data.pop();
-        help.push(ret);
-        swap(data, help);
-        return ret;
+        if (help.empty()) {
+            while (!data.empty()) {
+                int top = data.top(); data.pop();
+                help.push(top);
+            }
+        }
+        int top = help.top();
+        return top;
     }
     
     bool empty() {
-        return data.empty();
+        return help.empty() && data.empty();
     }
 };
+```
+
+### 1.2. [225] 用队列实现栈
+
+```c++
+class MyStack {
+    queue<int> data;
+    queue<int> help;
+public:
+    MyStack() {
+
+    }
+    
+    void push(int x) {
+        data.push(x);
+    }
+    
+    int pop() {
+        if (this->empty()) {
+            return -1;
+        }
+        while (data.size() > 1) {
+            int f = data.front(); data.pop();
+            help.push(f);
+        }
+        int ans = data.front(); data.pop();
+        swap(data, help);
+        return ans;
+    }
+    
+    int top() {
+        if (this->empty()) {
+            return -1;
+        }
+        while (data.size() > 1) {
+            int f = data.front(); data.pop();
+            help.push(f);
+        }
+        int ans = data.front(); 
+        return ans;
+    }
+    
+    bool empty() {
+        return data.empty() && help.empty();
+    }
+};
+
 ```
 
 ### 1.3. 😄最小栈
