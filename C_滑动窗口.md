@@ -88,3 +88,130 @@ class Solution(object):
         return ans
 ```
 
+-----
+
+#### 简介
+
+双指针算法有两个重要的使用，一种是两个序列，一个序列一个指针，比如归并排序的归并过程，另一种就是针对一个序列，使用两个指针，滑动窗口也是属于这一种。
+
+
+
+#### 模板
+
+使用传统的方法来解决双指针问题，时间复杂度会比较高。
+
+```java
+for(int i=0;i<;i++){
+    for(int j=0;j<;j++){
+    }
+}
+```
+
+使用双指针算法重点是找到问题的单调性，将O(n^2)优化成O(n)，常见的模板如下
+
+```java
+for(int i=0,j;i<;i++){
+    while(j<len&&check(j))j++;  // 判断j的范围，以及判断后面指针什么条件下进行移动
+}
+```
+
+
+
+#### 例题
+
+#### [无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
+
+
+
+##### 思路
+
+找到每个字符开头的最长无重复的字串(使用hash表来进行快速判断是否序列出现重复)，将结果长度进行记录，找出最小值。
+
+介绍一下滑动窗口的尾指针是怎样维护的，当hash表中没有出现该元素就进行添加。
+
+
+
+ ##### 模板使用
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        // hash表
+        HashSet<Character>hash=new HashSet<>();
+        int res=0;
+        // i是开头 j是结尾
+        for(int i=0,j=0;i<s.length();i++){
+            while(j<s.length()&&!hash.contains(s.charAt(j))){
+                hash.add(s.charAt(j));
+                j++;
+            }
+            hash.remove(s.charAt(i));
+            res=Math.max(res,j-i);
+        }
+        return res;
+    }
+}
+```
+
+
+
+#### [76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/)
+
+
+
+##### 思路
+
+这道题是一道困难题，主要难在怎样判断一个字符串是否覆盖一个字符串。假如说可以实现这样一个功能，咱么尝试写一下
+
+
+
+```c++
+public String minWindow(String s, String t) {
+    String res="";
+    for(int i=0,j=0;i<s.length();i++){
+        while(j<s.length()&&!check(i,j))j++;
+        // 此时如果j<s.length()证明（i，j）是符合条件的序列
+        if(i<s.length()){
+            if(res==""||res.length()>j-i+1)res=s.substring(i,j+1);
+        }
+    }
+    return res;
+}
+
+
+```
+
+
+
+完整效率低的代码
+
+```java
+class Solution {
+
+    String t,s;
+public String minWindow(String _s, String _t) {
+     s=_s;
+     t=_t;
+    String res="";
+    for(int i=0,j=0;i<s.length();i++){
+        while(j<s.length()&&!check(i,j))j++;
+        // 此时如果j<s.length()证明（i，j）是符合条件的序列
+        if(j<s.length()){
+            if(res==""||res.length()>j-i+1)res=s.substring(i,j+1);
+        }
+    }
+    return res;
+}
+
+boolean check(int i,int j){
+    if(i>j)return false;
+    int []map=new int[128];
+    for(int x=i;x<=j;x++)map[s.charAt(x)]++;
+    for(int x=0;x<t.length();x++){
+        if(map[t.charAt(x)]--<=0)return false;
+    }
+    return true;
+}
+}
+```
+
