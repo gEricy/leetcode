@@ -362,15 +362,17 @@ class Solution(object):
         # 1.保持单调栈
         stack = []
         for ch in num:
-            
             while stack and ch < stack[-1] and k > 0:
                 stack.pop(-1)
                 k -= 1
             stack.append(ch)
+
         # 2.构造结果
         #     别忘记(k>0)时，要处理下喔~
-        if k > 0:
-            stack = stack[:-k]
+        while k > 0:
+            stack.pop(-1)
+            k -= 1
+
         #     去掉左边的0
         ans = ''.join(stack).lstrip('0')
         return '0' if len(ans) == 0 else ans
