@@ -1,6 +1,6 @@
-[25] K 个一组翻转链表
-
-排序链表
+代码编写注意事项：
+1. 向前走N步、指向第N个节点：for(int i=0; ???; i++)
+2. 
 
 
 # 1.反转
@@ -92,7 +92,7 @@ public:
 ```
 
 
-### 1.4. [92. 反转从位置m到n的链表](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+### 1.4. [92] 反转从位置m到n的链表
 
 要求：一趟扫描完成反转
 
@@ -100,35 +100,37 @@ public:
 class Solution {
 public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        if (!head) {
-            return head;
-        }
-        
+        if (!head) return head;
+
         ListNode dummy;
         dummy.next = head;
 
         ListNode* pre = &dummy;
         ListNode* cur = head;
 
-        int i = 1;
-        // 查询开始翻转的点
-        for (; i < left; i++) {
+        // 寻找翻转的点
+        int i;
+        for (i=1; i < left; i++) {
             pre = pre->next;
             cur = cur->next;
         }
-        ListNode* tpre = pre;
-        ListNode* tcur = cur;
 
-        // 边遍历，边翻转: 翻转[left,right]区间内的节点，所以，循环退出条件: i<(right+1)
+        ListNode* pre1 = pre;
+        ListNode* cur1 = cur;
+
+        // 边遍历，边翻转: 翻转[left,right]区间内的节点
         for (; i <= right; i++) {
-            ListNode* post = cur->next;
+            ListNode* post = cur->next; // 保存后继
             cur->next = pre;
-            pre = cur; cur = post;
+            pre = cur; cur = post; // 向后遍历
         }
 
+        ListNode* pre2 = pre;
+        ListNode* cur2 = cur;
+
         // 重新连接
-        tpre->next = pre;
-        tcur->next = cur;
+        pre1->next = pre2;
+        cur1->next = cur2;
 
         return dummy.next;
     }
@@ -162,18 +164,19 @@ public:
 
         // 锁定翻转区间：[head, 第k个节点]
         ListNode* cur = head;
-        for (int i=1; i<k; i++) { // 注意: i=1
-            cur = cur->next;
-            if (!cur) // 递归退出条件
+        for (int i=1; i<k; i++) {
+            cur = cur->next; // 注意点: 先向后移动
+            if (!cur) // 递归退出条件，不足k个节点，直接退出
                 return head;
         }
 
         // 翻转后半段
-        ListNode* part2Head = reverseKGroup(cur->next, k);
-        // 处理前半段
+        ListNode* head2 = reverseKGroup(cur->next, k);
+        // 翻转前半段
         ListNode* newHead = reverse(head, cur);
-        head->next = part2Head;
-
+        // 重新连接
+        head->next = head2;
+        // 返回新的头结点
         return newHead;
     }
 };
@@ -336,29 +339,28 @@ public:
 class Solution {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
-        // 伪头结点: 因为第一个元素可能会被删除
+        if (!head) return head;
+
         ListNode dummy;
         dummy.next = head;
 
-        ListNode* fast_cur = head;
-
-        // 快指针先向前走n补
+        // 快指针: 向前走N步
+        ListNode* fast = head;
         for (int i=1; i<=n; i++) {
-            fast_cur = fast_cur->next;
+            fast = fast->next;
         }
 
-        // 快慢指针一起走: 当快指针走到null时，慢指针指向待删除节点
-        ListNode* slow_pre = &dummy;
-        ListNode* slow_cur = head;
-
-        while (fast_cur) {
-            slow_pre = slow_pre->next;
-            slow_cur = slow_cur->next;
-            fast_cur = fast_cur->next;
+        // 快/慢指针一起向后走，当快指针指向null时，慢指针指向待删除节点(倒数第 N 个结点)
+        ListNode* pre = &dummy;
+        ListNode* slow = head;
+        while (fast) {
+            fast = fast->next;
+            pre = slow;
+            slow = slow->next;
         }
-
-        slow_pre->next = slow_pre->next->next;
-
+        // 删除: 慢指针指向待删除节点(倒数第 N 个结点)
+        pre->next = slow->next;
+        
         return dummy.next;
     }
 };
@@ -398,40 +400,35 @@ public:
 - 返回环形链表的第一个交点
 
 1. 快指针走2步，慢指针走1步
-2. 有环: fast && fast->next
+2. 有环
 3. 环入口: 快指针移动到head，快慢指针一起走，第一次相遇节点就是入口
 
 ```cpp
 class Solution {
 public:
-    ListNode* rotateRight(ListNode* head, int k) {
-        if (!head || k == 0) {
-            return head;
+    ListNode *detectCycle(ListNode *head) {
+        ListNode* fast = head;
+        ListNode* slow = head;
+
+        bool found = false;
+        while (fast && fast->next) { // 快指针走2步，慢指针走1步
+            fast = fast->next->next;
+            slow = slow->next;
+            if (slow == fast) {
+                found = true;
+                break;
+            }
         }
-
-        ListNode* pre = nullptr;
-        ListNode* cur = head;
-
-        int cnt = 0;
-        while (cur) {
-            pre = cur;
-            cur = cur->next;
-            cnt++;
+        if (!found) { // 有环
+            return nullptr;
         }
-        
-        // 首位相连
-        pre->next = head; 
-
-        k = cnt - (k % cnt); 
-        cur = head;
-        for (int i=1; i<k; i++) {
-            cur = cur->next;
+        // 环入口: 快指针移动到head，快慢指针一起走，第一次相遇节点就是入口
+        fast = head;
+        while (fast != slow) {
+            fast = fast->next;
+            slow = slow->next;
         }
-
-        ListNode* newHead = cur->next;
-        cur->next = nullptr; // 断开
-
-        return newHead;
+        return slow;
     }
 };
 ```
@@ -444,8 +441,8 @@ public:
 class Solution {
 public:
     void deleteNode(ListNode* node) {
-       node->val = node->next->val;
-       node->next = node->next->next;
+        node->val = node->next->val;
+        node->next = node->next->next;
     }
 };
 ```
@@ -457,34 +454,33 @@ public:
 class Solution {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        ListNode* p = l1;
-        ListNode* q = l2;
-
-        int summry = 0;
-
         ListNode dummy;
         ListNode* cur = &dummy;
 
+        ListNode* p = l1;
+        ListNode* q = l2;
+
+        int carry = 0;
         while (p || q) {
             int pval = p ? p->val : 0;
             int qval = q ? q->val : 0;
-            int val = summry + pval + qval;
-            int low = val % 10;
-            summry = val / 10;
+            if(p) p = p->next;
+            if(q) q = q->next;
 
-            ListNode* newNode = new ListNode(low);
+            int sum = pval + qval + carry;
+
+            ListNode* newNode = new ListNode(sum%10);
             cur->next = newNode;
-
             cur = cur->next;
-            if (p) p = p->next;
-            if (q) q = q->next;
+
+            carry = sum/10;
         }
 
-        if (summry > 0) {
-            ListNode* newNode = new ListNode(summry);
+        if(carry > 0) {
+            ListNode* newNode = new ListNode(carry);
             cur->next = newNode;
         }
-        
+
         return dummy.next;
     }
 };
@@ -556,50 +552,18 @@ public:
     ListNode* deleteDuplicates(ListNode* head) {
         if (!head || !head->next)
             return head;
-
+        
         ListNode* pre = head;
         ListNode* cur = head->next;
-
-        while(cur) {
-            ListNode* post = cur->next;
-            if (pre->val == cur->val) { // 元素重复
-                pre->next = post; // 删除当前元素cur, pre不用更新
-            } else { // 元素不重复
-                pre = cur; // pre后移
-            }
-            cur = post;
-        }
-
-        return head;
-    }
-};
-```
-
-```cpp
-class Solution {
-public:
-    ListNode* deleteDuplicates(ListNode* head) {
-        if (!head || !head->next) {
-            return head;
-        }
-
-        ListNode dummy(-101);
-        dummy.next = head;
-
-        ListNode* pre = &dummy;
-        ListNode* cur = head;
-
         while (cur) {
-            ListNode* post = cur->next;
-            if (pre->val != cur->val) { // 不相等，向后遍历
-                pre = cur;
-                cur = post;
-            } else { // 相等，删除节点cur
-                pre->next = post;
-                cur = post;
+            if (pre->val == cur->val) {
+                pre->next = cur->next;
+            } else {
+                pre = pre->next;
             }
+            cur = cur->next;
         }
-        return dummy.next;
+        return head;
     }
 };
 ```
@@ -651,37 +615,38 @@ public:
 ```
 
 
-### 3.3. [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+### 3.3. [21] 合并两个有序链表
 
 ```cpp
 class Solution {
 public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-        ListNode* p = list1;
-        ListNode* q = list2;
-
-        ListNode dummy; // 伪头结点
+        ListNode dummy;
         ListNode* cur = &dummy;
 
+        ListNode* p = list1;
+        ListNode* q = list2;
         while (p && q) {
-            ListNode* node = nullptr;
-            
-            if (p->val <= q->val) {
-                node = p;
+            ListNode* select = nullptr;
+            if (p->val < q->val) {
+                select = p;
                 p = p->next;
             } else {
-                node = q;
+                select = q;
                 q = q->next;
             }
-            cur->next = node;
+            cur->next = select;
             cur = cur->next;
         }
-
-        if (p) {
-            cur->next = p;
-        }
-        if (q) {
+        while (q) {
             cur->next = q;
+            q = q->next;
+            cur = cur->next;
+        }
+        while (p) {
+            cur->next = p;
+            p = p->next;
+            cur = cur->next;
         }
 
         return dummy.next;
@@ -708,8 +673,8 @@ public:
             return head;
         }
 
-        ListNode list1;
-        ListNode list2;
+        ListNode list1; // <=
+        ListNode list2; // >
 
         ListNode* cur1 = &list1;
         ListNode* cur2 = &list2;
@@ -728,22 +693,27 @@ public:
         cur1->next = nullptr; // 一定要设置为空
         cur2->next = nullptr; // 一定要设置为空
 
-        // 连接
+        // 连接: list1的最后一个节点，指向list2的第一个节点
         cur1->next = list2.next;
 
+        // 返回: list1的第一个节点
         return list1.next;
     }
 };
 ```
 
-### 3.5. 奇偶链表
+### 3.5. [328] 奇偶链表
+
+给定单链表的头节点 head ，将所有索引为奇数的节点和索引为偶数的节点分别组合在一起，然后返回重新排序的列表。
+
 
 ```cpp
 class Solution {
 public:
     ListNode* oddEvenList(ListNode* head) {
-        ListNode list1;
-        ListNode list2;
+        
+        ListNode list1; // 奇数下标
+        ListNode list2; // 偶数下标
 
         ListNode* cur1 = &list1;
         ListNode* cur2 = &list2;
@@ -765,9 +735,10 @@ public:
         cur1->next = nullptr; // 一定要设置为空
         cur2->next = nullptr; // 一定要设置为空
 
-        // 连接
+        // 连接: list1的最后一个节点，指向list2的第一个节点
         cur1->next = list2.next;
 
+        // 返回: list1的第一个节点
         return list1.next;
     }
 };
@@ -836,7 +807,7 @@ public:
 ```
 
 
-### 3.8. [148. 排序链表😄](https://leetcode-cn.com/problems/sort-list/)
+### 3.8. 😄 [148] 排序链表
 
 1-插入排序 （会超时）
 
