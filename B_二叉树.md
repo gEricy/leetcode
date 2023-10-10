@@ -1,3 +1,5 @@
+- 后序遍历(非递归)
+
 
 # 1. 遍历（模板）
 
@@ -33,22 +35,21 @@ class Solution {
 public:
     vector<int> preorderTraversal(TreeNode* root) {
         vector<int> ans;
-        if (!root)
-            return ans;
-        
+        if(!root) return ans;
+
         stack<TreeNode*> S;
         TreeNode* p = root;
 
-        while (!S.empty() || p) {
+        while(!S.empty() || p) {
+            // 左子树一直进栈
             while (p) {
                 S.push(p); ans.push_back(p->val);
                 p = p->left;
             }
-
-            TreeNode* top = S.top(); S.pop(); 
+            // 不存在左子树了，弹出栈顶元素，p指向右子树
+            TreeNode* top = S.top(); S.pop();
             p = top->right;
         }
-        
         return ans;
     }
 };
@@ -84,23 +85,21 @@ class Solution {
 public:
     vector<int> inorderTraversal(TreeNode* root) {
         vector<int> ans;
-
-        if (!root)
-            return ans;
+        if(!root) return ans;
 
         stack<TreeNode*> S;
         TreeNode* p = root;
 
         while (!S.empty() || p) {
+            // 左子树一直进栈
             while (p) {
                 S.push(p);
                 p = p->left;
             }
-
-            TreeNode* top = S.top(); S.pop(); ans.push_back(top->val); 
+            // 不存在左子树了，弹出栈顶元素，p指向右子树
+            TreeNode* top = S.top(); S.pop(); ans.push_back(top->val);
             p = top->right;
         }
-
         return ans;
     }
 };
@@ -202,37 +201,38 @@ public:
 
 ```c++
 class Solution {
-    map<int, int> val2InorderIdxMap; // key,val = 中序遍历的值, 下标
 public:
-    TreeNode* create(vector<int>& preorder, int leftPreOrder, int rightPreOrder, vector<int>& inorder, int leftInorder, int rightInorder) {
-        if (leftPreOrder > rightPreOrder && leftInorder > rightInorder) {
+    map<int, int> map; // key,val = 中序遍历的值, 下标
+
+    TreeNode* build(
+        vector<int>& preorder, int l_preorder, int r_preorder,
+        vector<int>& inorder, int l_inorder, int r_inorder
+    ) {
+        if (l_preorder > r_preorder || l_inorder > r_inorder) {
             return nullptr;
         }
 
-        // 根节点
-        int rootVal = preorder[leftPreOrder];
-        TreeNode* root = new TreeNode(rootVal);
-        // 根节点在inorder中的位置
-        int rootIdx = val2InorderIdxMap[rootVal];
+        int root_val = preorder[l_preorder]; // 根节点: 前序遍历的第一个节点
+        int inorder_idx = map[root_val];     // 根节点将中序遍历分为2段
 
-        // 根据中序遍历，将中序数组分成[左段][右段]两份
-        int leftLen = rootIdx - leftInorder;  // [左段]元素个数
-        int rightLen = rightInorder - rootIdx;// [右段]元素个数
+        int lcnt = inorder_idx - l_inorder;  // 左段元素个数
+        int rcnt = r_inorder - inorder_idx;  // 右段元素个数
 
-        root->left = create(preorder, leftPreOrder+1, leftPreOrder+leftLen, inorder, leftInorder, rootIdx-1);
-        root->right = create(preorder, leftPreOrder+leftLen+1, leftPreOrder+leftLen+rightLen-1, inorder, rootIdx+1, rightInorder);
-
-        return root;
+        TreeNode* root = new TreeNode(root_val);
+        root->left = build(preorder, l_preorder+1, l_preorder+lcnt, inorder, l_inorder, inorder_idx-1);
+        root->right = build(preorder, l_preorder+lcnt+1, r_preorder, inorder, inorder_idx+1, r_inorder);
+        
+        return root;    
     }
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
-        // 初始化map
-        for (int i=0; i<inorder.size(); i++) {
-            val2InorderIdxMap[inorder[i]] = i;
+        // 构造中序遍历哈希表
+        for (int i=0; i<inorder.size(); i++){
+            map[inorder[i]] = i;
         }
-        return create(preorder, 0, preorder.size()-1, inorder, 0, inorder.size()-1);
+        // 创建二叉树
+        return build(preorder, 0, preorder.size()-1, inorder, 0, inorder.size()-1);
     }
 };
-
 ```
 
 ### 2.1.2. 😄 [106] 从中序与后序遍历序列构造二叉树
@@ -248,34 +248,35 @@ public:
 
 ```c++
 class Solution {
-    map<int, int> val2InorderIdxMap;
 public:
-    TreeNode* create(vector<int>& inorder, int leftInorder, int rightInorder, vector<int>& postorder, int leftPostorder, int rightPostorder) {
-        if (leftInorder > rightInorder && leftPostorder > rightPostorder) {
-            return NULL;
-        }
-        // 根节点
-        int rootVal = postorder[rightPostorder];
-        TreeNode* root = new TreeNode(rootVal);
-        // 根节点在inorder中的下标
-        int rootIdx = val2InorderIdxMap[rootVal];
-        
-        // 根据中序遍历，将中序数组分成[左段][右段]两份
-        int leftLen = rootIdx-leftInorder;   // [左段]元素个数
-        int rightLen = rightInorder-rootIdx; // [右段]元素个数
+    map<int, int> map;
 
-        root->left = create(inorder, leftInorder, rootIdx-1, postorder, leftPostorder, leftPostorder+leftLen-1);
-        root->right = create(inorder, rootIdx+1, rightInorder, postorder, leftPostorder+leftLen, rightPostorder-1);
+    TreeNode* build(
+        vector<int>& inorder, int l_inorder, int r_inorder,
+        vector<int>& postorder, int l_postorder, int r_postorder
+    ) {
+        if (l_inorder > r_inorder || l_postorder > r_postorder) 
+            return nullptr;
+
+        int root_val = postorder[r_postorder]; // 根节点: 后序遍历的最后一个节点
+        int inorder_idx = map[root_val];       // 根节点将中序遍历分为2段
+
+        int lcnt = inorder_idx - l_inorder;    // 左段元素个数
+        int rcnt = r_inorder - inorder_idx;    // 右段元素个数
+
+        TreeNode* root = new TreeNode(root_val);
+        root->left = build(inorder, l_inorder, inorder_idx-1, postorder, l_postorder, l_postorder+lcnt-1);
+        root->right = build(inorder, inorder_idx+1, r_inorder, postorder, l_postorder+lcnt, r_postorder-1);
 
         return root;
     }
-
     TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
-        // 初始化map
+        // 构造中序遍历哈希表
         for (int i=0; i<inorder.size(); i++) {
-            val2InorderIdxMap[inorder[i]] = i;
+            map[inorder[i]] = i;
         }
-        return create(inorder, 0, inorder.size()-1, postorder, 0, postorder.size()-1);
+        // 创建二叉树
+        return build(inorder, 0, inorder.size()-1, postorder, 0, postorder.size()-1);
     }
 };
 ```
@@ -294,19 +295,21 @@ public:
 ```c++
 class Solution {
 public:
-    TreeNode* create(vector<int>& nums, int left, int right) {
-        if (left <= right) {
-            int mid = (left+right) / 2;
-            TreeNode* root = new TreeNode(nums[mid]);
-            root->left = create(nums, left, mid-1);
-            root->right = create(nums, mid+1, right);
-            return root;
-        }
-        return nullptr;
+    TreeNode* build(vector<int>& nums, int left, int right) {
+        if (left > right)  
+            return nullptr;
+        
+        int idx = (left + right) / 2; // 每次都选择中间节点作为根
+        
+        TreeNode* root = new TreeNode(nums[idx]);
+        root->left = build(nums, left, idx-1);
+        root->right = build(nums, idx+1, right);
+        
+        return root;
     }
     TreeNode* sortedArrayToBST(vector<int>& nums) {
-        return create(nums, 0, nums.size()-1);
-    }   
+        return build(nums, 0, nums.size()-1);
+    }
 };
 ```
 
@@ -314,7 +317,7 @@ public:
 
 # 3. 前序遍历 (应用)
 
-### 3.1. [104. 二叉树的最大深度](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/)
+### 3.1. [104] 二叉树的最大深度
 
 ```c++
 class Solution {
@@ -327,7 +330,13 @@ public:
 };
 ```
 
-### 3.2. [111. 二叉树的最小深度](https://leetcode-cn.com/problems/minimum-depth-of-binary-tree/)
+### 3.2. [111] 😭 二叉树的最小深度
+
+- 后序遍历的应用
+
+解决步骤: 
+1. 先计算左子树和右子树的minDepth
+2. 根据结果，获取整棵树的minDepth
 
 ```c++
 class Solution {
@@ -339,99 +348,99 @@ public:
         int L = minDepth(root->left);
         int R = minDepth(root->right);
 
-        if (L>0 && R>0) { // √ √ --> 有两个子树
+        if (L > 0 && R > 0) { // √ √ --> 有两个子树
             return 1 + min(L, R);
-        } else if (L==0 && R==0) { // × × --> 只有root, 高度是1
-            return 1;
-        } else { // √ ×, × √ --> 左右子树，有一个空树 ==> 返回另外一个数的minDepth
+        } else { // x x , √ ×, × √   --> 左右子树，全部为空树 or 有一个为空树
             return 1 + L + R;
         }
     }
 };
 ```
 
-### 3.3. 110. 平衡二叉树
+### 3.3. [110] 平衡二叉树
 
-- 高度差不超过1（该题无需关注是否为BST树，仅仅是判断高度差不超过1）
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+一棵高度平衡二叉树定义为：一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 
 
 ```c++
 class Solution {
 public:
-    int Depth(TreeNode* root) {
-        if (!root) return 0;
-        return 1 + max(Depth(root->left), Depth(root->right));
+    int depth(TreeNode* root) {
+        if (!root)
+            return 0;
+        return 1+max(depth(root->left), depth(root->right));
     }
 
     bool isBalanced(TreeNode* root) {
-        if (!root) 
+        if (!root)
             return true;
 
-        int L = Depth(root->left);
-        int R = Depth(root->right);
+        int L = depth(root->left);
+        int R = depth(root->right);
 
-        if (abs(L-R) > 1)
+        if (abs(L-R) >1) {
             return false;
+        }
 
         return isBalanced(root->left) && isBalanced(root->right);
     }
 };
 ```
 
-### 3.4. [101. 判断: 对称\镜像二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
+### 3.4. [101] 😭 对称二叉树
+
+给你一个二叉树的根节点 root ， 检查它是否轴对称
+
+
 
 ```c++
 class Solution {
 public:
-    bool isSymme(TreeNode* p, TreeNode* q) {
-        if (!p && !q) // × ×
-            return true;
-        if (p && q) { // √ √
-            return p->val == q->val && isSymme(p->left, q->right) && isSymme(p->right, q->left) ;
-        }
-        return false;
+    // 判断两棵树是否对称
+    bool isSymme(TreeNode* t1, TreeNode* t2) {
+        if (!t1 && !t2) return true; // × ×
+        else if (t1 && t2) return t1->val == t2->val && isSymme(t1->left, t2->right) && isSymme(t1->right, t2->left); // √ √
+        else return false;
     }
+
     bool isSymmetric(TreeNode* root) {
-        if (!root)
-            return true;
-        return isSymme(root->left, root->right); 
+        if (!root) return true;
+        return isSymme(root->left, root->right);
     }
 };
 ```
 
-### 3.5. [100. 相同的树](https://leetcode-cn.com/problems/same-tree/)
+### 3.5. [100] 相同的树
 
 ```c++
 class Solution {
 public:
     bool isSameTree(TreeNode* p, TreeNode* q) {
-        if (!p && !q)  // × ×
-            return true;
-        if (p && q) {  // √ √
-            return p->val == q->val && isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
-        }
-        return false;
+        if (!p && !q) return true; // × ×
+        else if (p && q) return p->val == q->val && isSameTree(p->left, q->left) && isSameTree(p->right, q->right); // √ √
+        else return false;
     }
 };
 ```
 
-### 3.6. [572. 另一个树的子树](https://leetcode-cn.com/problems/subtree-of-another-tree/)  
+### 3.6. [572] 另一个树的子树
+
+给你两棵二叉树 root 和 subRoot 。检验 root 中是否包含和 subRoot 具有相同结构和节点值的子树。如果存在，返回 true ；否则，返回 false 。
+
 
 ```c++
 class Solution {
 public:
-    bool dfs(TreeNode* p, TreeNode* q) { // 相同的树
-        if (!p && !q) {
-            return true;
-        }
-        else if (p && q) {
-            return p->val == q->val && dfs(p->left, q->left) && dfs(p->right, q->right);
-        } else {
-            return false;
-        }
+    bool isSame(TreeNode* t1, TreeNode* t2) {
+        if (!t1 && !t2) return true;
+        else if (t1 && t2) return t1->val == t2->val && isSame(t1->left, t2->left) && isSame(t1->right, t2->right);
+        else return false;
     }
+
     bool isSubtree(TreeNode* root, TreeNode* subRoot) {
         if (!root) return false;
-        return dfs(root, subRoot) || isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);
+        return isSame(root, subRoot) || isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);
     }
 };
 ```
@@ -454,7 +463,7 @@ bool dfs(TreeNode* T1, TreeNode* T2) {
 }
 ```
 
-### 3.8. [226. 翻转二叉树](https://leetcode-cn.com/problems/invert-binary-tree/)  
+### 3.8. [226] 翻转二叉树
 
 ```c++
 class Solution {
@@ -462,60 +471,61 @@ public:
     TreeNode* invertTree(TreeNode* root) {
         if (!root)
             return root;
-
-        // 左右子树交换
-        TreeNode* tmp = root->left; 
+        
+        // 交换左右子树
+        TreeNode* tmp = root->left;
         root->left = root->right;
         root->right = tmp;
         
-        // 递归交换左右子树
-        TreeNode* L = invertTree(root->left);
-        TreeNode* R = invertTree(root->right);
-
-        return root; // 根节点不变
+        invertTree(root->left);
+        invertTree(root->right);
+        
+        return root;
     }
 };
 ```
 
-### 3.9. [404. 左叶子之和](https://leetcode-cn.com/problems/sum-of-left-leaves/)
+### 3.9. [404] 左叶子之和
 
 ```c++
 class Solution {
 public:
-    int ans = 0;
+    int ans;
     int sumOfLeftLeaves(TreeNode* root) {
         if (!root) return 0;
+
+        // 左叶子
         if (root->left && !root->left->left && !root->left->right) {
             ans += root->left->val;
         }
+
         sumOfLeftLeaves(root->left);
         sumOfLeftLeaves(root->right);
+        
         return ans;
     }
 };
 ```
 
-### 3.10. [222. 完全二叉树的节点个数](https://leetcode-cn.com/problems/count-complete-tree-nodes/)
-
+### 3.10. [222] 完全二叉树的节点个数
 
 ```c++
 class Solution {
 public:
     int depth(TreeNode* root) {
-        if (!root)
-            return 0;
-        return 1+max(depth(root->left), depth(root->right));
+        if (!root) return 0;
+        return 1 + max(depth(root->left), depth(root->right));
     }
     int countNodes(TreeNode* root) {
-        if (!root) {
-            return 0;
-        }
-        int ld = depth(root->left);
-        int rd = depth(root->right);
-        if (ld > rd) {
-            return 1+(1<<rd)-1 + countNodes(root->left);
+        if (!root) return 0;
+
+        int L = depth(root->left);
+        int R = depth(root->right);
+
+        if (L == R) {
+            return countNodes(root->right) + (1<<L);
         } else {
-            return 1+(1<<ld)-1 + countNodes(root->right);
+            return countNodes(root->left) + (1<<R);
         }
     }
 };
