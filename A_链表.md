@@ -69,7 +69,7 @@ public:
 };
 ```
 
-### 1.3. 两两交换链表中的节点
+### 1.3. [24] 两两交换链表中的节点
 
 ```cpp
 class Solution {
@@ -101,6 +101,7 @@ public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
         if (!head) return head;
 
+        // 增加伪头结点
         ListNode dummy;
         dummy.next = head;
 
@@ -108,20 +109,21 @@ public:
         ListNode* cur = head;
 
         // 寻找翻转的点
-        int i;
-        for (i=1; i < left; i++) {
+        int i = 1;
+        while (i < left) { // 循环退出时，cur指向第left个节点
             pre = pre->next;
             cur = cur->next;
+            i++;
         }
-
         ListNode* pre1 = pre;
         ListNode* cur1 = cur;
 
         // 边遍历，边翻转: 翻转[left,right]区间内的节点
-        for (; i <= right; i++) {
-            ListNode* post = cur->next; // 保存后继
+        while (i <= right) { // 循环退出时，cur指向第right个节点的后继
+            ListNode* post = cur->next;
             cur->next = pre;
-            pre = cur; cur = post; // 向后遍历
+            pre = cur; cur = post;
+            i++;
         }
 
         ListNode* pre2 = pre;
@@ -331,7 +333,9 @@ public:
 2. 慢指针从头开始，快慢指针一起走，当快指针走到null时，慢指针指向的位置就是待删除节点
 
 
-注意事项：因为第一个节点可能会被删除，所以要增加伪头结点
+注意事项
+1. 因为第一个节点可能会被删除，所以要增加伪头结点
+2. 快慢指针开始的时候，指向第一个节点(head)
 
 
 ```cpp
@@ -460,7 +464,7 @@ public:
         ListNode* q = l2;
 
         int carry = 0;
-        while (p || q) {
+        while (p || q) { // 只要有一个链表不为空，就一直向后迭代
             int pval = p ? p->val : 0;
             int qval = q ? q->val : 0;
             if(p) p = p->next;
@@ -468,16 +472,14 @@ public:
 
             int sum = pval + qval + carry;
 
-            ListNode* newNode = new ListNode(sum%10);
-            cur->next = newNode;
+            cur->next = new ListNode(sum%10);
             cur = cur->next;
 
             carry = sum/10;
         }
 
         if(carry > 0) {
-            ListNode* newNode = new ListNode(carry);
-            cur->next = newNode;
+            cur->next = new ListNode(carry);
         }
 
         return dummy.next;
@@ -485,40 +487,39 @@ public:
 };
 ```
 
-### 2.6. 复制带随机指针的链表
+### 2.6. 😭[138] 复制带随机指针的链表
 
-1. 先拷贝
-2. 再给random指针赋值
+1. 拷贝节点
+2. 给节点的random指针赋值
 3. 拆分
+
+说明: 遍历3次
 
 ```cpp
 class Solution {
 public:
     Node* copyRandomList(Node* head) {
-
-        if (!head) 
+        if (!head)
             return head;
 
-        // 1.拷贝
+        // 1. 遍历一次，复制新节点 (此时，random指针未赋值)
         Node* cur = head;
         while (cur) {
             // 拷贝: 新建一个节点，插入之
-            Node* nodeNew = new Node(cur->val);
-            nodeNew->next = cur->next;
-            cur->next = nodeNew;
+            Node *newNode = new Node(cur->val, cur->next, NULL);
+            cur->next = newNode;
             // cur向后移动
             cur = cur->next->next;
         }
-        
-        // 2.给random指针赋值
+
+        // 2. 遍历一次，给random赋值
         cur = head;
         while (cur) {
-            Node* tCur = cur->next;
-            tCur->random = cur->random ? cur->random->next : nullptr;
+            cur->next->random = cur->random ? cur->random->next : NULL;
             cur = cur->next->next;
         }
 
-        // 3.拆分新的链表
+        // 3. 遍历一次，拆分成2个链表
         Node l1(0); Node* cur1 = &l1;
         Node l2(0); Node* cur2 = &l2;
 
@@ -528,7 +529,7 @@ public:
             cur2->next = cur->next; cur2 = cur2->next;
 
             cur = cur->next->next;
-        } 
+        }
         cur1->next = nullptr; // 一定要设置为空
         cur2->next = nullptr; // 一定要设置为空
 
