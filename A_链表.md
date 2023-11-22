@@ -1,6 +1,11 @@
 代码编写注意事项：
 1. 向前走N步、指向第N个节点：for(int i=0; ???; i++)
 
+难题集合
+- [25] K 个一组翻转链表
+- [148] 排序链表
+- [23] 合并K个升序链表（逻辑简单，使用到stl库不好记）
+
 
 # 1.反转
 
@@ -145,8 +150,7 @@ public:
 ```cpp
 class Solution {
 public:
-    // 将[head, tail]翻转，返回新的头结点
-    ListNode* reverse(ListNode* head, ListNode* tail) {
+    void reverse(ListNode* head, ListNode* tail) {
         ListNode* pre = nullptr;
         ListNode* cur = head;
 
@@ -156,29 +160,30 @@ public:
             pre = cur; cur = post;
         } // 循环退出后，此时: cur指向tail; tail和tail前一个节点还未翻转
         cur->next = pre;
-        return cur;
     }
-
     ListNode* reverseKGroup(ListNode* head, int k) {
         if (!head)
             return head;
 
-        // 锁定翻转区间：[head, 第k个节点]
+        // 锁定翻转区间 [head, 第k个节点]
         ListNode* cur = head;
         for (int i=1; i<k; i++) {
-            cur = cur->next; // 注意点: 先向后移动
+            cur = cur->next;
             if (!cur) // 递归退出条件，不足k个节点，直接退出
                 return head;
         }
+        ListNode* part1Head = head;
+        ListNode* part1Tail = cur;
 
         // 翻转后半段
-        ListNode* head2 = reverseKGroup(cur->next, k);
+        ListNode* part2 = cur->next;
+        ListNode* part2Head = reverseKGroup(part2, k);
         // 翻转前半段
-        ListNode* newHead = reverse(head, cur);
+        reverse(part1Head, part1Tail);
         // 重新连接
-        head->next = head2;
+        part1Head->next = part2Head;
         // 返回新的头结点
-        return newHead;
+        return part1Tail;
     }
 };
 ```
@@ -489,11 +494,12 @@ public:
 
 ### 2.6. 😭[138] 复制带随机指针的链表
 
+说明: 遍历3次
+
 1. 拷贝节点
 2. 给节点的random指针赋值
 3. 拆分
 
-说明: 遍历3次
 
 ```cpp
 class Solution {
@@ -550,19 +556,17 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head || !head->next)
-            return head;
-        
-        ListNode* pre = head;
-        ListNode* cur = head->next;
+        if (!head || !head->next) return head;
+
+        ListNode* cur = head;
         while (cur) {
-            if (pre->val == cur->val) {
-                pre->next = cur->next;
+            if (cur->next && cur->val == cur->next->val) {
+                cur->next = cur->next->next; // 删除节点
             } else {
-                pre = pre->next;
+                cur = cur->next;
             }
-            cur = cur->next;
         }
+
         return head;
     }
 };
@@ -576,39 +580,31 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head || !head->next)
-            return head;
-        
+        if (!head || !head) return head;
+
         // 增加伪头结点
-        ListNode dummy(-1000);
+        ListNode dummy(-1);
         dummy.next = head;
 
         ListNode* pre = &dummy;
         ListNode* cur = head;
 
         while (cur) {
-            // if (pre->val != cur->val) { // 确保: 不让pre和cur相等
-                ListNode* tpre = cur;
-                ListNode* tcur = cur->next;
-                bool flag = false;
-                while (tcur) {
-                    if (tpre->val == tcur->val) {
-                        tpre = tpre->next;
-                        tcur = tcur->next;
-                        flag = true;
-                    } else {
-                        break;
-                    }
-                }
-                if (flag) {
-                    pre->next = tcur;
-                    cur = tcur;
-                } else {
-                    pre = tpre;
-                    cur = tcur;
-                }
-            // }
+            // 寻找下一个节点
+            bool repeat = false;
+            while (cur->next && cur->val == cur->next->val) {
+                repeat = true;
+                cur = cur->next;
+            }
+            if (repeat) { // 存在重复的节点
+                cur = cur->next;
+                pre->next = cur;
+            } else {
+                pre = pre->next;
+                cur = cur->next;
+            }
         }
+
         return dummy.next;
     }
 };
@@ -624,31 +620,27 @@ public:
         ListNode dummy;
         ListNode* cur = &dummy;
 
-        ListNode* p = list1;
-        ListNode* q = list2;
-        while (p && q) {
-            ListNode* select = nullptr;
-            if (p->val < q->val) {
-                select = p;
-                p = p->next;
-            } else {
-                select = q;
-                q = q->next;
-            }
-            cur->next = select;
-            cur = cur->next;
-        }
-        while (q) {
-            cur->next = q;
-            q = q->next;
-            cur = cur->next;
-        }
-        while (p) {
-            cur->next = p;
-            p = p->next;
-            cur = cur->next;
-        }
+        ListNode* l1 = list1;
+        ListNode* l2 = list2;
 
+        while (l1 && l2) {
+            if (l1->val < l2->val) {
+                cur->next = l1;
+                l1 = l1->next;
+            } else {
+                cur->next = l2;
+                l2 = l2->next;
+            }
+            cur = cur->next;
+        }
+        while (l1) {
+            cur->next = l1; l1 = l1->next;
+            cur = cur->next;
+        }
+        while (l2) {
+            cur->next = l2; l2 = l2->next;
+            cur = cur->next;
+        }
         return dummy.next;
     }
 };
@@ -668,35 +660,28 @@ public:
 class Solution {
 public:
     ListNode* partition(ListNode* head, int x) {
-
-        if (!head) {
-            return head;
-        }
-
-        ListNode list1; // <=
-        ListNode list2; // >
-
-        ListNode* cur1 = &list1;
-        ListNode* cur2 = &list2;
+        ListNode list1; ListNode* l1 = &list1;
+        ListNode list2; ListNode* l2 = &list2;
 
         ListNode* cur = head;
+
         while (cur) {
             if (cur->val < x) {
-                cur1->next = cur;
-                cur1 = cur1->next;
+                l1->next = cur;
+                l1 = l1->next;
             } else {
-                cur2->next = cur;
-                cur2 = cur2->next;
+                l2->next = cur;
+                l2 = l2->next;
             }
             cur = cur->next;
         }
-        cur1->next = nullptr; // 一定要设置为空
-        cur2->next = nullptr; // 一定要设置为空
+
+        l1->next = NULL; // 一定要设置为空
+        l2->next = NULL; // 一定要设置为空
 
         // 连接: list1的最后一个节点，指向list2的第一个节点
-        cur1->next = list2.next;
+        l1->next = list2.next;
 
-        // 返回: list1的第一个节点
         return list1.next;
     }
 };
@@ -711,52 +696,37 @@ public:
 class Solution {
 public:
     ListNode* oddEvenList(ListNode* head) {
-        
-        ListNode list1; // 奇数下标
-        ListNode list2; // 偶数下标
-
-        ListNode* cur1 = &list1;
-        ListNode* cur2 = &list2;
+        ListNode list1; ListNode* l1 = &list1;
+        ListNode list2; ListNode* l2 = &list2;
 
         ListNode* cur = head;
-
-        int i = 1;
+        int idx = 1;
         while (cur) {
-            if (i % 2 != 0) {
-                cur1->next = cur;
-                cur1 = cur1->next;
+            if (idx % 2 == 1) {
+                l1->next = cur;
+                l1 = l1->next;
             } else {
-                cur2->next = cur;
-                cur2 = cur2->next;
+                l2->next = cur;
+                l2 = l2->next;
             }
-            i++;
             cur = cur->next;
+            idx++;
         }
-        cur1->next = nullptr; // 一定要设置为空
-        cur2->next = nullptr; // 一定要设置为空
+
+        l1->next = NULL; // 一定要设置为空
+        l2->next = NULL; // 一定要设置为空
 
         // 连接: list1的最后一个节点，指向list2的第一个节点
-        cur1->next = list2.next;
+        l1->next = list2.next;
 
-        // 返回: list1的第一个节点
         return list1.next;
     }
 };
 ```
 
-### 3.6. 奇数位升序，偶数位降序链表排序
-
-一个链表，奇数位升序偶数位降序，让链表变成升序的。
-
-比如：<u>1</u> 8 <u>3</u> 6 <u>5</u> 4 <u>7</u> 2 <u>9</u>，最后输出1 2 3 4 5 6 7 8 9。
-
-> 1. 新建两个链表，分别挂奇数和偶数
-> 2. 奇数链表尾插； 偶数链表头插
-> 3. 将两个有序链表 **[合并]**
 
 
-
-### 3.7. [23. 合并K个`升序链表`😄](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+### 3.6. [23] 合并K个升序链表
 
 > 给你一个链表数组，每个链表都已经按升序排列。
 >
@@ -784,7 +754,7 @@ public:
         
         priority_queue<ListNode*, vector<ListNode*>, cmp> pq; // 创建小根堆
         
-        // 每个有序链表的链表头, 加入小根堆
+        // 初始化堆: 每个有序链表的链表头, 加入小根堆
         for (auto elem : lists){ // elem是ListNode*，链表头节点
             if(elem){
                 pq.push(elem);
@@ -807,55 +777,26 @@ public:
 ```
 
 
-### 3.8. 😄 [148] 排序链表
+### 3.7. 😄 [148] 排序链表
 
-1-插入排序 （会超时）
-
-```cpp
-class Solution {
-public:
-    ListNode* sortList(ListNode* head) {
-        if (!head)
-            return NULL;
-
-        ListNode* dummy = new ListNode();
-
-        while(head) {
-            // 从头到尾，寻找当前元素head的插入位置
-            ListNode* tpre = dummy;
-            ListNode* tcur = dummy->next;
-            while (tcur && tcur->val < head->val) {
-                tpre = tcur;
-                tcur = tcur->next;
-            }
-
-            ListNode* post = head->next;
-
-            tpre->next = head;
-            head->next = tcur;
-
-            head = post;
-        }
-        return dummy->next;
-    }
-};
-```
-
-2-链表排序(归并)
+链表排序(归并)
 
 ```cpp
 class Solution {
 public:
-    // 找中间节点(顺便将链表一分为二)  [head, mid], [mid->next, 末尾节点]
+    // 找中间节点(顺便将链表一分为二)  [head, pre], [slow, 末尾节点]
     ListNode* getMid(ListNode* head) {
-        ListNode *slow = head, *fast = head->next;
-        while (!fast && !fast->next) {
+        ListNode *pre; // 保存slow的前驱
+        ListNode *slow = head;
+        ListNode *fast = head;
+        // 寻找中间节点: fast走2步，slow走1步，当fast走到末尾时，slow指向中间节点
+        while (fast && fast->next) {
+            pre = slow;
             slow = slow->next;
             fast = fast->next->next;
         }
-        ListNode* mid = slow->next;
-        slow->next = NULL; // 切断链表 [head, slow] [slow->next, 末尾]
-        return mid;
+        pre->next = NULL; // 切断链表 [head, pre], [slow, 末尾节点]
+        return slow;
     }
 
     // 合并两个有序链表
@@ -865,7 +806,7 @@ public:
 
         ListNode dummy;
         ListNode *p = L1, *q = L2, *cur = &dummy;
-        
+
         while (p && q) {
             ListNode *newNode = NULL;
             if (p->val < q->val) {
@@ -884,14 +825,14 @@ public:
         return dummy.next;
     }
 
-    ListNode* sortList(ListNode* head){ 
+    ListNode* sortList(ListNode* head){
         if(!head || !head->next) // 归并排序递归条件: 至少2个节点
             return head;
-            
-        ListNode* mid = getMid(head);    // 将链表切成2半：[head, mid] [mid->next, 尾部节点]
-        ListNode* L1 = sortList(head);   // 左递归(划分)：[head, NULL)
-        ListNode* L2 = sortList(mid);    // 右递归(划分)：[mid, NULL)
-        return merge(L1, L2);            // 合并：[left, mid] [mid->next, right] 
+
+        ListNode* mid = getMid(head);    // 将链表切成2半
+        ListNode* L1 = sortList(head);   // 左递归排序
+        ListNode* L2 = sortList(mid);    // 右递归排序
+        return merge(L1, L2);            // 合并
     }
 };
 ```
