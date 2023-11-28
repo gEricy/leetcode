@@ -10,21 +10,18 @@
 class Solution {
 public:
     int reverse(int x) {
-        int flag = x > 0 ? 1 : -1;
-
-        int ans = 0;
-        
+        int sign = x >= 0 ? 1 : -1;
         x = abs(x);
+        int xx = 0;
         while (x > 0) {
             // 一定要判断是否越界
-            if (ans < INT_MIN / 10 || ans > INT_MAX / 10) {
+            if (xx < INT_MIN / 10 || xx > INT_MAX / 10) {
                 return 0;
             }
-            ans = ans * 10 + x % 10;
+            xx = xx * 10 + x % 10;
             x /= 10;
         }
-
-        return ans * flag;
+        return xx * sign;
     }
 };
 ```
@@ -78,7 +75,7 @@ public:
         // 从个位数开始逐位相乘
         for (int i=m-1; i>=0; i--) {
             for (int j=n-1; j>=0; j--) {
-                int sum = (num1[i] - '0') * (num2[j] - '0') + ans[i+j+1];
+                int sum = ans[i+j+1] + (num1[i] - '0') * (num2[j] - '0');
                 ans[i+j+1] = sum % 10;  // 低位
                 ans[i+j] += sum / 10;   // 高位
             }
