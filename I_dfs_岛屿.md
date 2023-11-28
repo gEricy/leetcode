@@ -1,26 +1,7 @@
 
 
-## [DFS](https://leetcode-cn.com/problems/number-of-islands/solution/dao-yu-lei-wen-ti-de-tong-yong-jie-fa-dfs-bian-li-/) 深度优先遍历
 
-下面是最简单的二叉树的前序遍历递归写法：
-
-```C++
-void dfs(TreeNode root) {
-    if (root == null) { // 判断 base case
-        return;
-    }
-    
-    cout << root.val << endl;  // 访问root
-    
-    // 访问两个相邻结点：左子结点、右子结点
-    dfs(root.left);
-    dfs(root.right);
-}
-```
-
-----
-
-### 1. [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
+### 1. [200] 岛屿数量
 
 ```c++
 class Solution {
@@ -61,35 +42,8 @@ public:
 };
 ```
 
-```python
-class Solution(object):
-    def numIslands(self, grid):
-        m = len(grid)
-        n = len(grid[0])
 
-        def dfs(grid, i, j):
-            if i < 0 or i >= m or j < 0 or j >= n:  # 越界
-                return
-            if grid[i][j] == "0":
-                return
-            grid[i][j] = "0"
-
-            dfs(grid, i + 1, j)
-            dfs(grid, i - 1, j)
-            dfs(grid, i, j + 1)
-            dfs(grid, i, j - 1)
-
-        ans = 0
-        for i in range(m):
-            for j in range(n):
-                if grid[i][j] == "1":
-                    dfs(grid, i, j)
-                    ans += 1
-
-        return ans
-```
-
-### 2. [695. 岛屿的最大面积](https://leetcode-cn.com/problems/max-area-of-island/)
+### 2. [695] 岛屿的最大面积
 
 ```c++
 class Solution {
@@ -117,13 +71,12 @@ public:
     int maxAreaOfIsland(vector<vector<int>>& grid) {
         m = grid.size();
         n = grid[0].size();
+        
         int ans = 0;
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                // if (grid[i][j] == 1) {
-                    ans = max( ans, dfs(grid, i, j) );
-                // }
+                ans = max( ans, dfs(grid, i, j) );
             }
         }
 
@@ -132,30 +85,59 @@ public:
 };
 ```
 
-```python
-class Solution(object):
-    def maxAreaOfIsland(self, grid):
-        m = len(grid)
-        n = len(grid[0])
+### 3. [463] 岛屿的周长 （Easy）
 
-        def dfs(grid, i, j):
-            if i < 0 or i >= m or j < 0 or j >= n:
-                return 0
-            if grid[i][j] == 0:
-                return 0
-            grid[i][j] = 0
-            return (
-                1
-                + dfs(grid, i + 1, j)
-                + dfs(grid, i - 1, j)
-                + dfs(grid, i, j + 1)
-                + dfs(grid, i, j - 1)
-            )
+统计多个岛屿各自的周长
 
-        ans = 0
-        for i in range(m):
-            for j in range(n):
-                if grid[i][j] == 1:
-                    ans = max(ans, dfs(grid, i, j))
-        return ans
+注意: 为了防止陆地格子在深度优先搜索中被重复遍历导致死循环，需要将遍历过的陆地格子标记为已经遍历过，下面的代码中我们设定值为 2 的格子为已经遍历过的陆地格子
+
+
+```c++
+class Solution {
+private:
+    int m;
+    int n;
+public:
+    int dfs(vector<vector<int>>& grid, int x, int y) {
+        if (x < 0 || x >= m || y < 0 || y >= n)  // 不在岛屿内
+            return 1;
+
+        if (grid[x][y] == 0)  // 节点是大海
+            return 1;
+
+        if (grid[x][y] == 2) // 已经遍历过的陆地，不在重复执行了，直接返回0
+            return 0;
+
+        grid[x][y] = 2; // 遍历过的陆地，标记为2，表示已经遍历过
+
+        return dfs(grid, x, y+1)
+                 + dfs(grid, x+1, y)
+                 + dfs(grid, x, y-1)
+                 + dfs(grid, x-1, y);
+    }
+
+    int islandPerimeter(vector<vector<int>>& grid) {
+        m = grid.size();
+        n = grid[0].size();
+
+        int ans = 0;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    ans += dfs(grid, i, j);
+                }
+            }
+        }
+
+        return ans;
+    }
+};
 ```
+
+### 4. 😭 [827] 最大人工岛 （Hard）
+
+给你一个大小为 n x n 二进制矩阵 grid 。最多 只能将一格 0 变成 1 。 返回执行此操作后，grid 中最大的岛屿面积是多少？
+
+
+
