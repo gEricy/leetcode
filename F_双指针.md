@@ -12,8 +12,8 @@ class Solution {
 public:
     int removeDuplicates(vector<int>& nums) {
         int j = 0;
-        for (int i=1;i<nums.size();i++) {
-            if(nums[i] != nums[j]) {
+        for (int i=0; i<nums.size(); i++) {
+            if (nums[i] != nums[j]) {
                 nums[++j] = nums[i];
             }
         }
@@ -64,7 +64,7 @@ public:
 class Solution {
 public:
     int removeElement(vector<int>& nums, int val) {
-        int j=0;
+        int j = 0;
         for (int i=0; i<nums.size(); i++) {
             if (nums[i] != val) {
                 nums[j++] = nums[i];
@@ -86,7 +86,7 @@ public:
 class Solution {
 public:
     void moveZeroes(vector<int>& nums) {
-        int j=0;
+        int j = 0;
         for (int i=0; i<nums.size(); i++) {
             if (nums[i] != 0) {
                 nums[j++] = nums[i];
@@ -119,14 +119,10 @@ nums2 = [2,5,6],       n = 3
 class Solution {
 public:
     void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
-        int k = m+n-1;
         int i = m-1, j = n-1;
+        int k = m+n-1;
         while (i>=0 && j>=0) {
-            if (nums1[i] > nums2[j]) {
-                nums1[k--] = nums1[i--];
-            } else {
-                nums1[k--] = nums2[j--];
-            }
+            nums1[k--] = nums1[i] >= nums2[j] ? nums1[i--] : nums2[j--];
         }
         while (j>=0) {
             nums1[k--] = nums2[j--];
@@ -147,18 +143,17 @@ public:
 class Solution {
 public:
     void sortColors(vector<int>& nums) {
-        int l=0, r=nums.size()-1;
-        int i=0;
+        int l = 0, i = 0, r = nums.size()-1;
         while (i <= r) {
             switch (nums[i]) {
                 case 0:
-                    swap(nums[i++], nums[l++]);
+                    swap(nums[l++], nums[i++]);
                     break;
                 case 1:
                     i++;
                     break;
-                case 2:
-                    swap(nums[i], nums[r--]);
+                case 2:  
+                    swap(nums[i], nums[r--]);  // i不向前走(因为换回来的如果是0，需要将0换到左边)
                     break;
             }
         }
@@ -251,7 +246,7 @@ public:
 ```python
 class Solution(object):
     def twoSum(self, nums, target):
-        hash = {}  # hash表中存放的是(元素, 下标)，即: (nums[i], i)
+        hash = {}  # {nums[i], i}
         for i in range(len(nums)):
             diff = target - nums[i]
             if diff in hash:
@@ -261,17 +256,6 @@ class Solution(object):
         return [-1, -1]
 ```
 
-```python
-class Solution(object):
-    def twoSum(self, nums, target):
-        hash = {}  # hash表中存放的是(diff,下标)，即: (target-nums[i], i)
-        for i in range(len(nums)):
-            if nums[i] in hash:
-                return [i, hash[nums[i]]]
-            else:
-                hash[target - nums[i]] = i
-        return [-1, -1]
-```
 
 8.2. [167] 两数之和 II - 输入有序数组
 
@@ -286,16 +270,17 @@ class Solution(object):
 ```python
 class Solution(object):
     def twoSum(self, numbers, target):
-        l,r = 0,len(numbers)-1
-        while l<r:
-            sum = numbers[l]+numbers[r]
+        l = 0
+        r = len(numbers)-1
+        while l < r:
+            sum = numbers[l] + numbers[r]
             if sum == target:
-                return [l+1,r+1]
+                return [l+1, r+1]
             elif sum > target:
-                r-=1
+                r -= 1
             else:
-                l+=1
-        return [-1,-1]
+                l += 1
+        return [-1, -1]
 ```
 
 ### 9. 😄 [15] 三数之和
@@ -321,80 +306,72 @@ class Solution(object):
 ```python
 class Solution(object):
     def threeSum(self, nums):
-        n = len(nums)
         ans = []
+        n = len(nums)
+        if n < 3:
+            return []
 
         nums.sort()
 
-        # 固定一个值nums[i]
-        for i in range(n - 2):
-            if i > 0 and nums[i] == nums[i - 1]:  # 1.去重
+        for i in range(n-2):
+            if i > 0 and nums[i] == nums[i-1]: # 去重
                 continue
-            # 双指针[l,r]锁定后面的区间
-            l = i + 1
-            r = n - 1
+            l, r = i+1, n-1
             while l < r:
-                sum = nums[i] + nums[l] + nums[r]
+                sum = nums[i]+nums[l]+nums[r]
                 if sum == 0:
                     ans.append([nums[i], nums[l], nums[r]])
-                    l += 1 # 相等时，l要++，继续寻找下一个符合条件的元素
-                    while l < r and nums[l] == nums[l - 1]:  # 2.去重
+                    l += 1
+                    while l < r and nums[l] == nums[l-1]: # 去重
                         l += 1
                 elif sum > 0:
                     r -= 1
                 else:
                     l += 1
-
+                    
         return ans
 ```
 
-```c++
-class Solution {
-public:
-    vector<vector<int>> threeSum(vector<int>& nums) {
-        
-        vector<vector<int>> ans;
-        
-        int size = nums.size();
-
-        if (size < 3) {
-            return ans;
-        }
-
-        sort(nums.begin(), nums.end());
-
-        // 固定一个值nums[i]
-        for (int i=0; i < size-2; i++) {
-            if (i>0 && nums[i] == nums[i-1]) { // 去重
-                continue;
-            }
-            // 固定两个头尾指针l,r = [i+1, size)
-            int l = i+1;
-            int r = size-1;
-            while (l < r) {
-                int sum = nums[i] + nums[l] + nums[r];
-                if (sum == 0) {
-                    ans.push_back(vector<int>{nums[i], nums[l], nums[r]});
-                    l++; // 相等时，l要++，继续寻找下一个符合条件的元素
-                    while (l < r && nums[l] == nums[l-1]) { // 去重
-                        l++;
-                    }
-                } else if (sum > 0) {
-                    r--;
-                } else {
-                    l++;
-                }
-            }
-        }
-
-        return ans;
-    }
-};
-```
 
 ### 10. 😄 [16] 最接近的三数之和
 
 
+输入：nums = [-1,2,1,-4], target = 1
+
+输出：2
+
+解释：与 target 最接近的和是 2 (-1 + 2 + 1 = 2) 
+
+```python
+class Solution(object):
+    def threeSumClosest(self, nums, target):
+        bestTarget = 10**7  # 接近target的值
+
+        n = len(nums)
+        if n < 3:
+            return -1
+
+        nums.sort() # 一定要排序
+
+        def update(curSum, bestTarget):
+            if abs(curSum-target) < abs(bestTarget-target):
+                bestTarget = curSum
+            return bestTarget
+
+        for i in range(n - 1):
+            l, r = i + 1, n - 1
+            while l < r:
+                sum = nums[l] + nums[i] + nums[r]
+                bestTarget = update(sum, bestTarget)
+                if sum == target: # 相等的话直接返回
+                    return target
+                elif sum > target:
+                    r -= 1
+                else:
+                    l += 1
+
+        return bestTarget
+```
 ### 11. 😄 [18] 四数之和
 
 给你一个由 n 个整数组成的数组 nums ，和一个目标值 target 。请你找出并返回满足下述全部条件且不重复的四元组 [nums[a], nums[b], nums[c], nums[d]] （若两个四元组元素一一对应，则认为两个四元组重复）：
@@ -434,12 +411,10 @@ public:
             swap(nums[left++], nums[right--]);
         }
     }
-
     void rotate(vector<int>& nums, int k) {
         int size = nums.size();
-
         k = k % size;
-
+        if (k==0) return;
         reverse(nums, size-k, size-1); // 右部分
         reverse(nums, 0, size-k-1);    // 左部分
         reverse(nums, 0, size-1);      // 全部
