@@ -1,4 +1,6 @@
 
+- [394] 字符串解码
+
 
 # 1. 栈 <==>队列
 
@@ -28,35 +30,35 @@ public:
     }
     
     int pop() {
-        if (this->empty()) {
-            return -1;
+        if (empty()) return -1;
+        if (!help.empty()) {
+            int top = help.top(); help.pop();
+            return top;
         }
-        if (help.empty()) {
-            while (!data.empty()) {
-                int top = data.top(); data.pop();
-                help.push(top);
-            }
+        while (!data.empty()) {
+            int top = data.top(); data.pop();
+            help.push(top);
         }
         int top = help.top(); help.pop();
         return top;
     }
     
     int peek() {
-        if (this->empty()) {
-            return -1;
+        if (empty()) return -1;
+        if (!help.empty()) {
+            int top = help.top();
+            return top;
         }
-        if (help.empty()) {
-            while (!data.empty()) {
-                int top = data.top(); data.pop();
-                help.push(top);
-            }
+        while (!data.empty()) {
+            int top = data.top(); data.pop();
+            help.push(top);
         }
         int top = help.top();
         return top;
     }
     
     bool empty() {
-        return help.empty() && data.empty();
+        return data.empty() && help.empty();
     }
 };
 ```
@@ -108,7 +110,7 @@ public:
 
 ```
 
-### 1.3. 😄最小栈
+### 1.3. 😄[155] 最小栈
 
 ---
 
@@ -120,18 +122,18 @@ public:
 - 获取栈顶：stack[-1]
 - 弹出栈顶：stack.pop(-1)  或  stack.pop()
 
-### 2.1. [71. 简化路径](https://leetcode-cn.com/problems/simplify-path/)
+### 2.1. [71] 简化路径
 
 ```python
 class Solution(object):
     def simplifyPath(self, path):
         stack = []
         for ch in path.split('/'):
-            if ch == '.':    # /a/./b/../../c/
+            if ch == '.':   
                 continue
-            elif ch == '':   # /home//foo/  注意: 不要忘记该case
+            elif ch == '':  
                 continue
-            elif ch == '..':  # /a/./b/../../c/
+            elif ch == '..': 
                 if stack:
                     stack.pop(-1)
             else:
@@ -139,7 +141,7 @@ class Solution(object):
         return '/' + '/'.join(stack)
 ```
 
-### 2.2. [20. 有效的括号](https://leetcode-cn.com/problems/valid-parentheses/)
+### 2.2. [20] 有效的括号
 
 ```python
 class Solution(object):
@@ -161,7 +163,7 @@ class Solution(object):
         return len(stack) == 0
 ```
 
-### 2.3. [844. 比较含退格的字符串](https://leetcode-cn.com/problems/backspace-string-compare/)
+### 2.3. [844] 比较含退格的字符串
 
 ```
 输入：S = "ab#c", T = "ad#c"
@@ -171,36 +173,36 @@ class Solution(object):
 
 ```python
 class Solution(object):
-    def backspaceCompare(self, s, t):
-        def deal(s):
-            stack = []
-            for ch in s:
-                if ch != "#":
-                    stack.append(ch)
-                else:
-                    if stack:
-                        stack.pop(-1)
-            return stack
-        return deal(s) == deal(t)
+  def backspaceCompare(self, s, t):
+    def backspace(s):
+      stack = []
+      for ch in s:
+        if ch == "#":
+          if stack:
+            stack.pop(-1)
+        else:
+          stack.append(ch)
+      return ''.join(stack)
+    return backspace(s) == backspace(t)
 ```
 
 
 
-### 2.4. [1544. 整理字符串](https://leetcode-cn.com/problems/make-the-string-great/)
+### 2.4. [1544] 整理字符串
 
 ```python
 class Solution(object):
-    def makeGood(self, s):
-        stack = []
-        for ch in s:
-            if stack and abs(ord(stack[-1])-ord(ch)) == abs(ord('a')-ord('A')):
-                stack.pop(-1)
-            else:
-                stack.append(ch)
-        return "".join(stack)
+  def makeGood(self, s):
+    stack = []
+    for ch in s:
+      if stack and abs(ord(stack[-1]) - ord(ch)) == abs(ord('a')-ord('A')):
+        stack.pop(-1)
+      else:
+        stack.append(ch)
+    return ''.join(stack)
 ```
 
-### 2.5. [1047. 删除字符串中的所有相邻重复项](https://leetcode-cn.com/problems/remove-all-adjacent-duplicates-in-string/)
+### 2.5. [1047] 删除字符串中的所有相邻重复项
 
 
 输入："abbaca"
@@ -222,7 +224,7 @@ class Solution(object):
         return "".join(stack)
 ```
 
-### 2.6. [1209. 删除字符串中的所有相邻重复项 II](https://leetcode-cn.com/problems/remove-all-adjacent-duplicates-in-string-ii/)
+### 2.6. [1209] 删除字符串中的所有相邻重复项 II
 
 
 输入：s = "deeedbbcccbdaa", k = 3
@@ -259,7 +261,7 @@ class Solution(object):
         return ans
 ```
 
-### 2.7. 😄 [394. 字符串解码](https://leetcode-cn.com/problems/decode-string/)
+### 2.7. 😄 [394] 字符串解码
 
 给定一个经过编码的字符串，返回它解码后的字符串。
 
@@ -274,27 +276,26 @@ class Solution(object):
 输出："accaccacc"
 ```
 
-[解答](https://leetcode-cn.com/problems/decode-string/solution/decode-string-fu-zhu-zhan-fa-di-gui-fa-by-jyd/)
-
-- 阶梯关键: 栈存放的元素 (当前元素出现的次数, 上一个字符串)
-
 ```python
 class Solution(object):
-    def decodeString(self, s):
-        stack = []
-        res, multi = "", 0
-        for c in s:
-            if '0' <= c <= '9': # [0-9]
-                multi = multi * 10 + int(c)            
-            elif c == '[':  # 入栈
-                stack.append([multi, res])
-                res, multi = "", 0
-            elif c == ']':  # 出栈
-                top = stack.pop(-1)
-                res = top[1] + top[0] * res
-            else: # [A-Z,a-z]
-                res += c
-        return res
+  def decodeString(self, s):
+    stack = [] # [cur_str, num]
+    cur_str = ""
+    cur_num = 0
+    for ch in s:
+      if ch >= '0' and ch <= '9': # 数字
+        cur_num = cur_num * 10 + int(ch)
+      elif ch == '[': # 入栈
+        stack.append([cur_num, cur_str])
+        cur_num = 0
+        cur_str = ""
+      elif ch == ']': # 出栈
+        num, str = stack.pop(-1)
+        cur_num = 0
+        cur_str = str + num * cur_str
+      else: # 字母
+        cur_str += ch
+    return cur_str
 ```
 
 --- 
@@ -319,13 +320,11 @@ class Solution(object):
 
 ## 3.1. 单调栈
 
-### 3.2.1. 😄[739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)
+### 3.2.1. [739] 每日温度
 
 ```python
-请根据每日气温列表，重新生成一个列表。对应位置的输出为：要想观测到更高的气温，至少需要等待的天数。如果气温在这之后都不会升高，请在该位置用 0 来代替。
-例如，
-	给定一个列表 temperatures = [73, 74, 75, 71, 69, 72, 76, 73]
-	你的输出应该是 [1, 1, 4, 2, 1, 1, 0, 0]。
+# 给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指对于第 i 天，下一个更高温度出现
+# 在几天后。如果气温在这之后都不会升高，请在该位置用 0 来代替。 
 ```
 
 - 栈中存放的元素，是下标，不是nums[i]
@@ -344,7 +343,7 @@ class Solution(object):
         return ans
 ```
 
-### 3.2.2. 😄[402. 移掉K位数字](https://leetcode-cn.com/problems/remove-k-digits/)
+### 3.2.2. [402] 移掉K位数字
 
 给定一个以字符串表示的非负整数 *num*，移除这个数中的 *k* 位数字，使得剩下的数字最小。
 
@@ -354,33 +353,29 @@ class Solution(object):
 解释: 移除掉三个数字 4, 3, 和 2 形成一个新的最小的数字 1219	。
 ```
 
-
-
 ```python
 class Solution(object):
     def removeKdigits(self, num, k):
-        # 1.保持单调栈
         stack = []
+        # 1.保持单调栈
         for ch in num:
             while stack and ch < stack[-1] and k > 0:
                 stack.pop(-1)
                 k -= 1
             stack.append(ch)
-
-        # 2.构造结果
-        #     别忘记(k>0)时，要处理下喔~
+        
+        # 2. 别忘记(k>0)时，要处理下喔~
         while k > 0:
             stack.pop(-1)
             k -= 1
 
-        #     去掉左边的0
         ans = ''.join(stack).lstrip('0')
         return '0' if len(ans) == 0 else ans
 ```
 
 
 
-### 3.2.3. 😄[496. 下一个更大元素 I](https://leetcode-cn.com/problems/next-greater-element-i/) TODO
+### 3.2.3. 😄[496] 下一个更大元素 I
 
 给定两个 `没有重复元素` 的数组 nums1 和 nums2 ，其中nums1 是 nums2 的子集。找到 nums1 中每个元素在 nums2 中的下一个比其大的值。
 
@@ -422,7 +417,7 @@ class Solution(object):
 
 
 
-### 3.2.4. [503. 下一个更大元素 II](https://leetcode-cn.com/problems/next-greater-element-ii/) 
+### 3.2.4. [503] 下一个更大元素 II 
 
 给定一个循环数组（最后一个元素的下一个元素是数组的第一个元素），输出每个元素的下一个更大元素。数字 x 的下一个更大的元素是按数组遍历顺序，这个数字之后的第一个比它更大的数，这意味着你应该循环地搜索它的下一个更大的数。如果不存在，则输出 -1。
 
