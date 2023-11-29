@@ -1,3 +1,10 @@
+
+
+-[93] 复原 IP 地址 
+
+
+---
+
 递归回溯 、 dfs深度优先遍历
 
 
@@ -139,8 +146,6 @@ class Solution(object):
         def dfs(start):
             if len(land) == k:
                 ans.append(land[:])
-                return
-
             for i in range(start, size):
                 land.append(nums[i])
                 dfs(i+1)
@@ -237,46 +242,25 @@ class Solution(object):
     def combinationSum3(self, k, n):
         nums = [i+1 for i in range(9)]
 
-        size = len(nums)
-
-        l, r = 0, size
-
         ans = []
         land = []
 
         def dfs(start, target):
-            if len(land) == k and target == 0:
-                ans.append(land[:])
+            if target < 0:
                 return
-            for i in range(start, size):
-                land.append(nums[i])
-                dfs(i+1, target-nums[i])
-                land.pop(-1)
-
-        dfs(0, n)
-        return ans
-```
-
-```python
-class Solution(object):
-    def combinationSum3(self, k, n):
-        nums = [i + 1 for i in range(9)]  # 1-9
-
-        ans = []
-        land = []
-
-        def dfs(start):
-            if sum(land) == n and len(land) == k:
+            if len(land) > k:
+                return
+            if target == 0 and len(land) == k:
                 ans.append(land[:])
                 return
             for i in range(start, len(nums)):
                 land.append(nums[i])
-                dfs(i + 1)
-                land.pop()
-
-        dfs(0)
+                dfs(i+1, target-nums[i])
+                land.pop(-1)
+        dfs(0, n)
         return ans
 ```
+
 
 ### 1.6. [377] 组合总和 Ⅳ
 
@@ -382,63 +366,32 @@ class Solution(object):
 
 解：生成n对括弧，那么结果就是2n，设置left/right两个变量，分别记录左/右括弧出现的次数
 
-> 每次，选中左/右括弧，相应的left/right都+1。当满足left+right=2n时，得到一个括弧
+每次，选中左/右括弧，相应的left/right都+1。当满足left+right=2n时，得到一个括弧
 
-> 「注」在选择左/右括弧时，是有条件的！
+「注」在选择左/右括弧时，是有条件的！
 
-> 「注」每次选中，都要对left/right +1，然后，将括弧加入land中，再次backtrace
+「注」每次选中，都要对left/right +1，然后，将括弧加入land中，再次backtrace
 
-> 1. 选中左括弧条件: left < n，即左括弧的个数，没到n个
-> 2. 选中右括弧条件: right < n && left > right，即右括弧的个数没到n个 && 左括弧个数比右括弧个数多
-
-```python
-# 写法1
-class Solution(object):
-    # 1.左括弧+右括弧，共有2n个括弧时，一共能构成哪些
-    # 2.不满足括弧匹配的进行剪枝
-    def generateParenthesis(self, n):
-        ans = []
-        land = ""
-
-        def dfs(land, left, right):  # left,right 左括弧数量, 右括弧的数量
-            if left + right == 2 * n:  # 递归终止条件: 左右括弧总数量 == 2n
-                ans.append(land[:])
-                return
-
-            # 添加‘(’的条件: 左括弧 < n
-            if left < n:
-                dfs(land + "(", left + 1, right)
-
-            # 添加‘)’的条件: 左括弧>右括弧 && 右括弧 < n
-            if right < n and left > right:
-                dfs(land + ")", left, right + 1)
-
-        dfs(land, 0, 0)
-        return ans
-```
+1. 选中左括弧条件: left < n，即左括弧的个数，没到n个
+2. 选中右括弧条件: left > right，左括弧个数比右括弧个数多
 
 ```python
-# 写法2
 class Solution(object):
     def generateParenthesis(self, n):
         ans = []
-
-        left, right = 0, 0
-
-        def dfs(s, left, right):
-            if left + right == 2 * n:
-                ans.append(s)
+        def dfs(left, right, land):
+            if left == n and right == n:
+                ans.append(land)
                 return
-
             if left < n:
-                dfs(s + "(", left + 1, right)
+                dfs(left+1, right, land+"(")
+            if left > right:
+                dfs(left, right+1, land+")")
 
-            if right < left and right < n:
-                dfs(s + ")", left, right + 1)
-
-        dfs("", 0, 0)
+        dfs(0, 0, "")
         return ans
 ```
+
 
 ### 3.2. [17] 电话号码的字母组合
 
@@ -454,9 +407,8 @@ class Solution(object):
 ```python
 class Solution(object):
     def letterCombinations(self, digits):
-        if digits == "":
+        if len(digits) == 0:
             return []
-
         hash = {
             "2": "abc",
             "3": "def",
@@ -467,17 +419,15 @@ class Solution(object):
             "8": "tuv",
             "9": "wxyz",
         }
-
         ans = []
 
-        def dfs(start, s):
-            if len(s) == len(digits):  # 递归退出条件: land的个数 == 按键个数
-                ans.append(s)
+        def dfs(start, land):
+            if len(land) == len(digits):  # 递归退出条件: land的个数 == 按键个数
+                ans.append(land)
                 return
-            for i in range(start, len(digits)):  # 遍历每个按键
-                for ch in hash[digits[i]]:  # 遍历每个按键对应的字符
-                    dfs(i + 1, s + ch)
-
+            for i in range(start, len(digits)): # 遍历每个按键
+                for ch in hash[digits[i]]: # 遍历每个按键对应的字符
+                    dfs(i+1, land+ch)
         dfs(0, "")
         return ans
 ```
