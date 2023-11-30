@@ -13,19 +13,15 @@
 ```python
 class Solution(object):
     def search(self, nums, target):
-        size = len(nums)
-
-        l, r = 0, size-1
-
+        l, r = 0, len(nums)-1
         while l <= r:
-            mid = (l+r) / 2
+            mid = (l+r)/2
             if nums[mid] == target:
                 return mid
-            elif nums[mid] > target:
-                r = mid-1
-            else:
+            elif nums[mid] < target:
                 l = mid+1
-
+            else:
+                r = mid-1
         return -1
 ```
 
@@ -49,7 +45,6 @@ class Solution(object):
 ```
 
 ```python
-# 模板1
 class Solution(object):
     def searchMatrix(self, matrix, target):
         m = len(matrix)     # m行n列
@@ -69,31 +64,6 @@ class Solution(object):
         return False
 ```
 
-```python
-# 模板2
-class Solution(object):
-    def searchMatrix(self, matrix, target):
-        m = len(matrix)  # m行n列
-        n = len(matrix[0])
-
-        l, r = 0, m * n - 1
-
-        while l + 1 < r:
-            mid = (l + r) / 2
-            if matrix[mid / n][mid % n] == target:
-                return True
-            elif matrix[mid / n][mid % n] < target:
-                l = mid
-            else:
-                r = mid
-
-        if matrix[l / n][l % n] == target:
-            return True
-        if matrix[r / n][r % n] == target:
-            return True
-
-        return False
-```
 
 ### 1.3. [240] 搜索二维矩阵 II
 
@@ -196,7 +166,7 @@ class Solution(object):
         return [searchFirst(), searchLast()]
 ```
 
-### 2.1.2. 😭 [35] 搜索插入位置
+### 2.1.2. [35] 搜索插入位置
 
 给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
 
@@ -205,33 +175,21 @@ class Solution(object):
 ```python
 class Solution(object):
     def searchInsert(self, nums, target):
-        size = len(nums)
-        if size == 0:
-            return 0
-
-        l, r = 0, size-1
-
+        l, r = 0, len(nums)-1
         while l+1 < r:
-            mid = (l+r) / 2
+            mid = (l+r)/2
             if nums[mid] == target:
                 r = mid
             elif nums[mid] > target:
                 r = mid
             else:
                 l = mid
-        
-        # nums[l]一定是小于等于nums[r]，那么，targe与nums[l],nums[r]之间的关系有以下几种
-
-        if nums[r] < target:
-            return r+1
-        if nums[r] == target:
+                
+        if target <= nums[l]:
+            return l
+        if target <= nums[r]:
             return r
-        if nums[l] < target:
-            return l+1
-        if nums[l] == target:
-            return l
-        if nums[l] > target:
-            return l
+        return r+1
 ```
 
 ## 2.2. 旋转排序数组
@@ -271,34 +229,30 @@ class Solution(object):
 ```python
 class Solution(object):
     def search(self, nums, target):
-        size = len(nums)
-
-        l, r = 0, size - 1
-
-        while l + 1 < r:
-            mid = (l + r) / 2
-
-            if nums[mid] == target:
+        l, r = 0, len(nums)-1
+        while l+1 < r:
+            mid = (l+r)/2
+            if target == nums[mid]:
                 return mid
-            if nums[l] == target:
+            if target == nums[l]:
                 return l
-            if nums[r] == target:
+            if target == nums[r]:
                 return r
-
-            if nums[l] < nums[mid]:  # [l,mid]是单调区间
-                if nums[l] < target < nums[mid]: # target在区间内
+            # 锁定单调区间
+            if nums[l] < nums[mid]:
+                if nums[l] < target < nums[mid]:
                     r = mid
                 else:
                     l = mid
-            else:  # [mid,r]是单调区间
-                if nums[mid] < target < nums[r]: # target在区间内
+            else:
+                if nums[mid] < target < nums[r]:
                     l = mid
                 else:
                     r = mid
 
-        if nums[l] == target:
+        if target == nums[l]:
             return l
-        if nums[r] == target:
+        if target == nums[r]:
             return r
 
         return -1
@@ -311,80 +265,54 @@ class Solution(object):
 - `升序数组：已知一个长度为 n 的数组，预先按照升序排列，经由 1 到 n 次 旋转 后，得到输入数组`
 
 
-[153] 寻找旋转排序数组中的最小值
-
-[154] 寻找旋转排序数组中的最小值 II    ------ 可能存在【重复】元素值的数组nums
-
-
-解题思路：
-
-用二分法查找，需要始终将目标值（这里是最小值）套住，并不断收缩左边界或右边界。
-
-左、中、右三个位置的值相比较，有以下几种情况: 
-
-1.左值 < 中值，中值 < 右值: 没有旋转，最小值在最左边，可以收缩右边界
-
-```
-        右
-    中
-左
-``` 
-
-2.左值 > 中值，中值 < 右值: 有旋转，最小值在左半边，可以收缩右边界
-
-```
-左       
-        右
-    中
-``` 
-
-3.左值 < 中值，中值 > 右值: 有旋转，最小值在右半边，可以收缩左边界
-
-```
-    中  
-左 
-        右
-```
-
-4.左值 > 中值，中值 > 右值: 单调递减，不可能出现
-
-```
-左
-    中
-        右
-```
-
-分析前面3种可能的情况，会发现情况1、2是一类，情况3是另一类。（情况4不可能出现）
-
-结论: 通过比较“中值与右值”，可以确定最小值的位置范围，从而决定边界收缩的方向
-
-- 如果 中值 < 右值，则最小值在左半边，可以收缩右边界
-- 如果 中值 > 右值，则最小值在右半边，可以收缩左边界
-
-因此，分为3种情况
-
-1. 中值 < 右值 nums[mid] < nums[r]，收缩右边界，r = mid
-2. 中值 > 右值 nums[mid] > nums[r]，收缩左边界，l = mid
-3. 中值 = 右值 nums[mid] = nums[r]，由于重复元素的存在，不能确定nums[mid]是在最小值的左侧还是右侧，所以不能鲁莽的忽略掉某一部分（唯一可以知道的是，因为它们的值相同，所以nums[r]不是最小值，它有一个值nums[mid]可以代替，故，可以忽略二分查找区间的右端点）
-
-
+[153] 寻找旋转排序数组中的最小值 --- 元素互不相同
 
 ```python
 class Solution(object):
     def findMin(self, nums):
-        l,r = 0,len(nums)-1
-        while l+1<r:
+        if len(nums) == 0:
+            return 0
+        if len(nums) == 1:
+            return nums[0]
+
+        l, r = 0, len(nums)-1
+        while l+1 < r:
             mid = (l+r)/2
-            if nums[mid] < nums[r]:
-                r=mid
-            elif nums[mid]==nums[r]:
-                r=mid
+            if nums[mid] <= nums[r]:
+                r = mid
             else:
-                l=mid
-        return min(nums[l],nums[r])
+                l = mid
+        return min(nums[l], nums[r])
+```
+
+[154] 寻找旋转排序数组中的最小值 II --- 元素可能相同
+
+```python
+class Solution(object):
+    def findMin(self, nums):
+        if len(nums) == 0:
+            return 0
+        if len(nums) == 1:
+            return nums[0]
+
+        l, r = 0, len(nums)-1
+        while l+1 < r:
+            if nums[r] == nums[r-1]:  # +++
+                r -= 1
+                continue
+            if nums[l] == nums[l+1]:  # +++
+                l += 1
+                continue
+            mid = (l+r)/2
+            if nums[mid] <= nums[r]:
+                r = mid
+            else:
+                l = mid
+        return min(nums[l], nums[r])
 ```
 
 ## 2.3. 变种题
+
 
 ### 2.3.1. [162]. 寻找峰值
 
@@ -393,18 +321,6 @@ class Solution(object):
 
 解题思路: 相邻的两个元素 `nums[mid],nums[mid-1]` 或 `nums[mid],nums[mid+1]`，判断是否出现逆序
 
-```python
-class Solution(object):
-    def findPeakElement(self, nums):
-        l,r = 0,len(nums)-1
-        while l+1<r:
-            mid=(l+r)/2
-            if nums[mid] < nums[mid-1]:
-                r=mid
-            else:
-                l=mid
-        return l if nums[l]>nums[r] else r
-```
 
 ```python
 class Solution(object):
