@@ -194,37 +194,12 @@ class Solution(object):
 
 ## 2.2. 旋转排序数组
 
-单调递增数组
-```
-        *
-      *
-    *
-  *
-*
-```
-
-做了旋转：
-```
-  *
-*
-        *
-      *
-    *
-```
 
 ### 2.2.1. 😄[33] 搜索旋转排序数组
 
 
-1. 先锁定单调区间（mid将l,r分成2个区间后，至少会存在一个单调区间）
-    - nums[l] < nums[mid]     [l,mid]是单调区间
-    - nums[mid] < nums[r]     [mid,r]是单调区间
+1. 先锁定单调区间
 2. 根据target“在/不在”单调区间内，又分为2种情况
-    - [l,mid]是单调区间，
-        - target“在”该单调区间内
-        - target“不在”该单调区间内
-    - [mid,r]是单调区间，
-        - target“在”该单调区间内
-        - target“不在”该单调区间内
 
 ```python
 class Solution(object):
