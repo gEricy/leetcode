@@ -52,6 +52,7 @@ public:
 
 计算一个`数组`中，任意两个数之间汉明距离的总和。
 
+- 每一列的汉明距离总和 = 1的个数 * 0的个数
 
 ```c++
 class Solution {
@@ -82,23 +83,6 @@ public:
 };
 ```
 
-```python
-class Solution(object):
-    def totalHammingDistance(self, nums):
-        ans = 0
-        for i in range(32):
-            zero = 0
-            one = 0
-            mask = 1 << i
-            for num in nums:
-                if num & mask == 0:
-                    zero += 1
-                else:
-                    one += 1
-            ans += zero * one
-        return ans
-```
-
 
 
 ## 1.4. [231] 2的幂
@@ -107,14 +91,7 @@ class Solution(object):
 
 因此，该问题转化为，将 n 的二进制表示中最低位的那个 1 提取出来，再判断剩余的数值是否为 0 即可。
 
-```c++
-class Solution {
-public:
-    bool isPowerOfTwo(int n) {
-        return n>0 && ((n&(n-1)) == 0);
-    }
-};
-```
+
 
 ```python
 class Solution(object):
@@ -124,14 +101,6 @@ class Solution(object):
 
 ## 1.5. [342] 4的幂
 
-```c++
-class Solution {
-public:
-    bool isPowerOfFour(int n) {
-        return n>0 && ((n&(n-1)) == 0) && (n%3 == 1);
-    }
-};
-```
 
 ```python
 class Solution(object):
@@ -187,18 +156,6 @@ class Solution(object):
 
 ## 2.1. [136] 只出现一次的数字
 
-```c++
-class Solution {
-public:
-    int singleNumber(vector<int>& nums) {
-        int xx = 0;
-        for (auto num : nums) {
-            xx ^= num;
-        }
-        return xx;
-    }
-};
-```
 
 ```python
 class Solution(object):
@@ -238,8 +195,6 @@ public:
 };
 ```
 
-```python
-```
 
 ## 2.3. [260] 只出现一次的数字 III
 
@@ -253,29 +208,6 @@ public:
 4. 因此，将这2组的元素分别异或起来，就得到 x1 和 x2
 
 
-```c++
-class Solution {
-public:
-    vector<int> singleNumber(vector<int>& nums) {
-        unsigned int xx = 0; // 遍历数组，逐一异或，得到 xx = x1 ^ x2
-        for (auto num : nums) {
-            xx ^= num;
-        }
-
-        int lowbit = xx & (-xx); // 保留xx的最右边的1，其他位置全部抹0
-
-        int a=0, b=0;
-        for (auto num : nums) {
-            if ( (lowbit & num) != 0) { // 使用lowbit将num分组: 相同的元素一定分到一个组，x1和x2一定分在不同的组
-                a ^= num;
-            } else {
-                b ^= num;
-            }
-        }
-        return {a, b};
-    }
-};
-```
 
 ```python
 class Solution(object):
@@ -297,26 +229,6 @@ class Solution(object):
 ```
 
 ### 2.4. [190] 颠倒二进制位
-
-
-```c++
-class Solution {
-public:
-    uint32_t reverseBits(uint32_t n) {
-        
-        int ans = 0;
-
-        for (int i=0; i<32; i++) {
-            int mask = 1 << i;
-            if ( (mask & n) != 0 ) {  // 当前bit位(i)不为0, 对称bit位(31-i)设为1
-                ans += 1<<(31-i);
-            }
-        }
-        
-        return ans;
-    }
-};
-```
 
 ```python
 class Solution:
@@ -346,23 +258,6 @@ class Solution:
 
 解题：该问题转换为求公共前缀
 
-```c++
-class Solution {
-public:
-    int rangeBitwiseAnd(int left, int right) {
-        
-        int cnt = 0;
-        while (left < right) {
-            left >>= 1;
-            right >>= 1;
-            cnt++;
-        }
-
-        return left << cnt;
-    }
-};
-```
-
 ```python
 class Solution(object):
     def rangeBitwiseAnd(self, left, right):
@@ -371,7 +266,7 @@ class Solution(object):
             left >>= 1
             right >>= 1
             cnt += 1
-        return left << cnt  # return right << cnt
+        return left << cnt  
 ```
 
 ## 3.2. [371] 两整数之和
