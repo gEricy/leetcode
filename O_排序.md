@@ -2,7 +2,6 @@
 - 堆排
 - 归并
 
-
 ### 😭 [148] 链表排序
 
 
@@ -161,37 +160,32 @@ class Solution(object):
 ```c++
 class Solution {
 public:
-    // root: 以root为根节点，向下调整
+    // k: 以k为根节点，向下调整
     // N: 数组总个数
-    void down(vector<int>& A, int root, int N) {
-        int i = 2*root+1;
-        while (i < N) {
-            if (i+1 < N && A[i] < A[i+1]) { // 存在右孩子 && 左孩子 < 右孩子
-                i++; // i指向右孩子（右孩子更大）
+    void adjust(vector<int>& A, int k, int n) {
+        for (int i=2*k+1; i<n; i=2*k+1) {
+            if (i+1<n && A[i] < A[i+1]) { // 选择较大值
+                i++;
             }
-            if (A[root] > A[i]) { // 已经是大根堆了，不需要再调整了，直接break
+            if (A[i] > A[k]) {
+                swap(A[i], A[k]); // 将根和较大的孩子值交换
+                k = i;  // 更新根节点索引，指向较大的孩子
+            } else { // 已经是大根堆了，不需要再调整了，直接break
                 break;
-            } else {
-                swap(A[root], A[i]); // 将根和较大的孩子值交换
-                root = i;     // 更新root，指向较大的孩子
-                i = 2*root+1; // 更新左孩子，继续遍历
             }
         }
     }
-
     vector<int> sortArray(vector<int>& A) {
+        int n = A.size();
         // 创建大根堆: 以每个根节点作为调整的对象，从后向前调整
-        int N = A.size();
-        for (int i=N/2-1; i>=0; i--) {
-            down(A, i, N);
+        for (int i=n/2-1; i>=0; i--) {
+            adjust(A, i, n);
         }
-
         // 堆顶元素是结果, 一个个取出来
-        for (int i=N-1; i>=0; i--) {
+        for (int i=n-1; i>=0; i--) {
             swap(A[0], A[i]); // 堆顶元素放在最后，确定一个元素的排序位置
-            down(A, 0, i); // 数组长度: 一直缩短
+            adjust(A, 0, i);  // 数组长度: 一直缩短
         }
-        
         return A;
     }
 };
@@ -202,9 +196,7 @@ public:
 
 ### 2.2. [23] 合并 K 个升序链表
 
-  > 给你一个链表数组，每个链表都已经按升序排列。
-  >
-  > 请你将所有链表合并到一个升序链表中，返回合并后的链表。
+给你一个链表数组，每个链表都已经按升序排列。 请你将所有链表合并到一个升序链表中，返回合并后的链表。
 
 ```c
 定义：priority_queue<Type, Container, Functional>
