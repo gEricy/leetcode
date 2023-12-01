@@ -1,59 +1,61 @@
 
 ### 😭 [148] 链表排序
 
-```c++
+
+链表排序(归并)
+
+```cpp
 class Solution {
 public:
-    // 找中间节点(顺便将链表一分为二)  [head, mid前驱] [mid, 末尾节点]
-    ListNode* getMidNode(ListNode* head){
-        ListNode* slow = head;
-        ListNode* fast = head;
-        ListNode* mid_pre = head;
-        while(fast && fast->next){
-            fast = fast->next->next;
-            mid_pre = slow;
+    // 找中间节点(顺便将链表一分为二)  [head, pre], [slow, 末尾节点]
+    ListNode* getMid(ListNode* head) {
+        ListNode *pre; // 保存slow的前驱
+        ListNode *slow = head;
+        ListNode *fast = head;
+        // 寻找中间节点: fast走2步，slow走1步，当fast走到末尾时，slow指向中间节点
+        while (fast && fast->next) {
+            pre = slow;
             slow = slow->next;
+            fast = fast->next->next;
         }
-        // 切断链表 (用中间节点的前驱，切断链表)
-        mid_pre->next = NULL;  // 将链表一分为二：[left, mid的前驱] [mid, right]
-        // 返回中间节点
+        pre->next = NULL; // 切断链表 [head, pre], [slow, 末尾节点]
         return slow;
     }
+
     // 合并两个有序链表
-    ListNode* merge(ListNode* l1, ListNode* l2){
-        ListNode* dummy = new ListNode(-1);
-        ListNode* cur = dummy;
-        
-        while(l1 && l2){
-            if(l1->val <= l2->val){
-                cur->next = l1;
-                l1 = l1->next;
+    ListNode* merge(ListNode *L1, ListNode *L2) {
+        if (!L1) return L2;
+        if (!L2) return L1;
+
+        ListNode dummy;
+        ListNode *p = L1, *q = L2, *cur = &dummy;
+
+        while (p && q) {
+            ListNode *newNode = NULL;
+            if (p->val < q->val) {
+                newNode = p;
+                p = p->next;
+            } else {
+                newNode = q;
+                q = q->next;
             }
-            else{
-                cur->next = l2;
-                l2 = l2->next;
-            }
+            cur->next = newNode;
             cur = cur->next;
         }
-        if(l1){
-            cur->next = l1;
-        }
-        if(l2){
-            cur->next = l2;
-        }
-        return dummy->next;
+        if (p) cur->next = p;
+        if (q) cur->next = q;
+
+        return dummy.next;
     }
-    // 归并排序
-    ListNode* mergeSort(ListNode* head){
-        if(!head || !head->next)  // 递归退出条件: 没有节点 or 只有一个节点
+
+    ListNode* sortList(ListNode* head){
+        if(!head || !head->next) // 归并排序递归条件: 至少2个节点
             return head;
-        ListNode* mid = getMidNode(head);// [head, 中间节点的前驱] [中间节点, 尾部节点]
-        ListNode* L1 = mergeSort(head);  // 区间：左闭右开 [head, NULL)
-        ListNode* L2 =mergeSort(mid);    // 区间：左闭右开 [mid, NULL)
-        return merge(L1, L2);   		 // [left, mid] [mid->next, right] 合并
-    }
-    ListNode* sortList(ListNode* head) {
-        return mergeSort(head);
+
+        ListNode* mid = getMid(head);    // 将链表切成2半
+        ListNode* L1 = sortList(head);   // 左递归排序
+        ListNode* L2 = sortList(mid);    // 右递归排序
+        return merge(L1, L2);            // 合并
     }
 };
 ```
@@ -67,38 +69,32 @@ public:
 - 注意: 采用快速排序竟然会超时
 
 ```python
-class Solution:
-    def swap(self, nums, i, j):
-        nums[i], nums[j] = nums[j], nums[i]
+class Solution(object):
+  def partition(self, nums, l, r):
+    left = l
+    pivot = nums[l]
+    while l<r: # 按照基准pivot，将数组分成2个部分
+      # 先右后左
+      while l<r and nums[r]>=pivot:
+        r -= 1
+      while l<r and nums[l]<=pivot:
+        l += 1
+      nums[l], nums[r] = nums[r], nums[l]
+    # 新旧基准做交换
+    nums[l], nums[left] = nums[left], nums[l]
+    # 返回新的基准位置: l和r都可以
+    return l
 
-    def partition(self, nums, l, r):
-        left = l
-        pivot = nums[l]
+  def quickSort(self, nums, l, r):
+    if l < r: # 至少有2个元素
+      pivot = self.partition(nums, l, r)
+      self.quickSort(nums, l, pivot-1)
+      self.quickSort(nums, pivot+1, r)
 
-        # 按照基准pivot，将数组分成2个部分
-        while l < r:
-            # 1. 寻找不符合 nums[右] >= pivot >= nums[左] 的2个元素
-            while l < r and nums[r] >= pivot:
-                r -= 1
-            while l < r and nums[l] <= pivot:
-                l += 1
-            # 2. 将这2个元素做交换
-            self.swap(nums, l, r)
-
-        # 新旧基准做交换
-        self.swap(nums, l, left)
-        # 返回新的基准位置: l和r都可以
-        return l
-
-    def qsort(self, nums, l, r):
-        if l < r:
-            pivot = self.partition(nums, l, r)
-            self.qsort(nums, l, pivot - 1)
-            self.qsort(nums, pivot + 1, r)
-
-    def sortArray(self, nums):
-        self.qsort(nums, 0, len(nums) - 1)
-        return nums
+  def sortArray(self, nums):
+    l, r = 0, len(nums)-1
+    self.quickSort(nums, l, r)
+    return nums
 ```
 
 ### 1.2. [215] 数组中的第K个最大元素
@@ -419,22 +415,7 @@ public:
         int i = l;
         int j = mid+1;
         while (i <= mid && j <= r) {
-            // 写法1: 
             B[k++] = A[i] < A[j] ? A[i++] : A[j++];
-            
-            // 写法2: 
-            // if (A[i] < A[j]) {
-            //     B[k++] = A[i++];
-            // } else {
-            //     B[k++] = A[j++];
-            // }
-            
-            // 写法3: 
-            // if (A[i] > A[j]) {
-            //     B[k++] = A[j++];
-            // } else {
-            //     B[k++] = A[i++];
-            // }
         }
         while (i <= mid) {
             B[k++] = A[i++];
@@ -444,9 +425,8 @@ public:
         }
 
         // 3. 将辅助数组B中排好序的结果，copy到原数组A
-        k = 0;
         for (int i=l; i<=r; i++) {
-            A[i] = B[k++];
+            A[i] = B[i-l];
         }
     }
 
@@ -471,6 +451,7 @@ public:
 
 ### 3.2. [剑指 Offer 51. 数组中的逆序对](https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/)
 
+LCR 170. 交易逆序对的总数
 
 在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
 
@@ -503,9 +484,8 @@ public:
         }
         
         // 3. 将辅助数组B中的数据，copy到A
-        k = 0;
-        for (int i = l; i <= r; i++) {
-            A[i] = B[k++];
+        for (int i=l; i<=r; i++) {
+            A[i] = B[i-l];
         }
     }
     void mergeSort(vector<int>& A, int l, int r) {
@@ -554,9 +534,8 @@ public:
         }
         
         // 3. 将辅助数组B中的数据，copy到A
-        k = 0;
-        for (int i = l; i <= r; i++) {
-            A[i] = B[k++];
+        for (int i=l; i<=r; i++) {
+            A[i] = B[i-l];
         }
     }
     void mergeSort(vector<int>& A, int l, int r) {
