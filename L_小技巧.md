@@ -44,23 +44,6 @@ public:
 };
 ```
 
-```python
-class Solution(object):
-    def rotate(self, matrix):
-        m = len(matrix)
-        n = len(matrix[0])
-        # 上下翻转
-        for i in range(m / 2):
-            for j in range(n):
-                matrix[i][j], matrix[m - i - 1][j] = matrix[m - i - 1][j], matrix[i][j]
-        # 对角戏翻转
-        for i in range(m):
-            for j in range(i):
-                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
-
-        return matrix
-```
-
 ### 1.2. [54] 螺旋矩阵
 
 给定一个包含 *m* x *n* 个元素的矩阵（*m* 行, *n* 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。
@@ -150,42 +133,23 @@ public:
 class Solution {
 public:
     int majorityElement(vector<int>& nums) {
-        int candidate = -1; // 候选者
-        int cnt = 0;        // 出现次数
-
-        for (int i=0; i<nums.size(); i++) {
-            if (cnt == 0) { // 无候选者
+        int cand = -1; // 候选者
+        int cnt = 0;   // 出现次数
+        for (auto num : nums) {
+            if (cnt == 0) {
+                cand = num;
                 cnt++;
-                candidate = nums[i];
-            } else { // 存在候选者
-                if (nums[i] == candidate) {
+            } else {
+                if (cand == num) {
                     cnt++;
                 } else {
                     cnt--;
                 }
             }
         }
-        return candidate;
+        return cand;
     }
 };
-```
-
-```python
-class Solution(object):
-    def majorityElement(self, nums):
-        candidate = -1
-        cnt = 0
-
-        for num in nums:
-            if cnt == 0:  # 没有候选
-                cnt += 1
-                candidate = num
-            else:
-                if candidate == num:
-                    cnt += 1
-                else:
-                    cnt -= 1
-        return candidate
 ```
 
 ### 2.2. 😄 [229] 多数元素 II 
@@ -237,33 +201,33 @@ class Solution(object):
 `核心要点：有效元素 x ∈ [1,n]，通过不断的置换，它一定能放在 下标为x-1的位置，最终的效果是，nums[x-1] = x`
 
 
-### 3.1. [41. 缺失的第一个正数](https://leetcode-cn.com/problems/first-missing-positive/)
+### 3.1. [41] 缺失的第一个正数
 
 ```c++
 class Solution {
 public:
     int firstMissingPositive(vector<int>& nums) {
-        int size = nums.size();
-        
-        // 有效元素 x ∈ [1,size]，应该放在nums[x-1]的位置 
-        for (int i=0; i<size; i++) { 
-            while (1 <= nums[i] && nums[i] <= size && nums[nums[i] - 1] != nums[i]) {
+        int n = nums.size();
+
+        // 有效元素 x ∈ [1,n]，应该放在nums[x-1]的位置
+        for (int i=0; i<n; i++) {
+            while (1 <= nums[i] && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {
                 swap(nums[i], nums[nums[i]-1]);
             }
         }
 
         // 寻找第一个不相等的值
-        for (int i=0; i<size; i++) {
+        for (int i=0; i<n; i++) {
             if (nums[i] != i+1) {
                 return i+1;
             }
         }
-        return size+1;
+        return n+1;
     }
 };
 ```
 
-### 3.2. [442. 数组中重复的数据](https://leetcode-cn.com/problems/find-all-duplicates-in-an-array/)
+### 3.2. [442] 数组中重复的数据
 
 ```python
 给定一个整数数组 a，其中1 ≤ a[i] ≤ n （n为数组长度）, 其中有些元素出现两次而其他元素出现一次。找到所有出现两次的元素。
@@ -279,17 +243,15 @@ public:
 class Solution {
 public:
     vector<int> findDuplicates(vector<int>& nums) {
-        int size = nums.size();
-
-        // 有效元素 x ∈ [1,size]，应该放在nums[x-1]的位置 
-        for (int i=0; i<size; i++) {
-            while (1 <= nums[i] && nums[i] <= size && nums[nums[i] - 1] != nums[i]) {
-                swap(nums[nums[i]-1], nums[i]);
+        int n = nums.size();
+        for (int i=0; i<n; i++) {
+            while (1<=nums[i] && nums[i]<=n && nums[i] != nums[nums[i]-1]) {
+                swap(nums[i] ,nums[nums[i]-1]);
             }
         }
 
         vector<int> ans;
-        for (int i=0; i<size; i++) {
+        for (int i=0; i<n; i++) {
             if (nums[i] != i+1) {
                 ans.push_back(nums[i]);
             }
@@ -299,7 +261,7 @@ public:
 };
 ```
 
-### 3.3. [287. 寻找重复数](https://leetcode-cn.com/problems/find-the-duplicate-number/)
+### 3.3. [287] 寻找重复数
 
 ```python
 给定一个包含 n + 1 个整数的数组 nums，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。
@@ -311,21 +273,17 @@ public:
 class Solution {
 public:
     int findDuplicate(vector<int>& nums) {
-        int size = nums.size();
-
-        // 有效元素 x ∈ [1,size]，应该放在nums[x-1]的位置 
-        for (int i=0; i<size; i++) {
-            while (1 <= nums[i] && nums[i] <= size && nums[nums[i] - 1] != nums[i]) {
-                swap(nums[i], nums[nums[i]-1]);
+        int n = nums.size();
+        for (int i=0; i<n; i++) {
+            while (1<=nums[i] && nums[i]<=n && nums[nums[i]-1] != nums[i]) {
+                swap(nums[nums[i]-1], nums[i]);
             }
         }
-
-        for (int i=0; i<size; i++) {
-            if (nums[i] != i+1){
+        for (int i=0; i<n; i++) {
+            if (nums[i] != i+1) {
                 return nums[i];
             }
         }
-
         return -1;
     }
 };
@@ -341,47 +299,52 @@ public:
 1. 字符串比较: 使用自带的 `cmp()` 函数，return cmp(s1, s2)
 2. int比较: return x-y，而不是 return x>y
 
-### 4.1. 😄 [56.合并区间](https://leetcode-cn.com/problems/merge-intervals/)
+### 4.1. [56] 合并区间
 
-```python
 输入: intervals = [[1,3],[2,6],[8,10],[15,18]]
+
 输出: [[1,6],[8,10],[15,18]]
+
 解释: 区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
-```
+
 
 ```python
 class Solution(object):
     def merge(self, intervals):
-        def cmp_func(iter1, iter2):  # 按照第一个元素[升序]排序
-            return iter1[0]-iter2[0]
+        def cmp_func(x, y):  # 按照第一个元素[升序]排序
+            return cmp(x[0], y[0])
 
         intervals.sort(cmp_func)
 
         ans = []
         for iter in intervals:
-            # (结果集中没有区间) or (当前区间的左边界 > 结果集中的最后一个区间的右边界)
-            if ans == [] or iter[0] > ans[-1][1]:
-                ans.append(iter)  # 将该区间加入结果集中
-            else:  # 结果集合中有区间 && (当前区间的左边界 <= 结果集中的最后一个区间的右边界)
-                # 当前区间的右边界 > 结果集中的最后一个区间的右边界
-                if iter[1] > ans[-1][1]:
-                    ans[-1][1] = iter[1]
+            if len(ans) == 0:
+                ans.append(iter)
+            else:
+                x1, y1 = ans[-1]
+                x2, y2 = iter
+                if x2 > y1:
+                    ans.append(iter)
+                else:
+                    if y2 >= y1:
+                        ans[-1][1] = y2
         return ans
 ```
 
 
-### 4.2 [179.最大组合数](https://leetcode-cn.com/problems/largest-number/)
+### 4.2 [179] 最大组合数
 
-```shell
+
 输入：nums = [3,30,34,5,9]
+
 输出："9534330"
-```
+
 
 ```python
 class Solution(object):
     def largestNumber(self, nums):
         def cmp_func(x, y):
-            return cmp(str(y)+str(x), str(x)+str(y)) # 按照 y+x, x+y 的字典序[降序]排序
+            return cmp(str(y)+str(x), str(x)+str(y)) # 字典序[降序]排序
 
         nums.sort(cmp_func)
 
