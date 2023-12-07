@@ -107,21 +107,19 @@ class Solution(object):
 ```python
 class Solution(object):
     def coinChange(self, coins, amount):
-        INT_MAX = (1 << 31) - 1  # 初始为INT_MAX, 表示组不成总金额
-
-        # dp[i]: 凑成总金额i所需的最少硬币个数: dp[i] = min { dp[i - coins[j]] + 1 }, i - coins[j] > 0
-        dp = [INT_MAX] * (amount + 1)
-
-        dp[0] = 0  # 初始化: 组成0元, 使用0个硬币
-
-        for i in range(1, amount + 1):
-            tmp_min = INT_MAX
+        # dp[i]: 凑成总金额i所需的最少硬币个数（-1表示不能构成）
+        # dp[i] = min { dp[i-coins[j]] + 1 }, i-coins[j] >= 0
+        dp = [-1] * (amount+1)
+        # 初始化: 组成0元, 使用0个硬币
+        dp[0] = 0 
+        for i in range(1, amount+1):
+            select = []
             for coin in coins: # 使用每一个面值的硬币
-                if i - coin >= 0:
-                    tmp_min = min(tmp_min, dp[i - coin] + 1)
-            dp[i] = tmp_min
-
-        return -1 if dp[amount] == INT_MAX else dp[amount]
+                if i-coin >= 0 and dp[i-coin] != -1:
+                    select.append(dp[i-coin])
+                if len(select) > 0:
+                    dp[i] = min(select) + 1
+        return dp[amount]
 ```
 
 ### 1.2.2. 😭 [518] 零钱兑换 II
@@ -132,20 +130,21 @@ class Solution(object):
 
 假设每一种面额的硬币有无限个。 
 
-题目数据保证结果符合 32 位带符号整数。
+解题思路：
+
+- 定义子问题: problem(i) = sum( problem(i-coin[j]) ), coin[j] = 1,2,5 
+- 含义为凑成总金额i的硬币组合数 = 凑成总金额硬币 i-1, i-2, i-5,...的子问题之和
+
 
 ```python
 class Solution(object):
     def change(self, amount, coins):
-        dp = [0] * (amount + 1)
-
-        dp[0] = 1  # 不选择任何硬币时，金额之和为0
-
+        dp = [0] * (amount+1) # 凑成总金额amount的硬币组合数
+        dp[0] = 1 # 不选择任何硬币时，金额之和为0
         for coin in coins:
-            for i in range(1, amount + 1):
-                if i - coin >= 0:
-                    dp[i] += dp[i - coin]
-
+            for i in range(amount+1):
+                if i-coin >= 0:
+                    dp[i] += dp[i-coin]
         return dp[amount]
 ```
 
@@ -398,14 +397,16 @@ class Solution(object):
         for i in range(n):
             dp[0][i] = 0
 
+        ans = 0
         for i in range(1, m):
             for j in range(1, n):
                 if text1[i] == text2[j]:
                     dp[i][j] = dp[i - 1][j - 1] + 1
                 else:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-
-        return dp[-1][-1]
+                ans = max(ans, dp[-1][-1])
+                
+        return ans
 ```
 
 ### 2.1.6. 😭[72] 编辑距离
@@ -446,6 +447,8 @@ class Solution(object):
 
 
 ### 2.2.1. 😭 [5] 最长回文子串
+
+
 
 ```python
 # 中心扩散法
@@ -488,7 +491,29 @@ class Solution(object):
 
 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是 回文串 。返回 s 所有可能的分割方案。
 
+示例：
 
+输入：s = "aab"
+
+输出：[["a","a","b"],["aa","b"]]
+
+
+解法: 动态规划+递归回溯
+
+```
+以aab为例，我们dfs的流程是：
+    添加"a"--->
+    继续添加"a"--->
+    继续添加"b"--->
+    继续dfs发现i==len越界，将答案["a","a","b"]加入到ret里然后返回-->
+    在res中删除最后添加的"b"，并且发现当前层dfs的for循环不能再执行了于是自然返回--->
+    res继续删除末尾的"a",再次for循环更长的回文串，但发现"ab"不是回文串，而且for循环执行不下去了遂返回--->
+    res继续删除末尾的"a"(空了)，然后for循环(i,j)从(0,0)变为(0,1)，将对应回文串"aa"添加--->
+    继续添加"b"-->继续dfs发现i==len越界，将答案["aa", "b"]加入到ret然后返回--->
+    在res中删除最后添加的"b"，发现for不能执行了自然返回--->
+    res继续删除"aa"，再次for循环找更长的回文串，(i,j)从(0,1)变成了(0,2)，但"子串aab"不是回文串---->
+    继续for循环，发现j==len越界，for循环结束，最外层调用的dfs函数自然返回。主函数返回结果集ret...
+```
 
 ```python
 class Solution(object):
@@ -515,23 +540,21 @@ class Solution(object):
                     l -= 1
                     r += 1
 
-        # 递归回溯: 子集
-        ans = []
+        # 递归回溯
         land = []
-
+        ans = []
         def dfs(start):
-            if start == n:
+            if start == n: # 递归终止条件: 当start遍历到最后一个元素
                 ans.append(land[:])
                 return
             for i in range(start, n):
                 if dp[start][i]:
-                    land.append(s[start : i + 1])
-                    dfs(i + 1)
-                    land.pop()
+                    land.append(s[start:i+1])
+                    dfs(i+1)
+                    land.pop(-1)
 
         isPalindrome(dp)
         dfs(0)
-
         return ans
 ```
 
@@ -626,14 +649,11 @@ int longestPalindromeSubseq(string s) {
 }
 ```
 
-解法2: 将字符串翻转，然后，求两个字符串的最长公共子序列
+解法2: 问题转化为 = 将字符串翻转，然后，求两个字符串的最长公共子序列
 
 ```python
 class Solution(object):
     def longestPalindromeSubseq(self, s):
-        s1 = s
-        s2 = s[::-1]
-
         # 增加空字符串
         s1 = "0" + s
         s2 = "0" + s[::-1]
@@ -708,7 +728,7 @@ class Solution(object):
         if N == 2:
             return max(nums[0], nums[1])
 
-        def robMax(nums):  # 这个就是打家劫舍问题I (代码没变化)
+        def robMax(nums): # 这个就是打家劫舍问题I (代码没变化)
             N = len(nums)
             dp = [0 for _ in range(N)]
             dp[0] = nums[0]
@@ -717,12 +737,10 @@ class Solution(object):
                 dp[i] = max(nums[i] + dp[i - 2], dp[i - 1])
             return dp[-1]
 
-        ret = 0
         # 由于0和N-1房子是邻居, 所以不能同时偷盗, 因此可以分为以下2种情况
-        ret = max(ret, robMax(nums[0 : N - 1]))  # 没偷房子N-1, 偷的范围[0, N-2]
-        ret = max(ret, robMax(nums[1:N]))  # 没偷房子0, 偷的范围[1, N-1]
-
-        return ret
+        # 没偷房子N-1, 偷的范围[0, N-2]
+        # 没偷房子0, 偷的范围[1, N-1]
+        return max(robMax(nums[0 : N - 1]), robMax(nums[1: N]))
 ```
 
 
@@ -774,12 +792,89 @@ class Solution(object):
 
 如果玩家 1 能成为赢家，返回 true 。如果两个玩家得分相等，同样认为玩家 1 是游戏的赢家，也返回 true 。你可以假设每个玩家的玩法都会使他的分数最大化。
 
+解：
 
-### 4.2. [877] 石子游戏
+dp[i][j] 下标范围[i...j]内，当前玩家和另一个玩家的分数之差的最大值（注意：当前玩家不一定是先手）
 
-### 4.3. 捡石头
+if ( i > j )  dp[i][j] = 0
 
-### 4.4. 青蛙过河
+if ( i = j )  dp[i][j] = nums[i]  只剩下一个数字，当前玩家只能取这个数字
+
+if ( i < j )  dp[i][j] = max( nums[i]−dp[i+1][j], nums[j]−dp[i][j−1] )  当前玩家可以选择nums[i]或nums[j]，然后轮到另一个玩家在剩下的牌堆中选取。在两种方案中，当前玩家会选择最优的方案，使得自己的数量最大化
+
+```python
+class Solution(object):
+    def predictTheWinner(self, nums):
+        n = len(nums)
+        if n == 0 or n == 1 or n == 2:
+            return True
+
+        # dp[i][j] 表示[i...j]区间内，当前玩家和下一个玩家的分差最大值
+        dp = [ [0 for _ in range(n)] for _ in range(n)]
+
+        for i in range(n):
+            dp[i][i] = nums[i]
+
+        for i in range(n-2, -1, -1): # 从下到上 for (int i = n-2; i >= 0; i--)
+            for j in range(i+1, n):  # 从左到右 for (int j = i+1; j < n; j++)
+                dp[i][j] = max(nums[i] - dp[i+1][j], nums[j] - dp[i][j-1])
+
+        return dp[0][n-1] >= 0
+```
+
+
+
+### 4.2. [877] 石子游戏 mid
+
+解1：与 `[486] 预测赢家` 解法一样
+
+由于每次只能从行的开始或结束处取走整堆石子，因此可以保证剩下的石子堆一定是连续的。
+
+如果只剩下一堆石子，则当前玩家只能取走这堆石子。如果剩下多堆石子，则当前玩家可以选择从行的开始或结束处取走整堆石子，然后轮到另一个玩家在剩下的石子堆中取走石子。这是一个递归的过程，因此可以使用递归进行求解，递归过程中维护一个总数，表示 Alice 和 Bob 的石子数量之差，当游戏结束时，如果总数大于 0，则 Alice 赢得比赛，否则 Bob 赢得比赛
+
+dp[i][j] 下标范围[i...j]内，当前玩家与另一个玩家的石子数量之差的最大值（注意：当前玩家不一定是先手）
+
+if ( i > j )  dp[i][j] = 0  
+
+if ( i = j )  dp[i][j] = piles[i]  只剩下一堆石子，当前玩家只能取走这堆石子
+
+if ( i < j )  dp[i][j] = max( piles[i]−dp[i+1][j], piles[j]−dp[i][j−1] )  当前玩家可以选择取走piles[i]或piles[j]，然后轮到另一个玩家在剩下的石子堆中取走石子。在两种方案中，当前玩家会选择最优的方案，使得自己的石子数量最大化
+
+
+
+```python
+class Solution(object):
+    def stoneGame(self, piles):
+        n = len(piles)
+        if n == 0 or n == 1 or n == 2:
+            return True
+
+        # dp[i][j] 表示[i...j]区间内，当前玩家和下一个玩家的分差最大值
+        dp = [ [0 for _ in range(n)] for _ in range(n)]
+
+        for i in range(n):
+            dp[i][i] = piles[i]
+
+        for i in range(n-2, -1, -1): # 从下到上 for (int i = n-2; i >= 0; i--)
+            for j in range(i+1, n):  # 从左到右 for (int j = i+1; j < n; j++)
+                dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])
+
+        return dp[0][n-1] >= 0
+```
+
+解2：数学推断 --- 先手必胜
+
+```python
+class Solution(object):
+    def stoneGame(self, piles):
+        return True
+```
+
+### 4.3. [1140] 石子游戏 2 mid
+
+### 4.4. [403] 青蛙过河 hard
+
+### 4.5. [2498] 青蛙过河 2 mid
 
 
 ---
