@@ -11,21 +11,18 @@
 
 ### 1.1. 一副扑克牌(54张)，共3个人，每个人18张，有人拿到王炸的概率
 
-> 出现在任何一个人手中 (18, 18, 18) ==> C(3, 1) * C(18, 2) / C(54, 2)
+> 出现在任何一个人手中 (18, 18, 18) ==> C(18, 2) * 3 / C(54, 2)
 
 ### 1.2. 一副扑克牌(54张)，斗地主，有人拿到王炸的概率
 
 > 1）出现在地主手中 ==> 17 17 20 --> C(20,2) / C(54, 2)
 >
-> 2）出现在任何一个平民手中 ==> 17 17 20 --> [ C(17, 2) * C(17, 2) ] / C(54, 2)
+> 2）出现在任何一个平民手中 ==> 17 17 20 --> [ C(17, 2) * 2 ] / C(54, 2)
 
 
 ---
 
 # 2. 😄 抛硬币
-
-
-正反反”和“反反正
 
 ### 2.1. 甲乙轮流抛硬币，正面胜，先抛的人优势多大？
 
@@ -87,6 +84,7 @@ Sn = a1 * (1-q^n) / (1-q) = (1/2)^3 * ( 1-(1/2)^n ) / (1 - 1/2) = (1/2)^2 * ( 1-
 
 ### 3.1. 等概率产生0和1
 
+
 - 有一个随机数发生器，能以概率p生成0，以概率1-p生成1，问如何做一个随机数发生器 
   使得生成0和1的概率相等。 
 
@@ -113,7 +111,7 @@ int Rand(){
 ```
 
 
-### 3.2. [470. 用 Rand7() 实现 Rand10()](https://leetcode-cn.com/problems/implement-rand10-using-rand7/)
+### 3.2. [470] 用 Rand7() 实现 Rand10()
 
 已有方法 rand7 可生成 1 到 7 范围内的均匀随机整数，试写一个方法 rand10 生成 1 到 10 范围内的均匀随机整数。
 
@@ -121,32 +119,23 @@ int Rand(){
 
 
 
-```c++
-/*
-    rand7():                 [1,2,...,7]
-    rand7()-1:               [0,1,...,6]
-    7*(rand7()-1):           [0,7,...,42]
-    7*(rand7()-1)+rand7():   [1,49]   等概率生成[1,49]的随机数
+```python
+    # rand7():                 [1,2,...,7]
+    # rand7()-1:               [0,1,...,6]
+    # 7*(rand7()-1):           [0,7,...,42]
+    # 7*(rand7()-1)+rand7():   [1,49]   等概率生成[1,49]的随机数
+    # 
+    # 有效数字x ∈ [1,40]
+    # 
+    # [1,40],再%10           --> [0,1,...,9]   等概率生成[0,9]中的随机数
+    # 再+1                   --> [1,2,...,10]  等概率生成[1,10]中的随机数
 
-    有效数字x ∈ [1,40]
-
-    [1,40],再%10           --> [0,1,...,9]   等概率生成[0,9]中的随机数
-    再+1                   --> [1,2,...,10]  等概率生成[1,10]中的随机数
-*/
-
-class Solution {
-public:
-    int rand10() {
-        int select = 7*7/10*10;
-        while (1) {
-            int x = 7*(rand7()-1) + rand7();
-            if (x >= 1 && x <= select) {
-                return x % 10 + 1;
-            }
-        }
-        return -1;
-    }
-};
+class Solution(object):
+    def rand10(self):
+        while True:
+            x = 7 * (rand7()-1) + rand7()# [1,49]
+            if x <= 40:
+                return x%10 + 1
 ```
 
 扩展: 用 randM() 实现 randN()
@@ -167,9 +156,11 @@ int rand300000() {
 
 # 4. 洗牌算法
 
+- 洗牌算法能够保证每个位置都能等概率的放置每个元素 ---- [视频算法讲解](https://www.bilibili.com/video/BV1k7411q7jo/?spm_id_from=333.337.search-card.all.click&vd_source=c55975f66082f8af59048d0ef31d17f9)
+
 问题描述：给你一副牌，设计一个算法，使得牌被洗的足够均匀
 
-
+解:
 
 1. 从最后一个位置开始，将它和前面位置中随机一个位置上的数字交换
 2. 从倒数第二个位置开始，将它和前面位置中随机一个位置上的数字交换
@@ -177,39 +168,62 @@ int rand300000() {
 
 - 总结: 从后向前，从 `nums[0] ~ nums[i]` 随机选取一个元素 与 `nums[i]` 做交换
 
-[384] 打乱数组
 
 ```c++
-void Knuth_Durstenfeld_Shuffle(vector<int>& arr) {
+void shuffle(vector<int>& arr) {
 	for (int i = arr.size()-1; i >= 0; i--){
-        int index = rand() % (i+1); // 0 <= index <= i
-		swap(arr[i], arr[index]);
+		swap(arr[i], arr[rand() % (i+1)]); // i 与 [0,i] 交换
 	}
-} 
+}
 ```
 
 ---
 
 # 5. 😭 蓄水池抽样
 
+在大小为 N 的数据流中，等概率的抽取 M 个元素(选中每个元素的概率都是M/N)  [视频算法讲解](https://www.bilibili.com/video/BV1vY411U7bN/?spm_id_from=333.337.search-card.all.click&vd_source=c55975f66082f8af59048d0ef31d17f9)
+
+```c++
+/*
+ * @brief 蓄水池抽样算法: 在数据流data[n]中, 等概率选出m个数据
+ * @param   [in] nums  数据流
+ * @param   [in] n     数据流中数据总个数
+ * @param   [in] m     采样数据总个数
+ * @return 采样到m个数据
+ */
+vector<int> Sampling(vector<int> nums, int n, int m) {
+    // 前m个元素，构成蓄水池
+    vector<int> pool;
+    for (int i=0; i<m; i++) {
+        pool.push_back(nums[i]);
+    }
+    
+    for (int i=m; i<n; i++) {
+         // 返回[0,i]中的随机下标
+         int idx = randIdx(0, i); 
+         if (0 <= idx < m) { // 如果idx是在蓄水池中，则交换
+            swap(nums[i], nums[idx]);
+         } else {
+            // 如果idx不在池子中，则不做处理
+         }
+    }
+    
+    // 蓄水池中的数据，就是等概率选出来的m个数
+    return pool;
+}
+```
 
 
-### 5.1. [382] 链表随机节点
+[面试题] 腾讯
 
-### 5.2. [398] 随机数索引
+工行有30万个员工，其工卡号码分别是1~30万，在接下来的某天他们将举行年会，需要抽出10万个员工发奖品。
 
+我们有一个随机数生成函数rand()能够生成0~65535的整数，请写一个公平的抽奖程序，输出这10万个员工的工卡号码。
 
-### 5.3. 腾讯
+注：直接在这里写代码，要求使用C++实现完整的代码
 
-> 工行有30万个员工，其工卡号码分别是1~30万，在接下来的某天他们将举行年会，需要抽出10万个员工发奖品。
->
-> 我们有一个随机数生成函数rand()能够生成0~65535的整数，请写一个公平的抽奖程序，输出这10万个员工的工卡号码。
->
-> 注：直接在这里写代码，要求使用C++实现完整的代码
->
-> > 解法：蓄水池抽样 + （rand65535 转 rand30万）
+解法：蓄水池抽样 + （rand65535 转 rand30万）
 
-方法1：
 
 ```c
 /*
@@ -237,71 +251,38 @@ int rand_i(int i) {
 
 /*
  * @brief 蓄水池抽样算法: 在数据流data[n]中, 等概率选出m个数据
- * @param   [in] data  数据流
+ * @param   [in] nums  数据流
  * @param   [in] n     数据流中数据总个数
  * @param   [in] m     采样数据总个数
  * @return 采样到m个数据
  */
-vector<int>
-Sampling(int data[], int n, int m) 
-{
+vector<int> Sampling(vector<int> nums, int n, int m) {
+    // 前m个元素，构成蓄水池
     vector<int> pool;
-    
-    for (int i = 0; i < n; i++) {
-        // init: 前m个数据, 投入蓄水池
-        if (i < m) {
-            pool.push_back(data[i]);
-        }
-        else {
-            // 1) 生成随机数idx: idx∈[0,i]
-            int idx = rand_i(i); // int idx = rand() % (i+1);
-            // 2) 若idx下标落在前m个区间内, 则替换 (池子中的数pool[idx] = 当前数data[i])
-            if (idx < m) {
-                pool[idx] = data[i];
-            }
-        }
+    for (int i=0; i<m; i++) {
+        pool.push_back(nums[i]);
     }
-
-    // for循环结束后, 蓄水池pool中的数据(就是等概率选出的m个数)
+    
+    for (int i=m; i<n; i++) {
+         // 返回[0,i]中的随机下标
+         int idx = rand_i(i); 
+         if (0 <= idx < m) { // 如果idx是在蓄水池中，则交换
+            swap(nums[i], nums[idx]);
+         } else {
+            // 如果idx不在池子中，则不做处理
+         }
+    }
+    
+    // 蓄水池中的数据，就是等概率选出来的m个数
     return pool;
 }
 ```
 
 
+---
 
-方法2：
+# 6. 其他题
 
-```c++
-int rand300000() {
-    int select = 65536*65536/300000*300000;
-    while(1) {
-        int x = 65536 * (rand65536()-1) + rand65536();
-        if (x <= select)
-            return x%300000+1;
-    }
-}
+[382] 链表随机节点
 
-// 抽取target_num个号码
-set<int> solution(int target_num){
-    set<int> ans;
-    int num = 0;
-    
-    while (1){
-        // 抽选一个数字x
-        while (1) {
-            int x = rand300000();
-            if (ans.find(x) == ans.end()) { // x不在结果集合中, 插入集合中
-                ans.insert(x);
-                break;
-            }
-        }
-        // 抽中的元素个数+1
-        if (++num >= target_num)
-            break;
-    }
-
-    return ans;
-}
-```
-
-
+[398] 随机数索引
