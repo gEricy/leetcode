@@ -2,7 +2,7 @@
 1. 向前走N步、指向第N个节点：for(int i=0; ???; i++)
 
 难题集合
-- [25] K 个一组翻转链表
+- [25] K个一组翻转链表
 - [148] 排序链表
 - [23] 合并K个升序链表（逻辑简单，使用到stl库不好记）
 
@@ -96,7 +96,7 @@ public:
 ```
 
 
-### 1.4. [92] 反转从位置m到n的链表
+### 1.4. 😭[92] 反转从位置m到n的链表
 
 要求：一趟扫描完成反转
 
@@ -104,39 +104,34 @@ public:
 class Solution {
 public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        if (!head) return head;
+        if (!head || left == right) return head;
 
         // 增加伪头结点
         ListNode dummy;
         dummy.next = head;
 
         ListNode* pre = &dummy;
-        ListNode* cur = head;
+        ListNode* cur = dummy.next;
 
         // 寻找翻转的点
         int i = 1;
-        while (i < left) { // 循环退出时，cur指向第left个节点
-            pre = pre->next;
+        for (; i < left; i++) { // 寻找最左面的节点，假设left = 1，其实已经找到了
+            pre = cur;
             cur = cur->next;
-            i++;
         }
         ListNode* pre1 = pre;
         ListNode* cur1 = cur;
 
         // 边遍历，边翻转: 翻转[left,right]区间内的节点
-        while (i <= right) { // 循环退出时，cur指向第right个节点的后继
+        for (; i <= right; i++) { // 循环退出时，cur指向第right个节点的后继
             ListNode* post = cur->next;
             cur->next = pre;
             pre = cur; cur = post;
-            i++;
         }
 
-        ListNode* pre2 = pre;
-        ListNode* cur2 = cur;
-
-        // 重新连接
-        pre1->next = pre2;
-        cur1->next = cur2;
+        // 重新连接新链表
+        pre1->next = pre;
+        cur1->next = cur;
 
         return dummy.next;
     }
@@ -145,105 +140,49 @@ public:
 
 ### 1.5. 😭[25] K 个一组翻转链表
 
-解法1: 递归
+递归
 
 ```cpp
 class Solution {
 public:
-    void reverse(ListNode* head, ListNode* tail) {
+    // 反转[left,right]之间的链表
+    void reverseKGroup(ListNode* left, ListNode* right) {
+        if (left == right) return;
+        
         ListNode* pre = nullptr;
-        ListNode* cur = head;
-
-        while (cur != tail) { // 退出条件
+        ListNode* cur = left;
+        while (cur != right) {
             ListNode* post = cur->next;
             cur->next = pre;
             pre = cur; cur = post;
-        } // 循环退出后，此时: cur指向tail; tail和tail前一个节点还未翻转
+        } // 循环退出后，此时: cur指向right; right和right前一个节点还未翻转
+        
         cur->next = pre;
     }
+    
     ListNode* reverseKGroup(ListNode* head, int k) {
-        if (!head)
+        if (!head) {
             return head;
+        }
 
-        // 锁定翻转区间 [head, 第k个节点]
-        ListNode* cur = head;
-        for (int i=1; i<k; i++) {
-            cur = cur->next;
-            if (!cur) // 递归退出条件，不足k个节点，直接退出
+        // 锁定翻转区间[left,right]
+        ListNode* left = head;
+        ListNode* right = head;
+        for (int i=1; i<k; i++) { // 遍历结束时，[left,right]就是待反转的区间了
+            right = right->next;
+            if (!right) {
                 return head;
-        }
-        ListNode* part1Head = head;
-        ListNode* part1Tail = cur;
-
-        // 翻转后半段
-        ListNode* part2 = cur->next;
-        ListNode* part2Head = reverseKGroup(part2, k);
-        // 翻转前半段
-        reverse(part1Head, part1Tail);
-        // 重新连接
-        part1Head->next = part2Head;
-        // 返回新的头结点
-        return part1Tail;
-    }
-};
-```
-
-解法2: 非递归
-
-```cpp
-class Solution {
-public:
-    // 翻转[head, tail]区间内的链表, 返回新的{头, 尾}
-    pair<ListNode*, ListNode*> myReverse(ListNode* head, ListNode* tail) {
-        ListNode* pre = NULL;
-        ListNode* cur = head;
-        ListNode* end = tail->next; // 循环终止条件: cur == end
-        while (cur != end) {
-            // 保存post
-            ListNode* post = cur->next;
-            // 反指
-            cur->next = pre;
-            // 更新
-            pre = cur;
-            cur = post;
-        }
-        return {tail, head};
-    }
-
-    ListNode* reverseKGroup(ListNode* head, int k) {
-        ListNode* dummy = new ListNode(0);
-        dummy->next = head;
-
-        ListNode* pre = dummy;  // 始终指向待翻转[head,tail]的前驱
-        // head: 指向第一个有效节点
-        
-        while (head) {
-            ListNode* tail = pre;
-            // 1.查找待翻转的尾节点位置, 即:[head,tail]中的tail
-            for (int i = 0; i < k; i++) {
-                tail = tail->next;
-                if (!tail) {
-                    return dummy->next;
-                }
             }
-            // 2.先保存[head,tail]区间的下一个节点, 即tail->next
-            ListNode* post = tail->next;
-
-            // 3.将[head,tail]区间内的链表翻转
-            pair<ListNode*, ListNode*> result = myReverse(head, tail);
-            head = result.first;
-            tail = result.second;
-
-            // 4.“重新连接”: 将翻转后的子链表[head,tail], 重新连接到原链表
-            pre->next = head;
-            tail->next = post;
-
-            // 5.更新pre,head: 即pre,head向前走, 用于翻转下k个元素
-            pre = tail;
-            head = tail->next;
         }
 
-        return dummy->next;
+        // 反转后半部分
+        ListNode* part2 = reverseKGroup(right->next, k);
+        // 反转前半段
+        reverseKGroup(left, right);
+        // 重连
+        left->next = part2;
+        // 返回新的头结点
+        return right;
     }
 };
 ```
@@ -299,7 +238,7 @@ public:
 
 # 2. 链表与【小技巧】
 
-### 2.1. 😭[160] 相交链表
+### 2.1. [160] 相交链表
 
 - 求两个相交链表的交点
 
@@ -311,27 +250,22 @@ public:
 class Solution {
 public:
     // 思想：L1+L2 == L2+L1
-    // 举例: L1 = 1 -> 2 -> ×    L2 = 3 -> ×，无交点
-    //     执行步骤: 
-    //     L1+L2 = 1 -> 2 -> × -> 3 -> ×
-    //     L2+L3 = 3 -> × -> 1 -> 2 -> ×
-    //                            ↑（相等，退出循环）
     ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
         ListNode* p = headA;
         ListNode* q = headB;
-
-        while (p != q) { // 循环退出条件: p和q走到同一个点(循环结束时，要么是交点，要么是null)
-            p = p ? p->next : headB; // pA,pB走到链表尾部, 就切换到对方的链表头
+        // 无论如何，p==q一定会存在
+        //     ----> 循环退出条件: p和q走到交点，走到链表结尾
+        while (p != q) {
+            p = p ? p->next : headB; // p,q走到链表尾部, 就切换到对方的链表头
             q = q ? q->next : headA;
         }
-
         return p;
     }
 };
 ```
 
 
-### 2.2. 😭[19] 删除链表的倒数第 N 个结点
+### 2.2. [19] 删除链表的倒数第 N 个结点
 
 解题思路
 1. 快指针先走K步
@@ -352,23 +286,23 @@ public:
         ListNode dummy;
         dummy.next = head;
 
-        // 快指针: 向前走N步
         ListNode* fast = head;
-        for (int i=1; i<=n; i++) {
+        ListNode* slow = head;
+        while (n--) { // 快指针先走n步
             fast = fast->next;
         }
 
-        // 快/慢指针一起向后走，当快指针指向null时，慢指针指向待删除节点(倒数第 N 个结点)
+        // 快慢指针一起走，当快指针走到null，慢指针指向[倒数第N个结点]
         ListNode* pre = &dummy;
-        ListNode* slow = head;
-        while (fast) {
-            fast = fast->next;
-            pre = slow;
+        while (slow && fast) {
+            pre = pre->next;
             slow = slow->next;
+            fast = fast->next;
         }
-        // 删除: 慢指针指向待删除节点(倒数第 N 个结点)
+
+        // 删除[倒数第N个结点]
         pre->next = slow->next;
-        
+
         return dummy.next;
     }
 };
@@ -415,24 +349,27 @@ public:
 class Solution {
 public:
     ListNode *detectCycle(ListNode *head) {
+        if (!head) return head;
+
+        // 快慢指针一起走
+        bool isCycle = false;
         ListNode* fast = head;
         ListNode* slow = head;
-
-        bool found = false;
-        while (fast && fast->next) { // 快指针走2步，慢指针走1步
+        while (fast && fast->next) { // 循环退出条件: 有环，走到相交的点、无环，fast走到null
             fast = fast->next->next;
             slow = slow->next;
             if (slow == fast) {
-                found = true;
+                isCycle = true;
                 break;
             }
         }
-        if (!found) { // 有环
-            return nullptr;
+        // 无环
+        if (!isCycle) {
+            return NULL;
         }
-        // 环入口: 快指针移动到head，快慢指针一起走，第一次相遇节点就是入口
-        fast = head;
-        while (fast != slow) {
+        // 有环，慢指针重新指向head，快慢指针一起走，再次相遇的点就是第一个入口点
+        slow = head;
+        while (slow != fast) {
             fast = fast->next;
             slow = slow->next;
         }
@@ -505,41 +442,45 @@ public:
 class Solution {
 public:
     Node* copyRandomList(Node* head) {
-        if (!head)
-            return head;
+        if (!head) return head;
 
-        // 1. 遍历一次，复制新节点 (此时，random指针未赋值)
         Node* cur = head;
+        
+        // 遍历第1次，复制节点
         while (cur) {
-            // 拷贝: 新建一个节点，插入之
+            // 拷贝: 复制一个节点
             Node *newNode = new Node(cur->val, cur->next, NULL);
+            // 插入
             cur->next = newNode;
             // cur向后移动
             cur = cur->next->next;
         }
 
-        // 2. 遍历一次，给random赋值
+        // 遍历第二次，顺便给random指针赋值
         cur = head;
         while (cur) {
             cur->next->random = cur->random ? cur->random->next : NULL;
             cur = cur->next->next;
         }
 
-        // 3. 遍历一次，拆分成2个链表
-        Node l1(0); Node* cur1 = &l1;
-        Node l2(0); Node* cur2 = &l2;
+        // 遍历第三次，拆分链表
+        Node head1(0,NULL,NULL); Node* cur1 = &head1; // 旧链表
+        Node head2(0,NULL,NULL); Node* cur2 = &head2; // 新链表
 
         cur = head;
         while (cur) {
-            cur1->next = cur; cur1 = cur1->next;
+            // 新链表插入新节点
             cur2->next = cur->next; cur2 = cur2->next;
-
+            // 旧链表插入旧节点
+            cur1->next = cur; cur1 = cur1->next;
+            // 向后遍历
             cur = cur->next->next;
         }
+
         cur1->next = nullptr; // 一定要设置为空
         cur2->next = nullptr; // 一定要设置为空
 
-        return l2.next;
+        return head2.next;
     }
 };
 ```
@@ -548,7 +489,7 @@ public:
 
 # 3. 链表与【排序/有序】
 
-### 3.1. 😭 [83] 删除排序链表中的重复元素 easy
+### 3.1. [83] 删除排序链表中的重复元素 easy
 
 给定一个已排序的链表的头 head ， 删除所有重复的元素，使每个元素只出现一次 。返回 已排序的链表 。
 
@@ -556,23 +497,27 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head || !head->next) return head;
+        if (!head) return head;
 
+        ListNode dummy; dummy.next = head;
+
+        ListNode* pre = &dummy;
         ListNode* cur = head;
+
         while (cur) {
-            if (cur->next && cur->val == cur->next->val) {
+            if (cur->next && cur->next->val == cur->val) {
                 cur->next = cur->next->next; // 删除节点
             } else {
                 cur = cur->next;
             }
         }
 
-        return head;
+        return dummy.next;
     }
 };
 ```
 
-### 3.2. 😭 [82] 删除排序链表中的重复元素 II  --- mid
+### 3.2. [82] 删除排序链表中的重复元素 II  --- mid
 
 给定一个已排序的链表的头 head ， 删除原始链表中所有重复数字的节点，只留下不同的数字 。返回 已排序的链表 。
 
@@ -580,25 +525,23 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head || !head) return head;
+        if (!head) return head;
 
-        // 增加伪头结点
-        ListNode dummy(-1);
-        dummy.next = head;
+        ListNode dummy; dummy.next = head;
 
         ListNode* pre = &dummy;
         ListNode* cur = head;
 
         while (cur) {
-            // 寻找下一个节点
-            bool repeat = false;
-            while (cur->next && cur->val == cur->next->val) {
-                repeat = true;
-                cur = cur->next;
+            bool hasEqual = false;
+            ListNode* ptr = cur->next;
+            while (ptr && ptr->val == cur->val) {
+                hasEqual = true;
+                ptr = ptr->next;
             }
-            if (repeat) { // 存在重复的节点
-                cur = cur->next;
-                pre->next = cur;
+            if (hasEqual) {
+                pre->next = ptr; // 删除
+                cur = ptr;
             } else {
                 pre = pre->next;
                 cur = cur->next;
@@ -620,27 +563,25 @@ public:
         ListNode dummy;
         ListNode* cur = &dummy;
 
-        ListNode* l1 = list1;
-        ListNode* l2 = list2;
+        ListNode* p = list1;
+        ListNode* q = list2;
 
-        while (l1 && l2) {
-            if (l1->val < l2->val) {
-                cur->next = l1;
-                l1 = l1->next;
+        while (p && q) {
+            int val;
+            if (p->val <= q->val) {
+                val = p->val;
+                p = p->next;
             } else {
-                cur->next = l2;
-                l2 = l2->next;
+                val = q->val;
+                q = q->next;
             }
+            cur->next = new ListNode(val);
             cur = cur->next;
         }
-        while (l1) {
-            cur->next = l1; l1 = l1->next;
-            cur = cur->next;
-        }
-        while (l2) {
-            cur->next = l2; l2 = l2->next;
-            cur = cur->next;
-        }
+
+        if (p) cur->next = p;
+        if (q) cur->next = q;
+
         return dummy.next;
     }
 };
@@ -660,6 +601,8 @@ public:
 class Solution {
 public:
     ListNode* partition(ListNode* head, int x) {
+    
+        // 创建2个链表，将 < x 和 >= x 的值，分别挂在两个链表上
         ListNode list1; ListNode* l1 = &list1;
         ListNode list2; ListNode* l2 = &list2;
 
@@ -747,30 +690,28 @@ public:
             return a->val > b->val;
         }
     };
-    
     ListNode* mergeKLists(vector<ListNode*>& lists) {
+
         ListNode dummy;
         ListNode* cur = &dummy;
-        
-        priority_queue<ListNode*, vector<ListNode*>, cmp> pq; // 创建小根堆
-        
+
+        priority_queue<ListNode*, vector<ListNode*>, cmp> Q; // 创建小根堆
+
         // 初始化堆: 每个有序链表的链表头, 加入小根堆
-        for (auto elem : lists){ // elem是ListNode*，链表头节点
-            if(elem){
-                pq.push(elem);
+        for (auto elem : lists) {
+            if (elem) {
+                Q.push(list);
             }
         }
 
-        while (!pq.empty()){
-            ListNode* top = pq.top(); pq.pop(); // 弹出堆顶(一定是最小值)
-            if(top->next){  // 将节点的next再次插入堆中
-                pq.push(top->next);
+        while (!Q.empty()) {
+            ListNode* node = Q.top(); Q.pop(); // 弹出堆顶(一定是最小值)
+            cur->next = node; cur = cur->next; // 插入结果集合
+            if (node->next) { // 将节点的next插入堆
+                Q.push(node->next);
             }
-
-            // 堆顶top添加到结果链表
-            cur->next = top;
-            cur = cur->next;
         }
+
         return dummy.next;
     }
 };
