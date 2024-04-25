@@ -294,15 +294,14 @@ public:
 ```c++
 class Solution {
 public:
-    TreeNode* build(vector<int>& nums, int left, int right) {
-        if (left <= right) {
-            int mid = (left+right)/2; // 每次都选择中间节点作为根
-            TreeNode* root = new TreeNode(nums[mid]);
-            root->left = build(nums, left, mid-1);
-            root->right = build(nums, mid+1, right);
-            return root;
-        }
-        return NULL;
+    TreeNode* build(vector<int>& nums, int l, int r) {
+        if (l > r) return NULL;
+
+        int mid = (l+r)/2;
+        TreeNode* root = new TreeNode(nums[mid]); // 每次都选择中间节点作为根
+        root->left = build(nums, l, mid-1);
+        root->right = build(nums, mid+1, r);
+        return root;
     }
     TreeNode* sortedArrayToBST(vector<int>& nums) {
         return build(nums, 0, nums.size()-1);
