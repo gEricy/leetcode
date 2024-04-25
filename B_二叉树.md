@@ -327,7 +327,7 @@ public:
 };
 ```
 
-### 3.2. [111] 😭 二叉树的最小深度
+### 3.2. [111] 二叉树的最小深度
 
 - 后序遍历的应用
 
@@ -338,17 +338,17 @@ public:
 ```c++
 class Solution {
 public:
-    int minDepth(TreeNode* root) {
+    int depth(TreeNode* root) {
         if (!root) return 0;
-
-        int lh = minDepth(root->left);
-        int rh = minDepth(root->right);
-
-        if (lh > 0 && rh > 0) { // √ √ --> 有两个子树
-            return 1 + min(lh, rh);
-        } else { // x x , √ ×, × √   --> 左右子树，全部为空树 or 有一个为空树
-            return 1+lh+rh;
+        
+        if (root->left && root->right) { // √ √
+            return 1+min(depth(root->left), depth(root->right));
+        } else { // (X,X)  (√,X)  (X,√) 
+            return 1+max(depth(root->left), depth(root->right));
         }
+    }
+    int minDepth(TreeNode* root) {
+        return depth(root);
     }
 };
 ```
@@ -379,7 +379,7 @@ public:
 };
 ```
 
-### 3.4. [101] 😭 对称二叉树
+### 3.4. [101] 对称二叉树
 
 给你一个二叉树的根节点 root ， 检查它是否轴对称
 
@@ -423,15 +423,14 @@ public:
 ```c++
 class Solution {
 public:
-    bool isSame(TreeNode* p, TreeNode* q) {
+    bool isSameTree(TreeNode* p, TreeNode* q) {
         if (!p && !q) return true;
-        else if (p && q) return p->val == q->val && isSame(p->left, q->left) && isSame(p->right, q->right);
+        else if (p && q) return p->val == q->val && isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
         else return false;
     }
     bool isSubtree(TreeNode* root, TreeNode* subRoot) {
-        if (!root && !subRoot) return true;
         if (!root) return false;
-        return isSame(root, subRoot) || isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);
+        return isSameTree(root, subRoot) || isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);
     }
 };
 ```
@@ -553,22 +552,27 @@ void inorder(TreeNode* root) {
 
 ```c++
 class Solution {
-    TreeNode* pre = NULL; // 前驱
 public:
-    bool inOrder(TreeNode* root) {
-        if (!root) return true;
+    TreeNode* pre = NULL; // 前驱
+    bool ans = true;
+    void inOrder(TreeNode* root) {
+        if (!root) return;
 
-        if (!inOrder(root->left)) return false;
+        inOrder(root->left);
 
         if (pre) {
-            if (pre->val >= root->val) return false;
+            if (pre->val >= root->val) {
+                ans = false;
+                return;
+            }
         }
         pre = root;
 
-        return inOrder(root->right);
+        inOrder(root->right);
     }
     bool isValidBST(TreeNode* root) {
-        return inOrder(root);
+        inOrder(root);
+        return ans;
     }
 };
 ```
@@ -631,7 +635,7 @@ public:
 };
 ```
 
-### 4.4. [面试题 17.12. BiNode](https://leetcode-cn.com/problems/binode-lcci/) :small_airplane: 
+### 4.4. 面试题 17.12. BiNode
 
 - 二叉搜索树转换为**单向链表**，保持链表单调性
 
@@ -671,40 +675,7 @@ public:
 };
 ```
 
-补充：[114] 二叉树展开为链表
-
-1. 前序遍历二叉树，将结果保存在vec中
-2. 遍历vec，串连成一个链表
-
-```c++
-class Solution {
-public:
-    vector<TreeNode*> vec;
-    void preorderTraversal(TreeNode* root) {
-        if (!root) return;
-        vec.push_back(root);
-        preorderTraversal(root->left);
-        preorderTraversal(root->right);
-    }
-
-    void flatten(TreeNode* root) {
-        // 前序遍历
-        preorderTraversal(root);
-
-        // 遍历前序遍历的结果集，串联成一个链表
-        int n = vec.size();
-        for (int i = 0; i < n-1; i++) {
-            TreeNode *pre = vec[i];
-            TreeNode *cur = vec[i+1];
-            pre->left = nullptr;
-            pre->right = cur;
-        }
-    }
-};
-```
-
-
-### 4.5. [面试题 04.06. 后继者](https://leetcode-cn.com/problems/successor-lcci/) 
+### 4.5. 面试题 04.06. 后继者 
 
 设计一个算法，找出二叉搜索树中指定节点的“下一个”节点（也即中序后继）。
 
@@ -722,7 +693,7 @@ public:
 
         inOrder(root->left, p);
 
-        if (pre == p) {
+        if (pre == p) { // 当pre指向p时，则root指向p的后继
             ans = root;
             // return;
         }
@@ -749,20 +720,18 @@ public:
     int kthSmallest(TreeNode* root, int k) {
         if (!root) return -1;
 
-        int ans;
-
         TreeNode* p = root;
         stack<TreeNode*> S;
 
         while (p || !S.empty()) {
-            // 左子树存在，就让左子树一直进栈
             while (p) {
                 S.push(p);
                 p = p->left;
             }
-            // 不存在左子树了，弹出栈顶元素，p指向右子树
-            TreeNode* top = S.top(); S.pop();
-            if (--k == 0) return top->val;
+            TreeNode* top = S.top(); S.pop(); k--;
+            if (k == 0) {
+                return top->val;
+            }
             p = top->right;
         }
 
@@ -974,7 +943,7 @@ public:
 };
 ```
 
-### 6.2. [513] 找树左下角的值 ----- TODO
+### 6.2. [513] 找树左下角的值
 
 ```c++
 class Solution {
@@ -1013,26 +982,27 @@ public:
     vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
         vector<vector<int>> ans;
         if (!root) return ans;
-        
+
         queue<TreeNode*> Q;
         Q.push(root);
-        
+
+        int i = 0; // 判断是否需要翻转
         while (!Q.empty()) {
-            vector<int> level;
             int size = Q.size();
+            vector<int> level;
             while (size--) {
-                TreeNode* cur = Q.front(); Q.pop();
-                level.push_back(cur->val);
-                if (cur->left) Q.push(cur->left);
-                if (cur->right) Q.push(cur->right);
+                TreeNode* p = Q.front(); Q.pop();
+                level.push_back(p->val);
+                if (p->left) Q.push(p->left);
+                if (p->right) Q.push(p->right);
             }
+            if (i%2!=0) {
+                reverse(level.begin(), level.end());
+            }
+            i++;
             ans.push_back(level);
         }
-        
-        for (int i=0; i<ans.size(); i++) {
-            if (i%2 == 1) std::reverse(ans[i].begin(), ans[i].end()); // vector反转，采用std::reverse
-        }
-        
+
         return ans;
     }
 };
@@ -1044,44 +1014,41 @@ public:
 层序遍历，queue中保存的元素是 <TreeNode*, index>
 
 ```cpp
-struct QNode {
+struct IndexTreeNode {
     TreeNode* node;
-    unsigned int idx;
-    QNode(TreeNode* node, unsigned int idx) : node(node), idx(idx) {}
+    unsigned int index; // 下标
+    IndexTreeNode(TreeNode* node, unsigned int x) : node(node), index(x) {}
 };
-
 class Solution {
 public:
     int widthOfBinaryTree(TreeNode* root) {
-        if (!root)
-            return 0;
-
         unsigned int ans = 0;
+        if(!root) return ans;
 
-        queue<QNode*> Q;
-        Q.push(new QNode(root, 1));
+        queue<IndexTreeNode*> Q; Q.push(new IndexTreeNode(root, 0));
 
         while (!Q.empty()) {
             int size = Q.size();
-            unsigned int leftIndex = 0; // 该层的最左节点
-            while (size--) {
-                QNode* cur = Q.front(); Q.pop();
-                if (leftIndex == 0) {
-                    leftIndex = cur->idx;
+            unsigned int leftIndex = 0;
+            unsigned int rightIndex = 0;
+            while(size--) {
+                IndexTreeNode* cur = Q.front(); Q.pop();
+                if (leftIndex == 0) { // 该层的最左节点
+                    leftIndex = cur->index;
                 }
-                if (leftIndex > 0) {
-                    ans = max(ans, cur->idx - leftIndex + 1);
+                if (size == 0) { // 该层的最右节点
+                    rightIndex = cur->index;
                 }
                 if (cur->node->left) {
-                    Q.push(new QNode(cur->node->left, 2*cur->idx));
+                    Q.push(new IndexTreeNode(cur->node->left, 2*cur->index+1));
                 }
                 if (cur->node->right) {
-                    Q.push(new QNode(cur->node->right, 2*cur->idx+1));
+                    Q.push(new IndexTreeNode(cur->node->right, 2*cur->index+2));
                 }
             }
+            ans = max(ans, rightIndex-leftIndex+1);
         }
-
-        return int(ans);
+        return ans;
     }
 };
 ```
@@ -1136,19 +1103,15 @@ public:
     Node* connect(Node* root) {
         if (!root) return root;
 
-        queue<Node*> Q;
-        Q.push(root);
+        queue<Node*> Q; Q.push(root);
 
         while (!Q.empty()) {
             int size = Q.size();
             Node* pre = NULL;
             while (size--) {
                 Node* cur = Q.front(); Q.pop();
-                if (pre) {
-                    pre->next = cur;
-                }
+                if (pre) pre->next = cur; // 连接
                 pre = cur;
-                cur->next = NULL;
                 if (cur->left) Q.push(cur->left);
                 if (cur->right) Q.push(cur->right);
             }
@@ -1169,7 +1132,6 @@ public:
 
 ### 7.1. 😄 [236] 二叉树的最近公共祖先 
 
-题意: p,q是树上的节点
 
 ```c++
 class Solution {
@@ -1187,13 +1149,13 @@ public:
         }
         bool lflag = find(root->left, p, q);
         bool rflag = find(root->right, p, q);
-        if (lflag && rflag) { // √ √
+        if (lflag && rflag) { // √ √ 如果p,q分别在左右子树，那么root一定是最近公共祖先
             return root;
-        } else if (!lflag && !rflag) { // X X
+        } else if (!lflag && !rflag) { // X X 
             return NULL;
-        } else if (lflag && !rflag) { // √ X
+        } else if (lflag && !rflag) { // √ X 如果p,q都在左子树，那么继续递归在左子树寻找
             return lowestCommonAncestor(root->left, p, q);
-        } else { // X √
+        } else { // X √ 如果p,q都在右子树，那么继续递归在右子树寻找
             return lowestCommonAncestor(root->right, p, q);
         }
     }
@@ -1233,10 +1195,16 @@ public:
 ```c++
 class Solution {
 public:
+    bool dfs(TreeNode* root, int targetSum) {
+        if (!root) return false;
+        if (!root->left && !root->right && root->val == targetSum) { // 叶子节点
+            return true;
+        }
+        return dfs(root->left, targetSum-root->val) || dfs(root->right, targetSum-root->val);
+    }
     bool hasPathSum(TreeNode* root, int targetSum) {
         if (!root) return false;
-        if (!root->left && !root->right && root->val == targetSum) return true;
-        return hasPathSum(root->left, targetSum-root->val) || hasPathSum(root->right, targetSum-root->val);
+        return dfs(root, targetSum);
     }
 };
 ```
@@ -1328,24 +1296,21 @@ public:
 
 ```c++
 class Solution {
+    int ans = 0;
 public:
-    int ans;
-
     void dfs(TreeNode* root, int path) {
-        if (!root)
-            return;
-        
+        if (!root) return;
+
         path = path * 10 + root->val;
 
         if (!root->left && !root->right) {
-            ans += path;    
+            ans += path;
             return;
         }
 
         dfs(root->left, path);
         dfs(root->right, path);
     }
-
     int sumNumbers(TreeNode* root) {
         dfs(root, 0);
         return ans;
