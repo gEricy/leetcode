@@ -54,19 +54,17 @@ def xxx(nums):
 ```python
 class Solution(object):
     def subsets(self, nums):
-        ans = []
-        land = []
-
         size = len(nums)
+        ans = []
 
-        def dfs(start):
+        def dfs(land, start):
             ans.append(land[:])
-            for i in range(start, size):  # start <= i < size
+            for i in range(start, size):
                 land.append(nums[i])
-                dfs(i+1)
-                land.pop(-1)
+                dfs(land, i+1)
+                land.pop()
 
-        dfs(0)
+        dfs([], 0)
 
         return ans
 ```
@@ -93,24 +91,20 @@ class Solution(object):
 ```python
 class Solution(object):
     def subsetsWithDup(self, nums):
-        ans = []
-        land = []
-
         nums.sort() # 剪枝前，必须排序
-
         size = len(nums)
+        ans = []
 
-        def dfs(start):
+        def dfs(land, start):
             ans.append(land[:])
             for i in range(start, size):
-                if i > start and nums[i] == nums[i-1]: # 剪枝: 解集不能包含重复的子集
+                if i>start and nums[i] == nums[i-1]: # 剪枝
                     continue
                 land.append(nums[i])
-                dfs(i+1)
-                land.pop(-1)
+                dfs(land, i+1)
+                land.pop()
 
-        dfs(0)
-
+        dfs([], 0)
         return ans
 ```
 
@@ -136,23 +130,20 @@ class Solution(object):
 ```python
 class Solution(object):
     def combine(self, n, k):
-        # 数据初始化: 将n转换成数组nums
-        nums = [(i+1) for i in range(n)]
-        size = n
-
+        nums = [i+1 for i in range(n)]
+        size = len(nums)
         ans = []
-        land = []
 
-        def dfs(start):
+        def dfs(land, start):
             if len(land) == k:
                 ans.append(land[:])
+                return
             for i in range(start, size):
                 land.append(nums[i])
-                dfs(i+1)
-                land.pop(-1)
+                dfs(land, i+1)
+                land.pop()
 
-        dfs(0)
-
+        dfs([], 0)
         return ans
 ```
 
@@ -167,15 +158,9 @@ candidates 中的 同一个数字可以`无限制重复`被选取。如果至少
 class Solution(object):
     def combinationSum(self, candidates, target):
         size = len(candidates)
-
-        l, r = 0, size
-
-        candidates.sort()
-
         ans = []
-        land = []
 
-        def dfs(start, target):
+        def dfs(land, start, target):
             if target < 0:
                 return
             if target == 0:
@@ -183,10 +168,10 @@ class Solution(object):
                 return
             for i in range(start, size):
                 land.append(candidates[i])
-                dfs(i, target-candidates[i]) # i: 相同位置的数可以被重复使用多次
-                land.pop(-1)
+                dfs(land, i, target-candidates[i])
+                land.pop()
 
-        dfs(0, target)
+        dfs([], 0, target)
         return ans
 ```
 
@@ -201,28 +186,24 @@ candidates 中的每个元素在每个组合中只能使用一次 。
 ```python
 class Solution(object):
     def combinationSum2(self, candidates, target):
-        size = len(candidates)
-        l, r = 0, size
-
         candidates.sort()
-
+        size = len(candidates)
         ans = []
-        land = []
 
-        def dfs(start, target):
+        def dfs(land, start, target):
             if target < 0:
                 return
             if target == 0:
                 ans.append(land[:])
                 return
             for i in range(start, size):
-                if i > start and candidates[i] == candidates[i-1]:  # 剪枝: 解集不包含重复组合
+                if i>start and candidates[i] == candidates[i-1]:
                     continue
                 land.append(candidates[i])
-                dfs(i+1, target - candidates[i]) # i+1: 不能重复使用
-                land.pop(-1)
+                dfs(land, i+1, target-candidates[i])
+                land.pop()
 
-        dfs(0, target)
+        dfs([], 0, target)
         return ans
 ```
 
@@ -241,23 +222,21 @@ class Solution(object):
 class Solution(object):
     def combinationSum3(self, k, n):
         nums = [i+1 for i in range(9)]
-
+        size = len(nums)
         ans = []
-        land = []
 
-        def dfs(start, target):
-            if target < 0:
+        def dfs(land, start, target):
+            if len(land) > k or target < 0:
                 return
-            if len(land) > k:
-                return
-            if target == 0 and len(land) == k:
+            if len(land) == k and target == 0:
                 ans.append(land[:])
                 return
-            for i in range(start, len(nums)):
+            for i in range(start, size):
                 land.append(nums[i])
-                dfs(i+1, target-nums[i])
-                land.pop(-1)
-        dfs(0, n)
+                dfs(land, i+1, target-nums[i])
+                land.pop()
+
+        dfs([], 0, n)
         return ans
 ```
 
@@ -284,13 +263,10 @@ class Solution(object):
 class Solution(object):
     def permute(self, nums):
         size = len(nums)
-
-        use = [0 for i in range(size)]
-
+        use = [0 for _ in range(size)]
         ans = []
-        land = []
 
-        def dfs():
+        def dfs(land):
             if len(land) == size:
                 ans.append(land[:])
                 return
@@ -299,11 +275,11 @@ class Solution(object):
                     continue
                 land.append(nums[i])
                 use[i] = 1
-                dfs()
-                land.pop(-1)
+                dfs(land)
+                land.pop()
                 use[i] = 0
 
-        dfs()
+        dfs([])
         return ans
 ```
 
@@ -315,33 +291,27 @@ class Solution(object):
 ```python
 class Solution(object):
     def permuteUnique(self, nums):
+        nums.sort()
         size = len(nums)
-
-        use = [0 for i in range(size)]
-
-        l, r = 0, size
-
-        nums.sort() # 剪枝: 有序
-
+        use = [0 for _ in range(size)]
         ans = []
-        land = []
 
-        def dfs():
+        def dfs(land):
             if len(land) == size:
                 ans.append(land[:])
                 return
             for i in range(size):
-                if use[i] == 1:
+                if i>0 and nums[i] == nums[i-1] and use[i-1] == 1:
                     continue
-                if i > 0 and use[i-1] == 1 and nums[i] == nums[i-1]: # 剪枝: 同层之前的元素 "相等 && 已被使用"
+                if use[i] == 1:
                     continue
                 land.append(nums[i])
                 use[i] = 1
-                dfs()
-                land.pop(-1)
+                dfs(land)
+                land.pop()
                 use[i] = 0
 
-        dfs()
+        dfs([])
         return ans
 ```
 
@@ -407,9 +377,12 @@ class Solution(object):
 ```python
 class Solution(object):
     def letterCombinations(self, digits):
-        if len(digits) == 0:
+        size = len(digits)
+        if size == 0:
             return []
-        hash = {
+        ans = []
+
+        map = {
             "2": "abc",
             "3": "def",
             "4": "ghi",
@@ -419,15 +392,15 @@ class Solution(object):
             "8": "tuv",
             "9": "wxyz",
         }
-        ans = []
 
         def dfs(start, land):
-            if len(land) == len(digits):  # 递归退出条件: land的个数 == 按键个数
+            if len(land) == size: # 递归退出条件: land的个数 == 按键个数
                 ans.append(land)
                 return
-            for i in range(start, len(digits)): # 遍历每个按键
-                for ch in hash[digits[i]]: # 遍历每个按键对应的字符
+            for i in range(start, size):  # 遍历每个按键
+                for ch in map[digits[i]]:  # 遍历每个按键对应的字符
                     dfs(i+1, land+ch)
+
         dfs(0, "")
         return ans
 ```
