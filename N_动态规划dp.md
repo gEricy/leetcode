@@ -1,3 +1,10 @@
+难点
+
+- 回文: 子串、子序列
+- 博弈型
+- 股票问题
+- 背包
+
 # 1. 坐标型
 
 ## 1.1. dp[i] = dp[i - 1] + dp[i - 2]
@@ -109,17 +116,19 @@ class Solution(object):
     def coinChange(self, coins, amount):
         # dp[i]: 凑成总金额i所需的最少硬币个数（-1表示不能构成）
         # dp[i] = min { dp[i-coins[j]] + 1 }, i-coins[j] >= 0
-        dp = [-1] * (amount+1)
-        # 初始化: 组成0元, 使用0个硬币
-        dp[0] = 0 
+        dp = [-1 for _ in range(amount+1)]
+
+        dp[0] = 0  # 初始化: 组成0元, 使用0个硬币
+
         for i in range(1, amount+1):
-            select = []
-            for coin in coins: # 使用每一个面值的硬币
+            for coin in coins:
                 if i-coin >= 0 and dp[i-coin] != -1:
-                    select.append(dp[i-coin])
-                if len(select) > 0:
-                    dp[i] = min(select) + 1
-        return dp[amount]
+                    if dp[i] == -1:  # 选择最小值
+                        dp[i] = dp[i-coin]+1
+                    else:
+                        dp[i] = min(dp[i-coin]+1, dp[i])
+
+        return dp[-1]
 ```
 
 ### 1.2.2. 😭 [518] 零钱兑换 II
@@ -139,13 +148,13 @@ class Solution(object):
 ```python
 class Solution(object):
     def change(self, amount, coins):
-        dp = [0] * (amount+1) # 凑成总金额amount的硬币组合数
-        dp[0] = 1 # 不选择任何硬币时，金额之和为0
+        dp = [0 for _ in range(amount+1)]  # 凑成总金额amount的硬币组合数
+        dp[0] = 1  # 组成金额为0，需要1种方式，就是不需要任何硬币
         for coin in coins:
             for i in range(amount+1):
                 if i-coin >= 0:
                     dp[i] += dp[i-coin]
-        return dp[amount]
+        return dp[-1]
 ```
 
 ---
@@ -191,17 +200,19 @@ class Solution(object):
         for i in range(m):
             if obstacleGrid[i][0] == 1:
                 break
-            dp[i][0] = 1
+            else:
+                dp[i][0] = 1
 
         for i in range(n):
             if obstacleGrid[0][i] == 1:
                 break
-            dp[0][i] = 1
+            else:
+                dp[0][i] = 1
 
         for i in range(1, m):
             for j in range(1, n):
                 if obstacleGrid[i][j] == 0:
-                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+                    dp[i][j] = dp[i-1][j] + dp[i][j-1]
 
         return dp[-1][-1]
 ```
@@ -273,7 +284,6 @@ class Solution(object):
 
         # 取max
         return max(dp)
-
 ```
 
 ### 2.1.2. [53] 最大子数组和
@@ -295,7 +305,7 @@ class Solution(object):
         n = len(nums)
 
         # dp[i]: 表示以nums[i]作为结尾的最大连续子数组的和
-        dp = [0] * n
+        dp = [0 for _ in range(n)]
 
         dp[0] = nums[0]
 
@@ -368,7 +378,7 @@ class Solution(object):
         ans = 0
         for i in range(1, m):
             for j in range(1, n):
-                if nums1[i] == nums2[j]:
+                if nums1[i] == nums2[j]: 
                     dp[i][j] = dp[i - 1][j - 1] + 1
                     ans = max(dp[i][j], ans)
 
@@ -376,7 +386,7 @@ class Solution(object):
 ```
 
 
-### 2.1.5. 😭[1143] 最长公共子序列
+### 2.1.5. [1143] 最长公共子序列
 
 ```python
 class Solution(object):
@@ -404,18 +414,19 @@ class Solution(object):
                     dp[i][j] = dp[i - 1][j - 1] + 1
                 else:
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+                # 更新结果
                 ans = max(ans, dp[-1][-1])
                 
         return ans
 ```
 
-### 2.1.6. 😭[72] 编辑距离
+### 2.1.6. [72] 编辑距离
 
 ```python
 class Solution(object):
     def minDistance(self, word1, word2):
-        word1 = "0" + word1
-        word2 = "0" + word2
+        word1 = " " + word1
+        word2 = " " + word2
 
         m = len(word1)
         n = len(word2)
@@ -430,14 +441,13 @@ class Solution(object):
 
         for i in range(1, m):
             for j in range(1, n):
-                if word1[i] == word2[j]: # 无需操作
-                    dp[i][j] = dp[i - 1][j - 1]
+                if word1[i] == word2[j]:  # 无需操作
+                    dp[i][j] = dp[i-1][j-1]
                 else:
-                    dp[i][j] = min( # 插入、删除、替换
-                        dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1
-                    )
+                    dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1  # 插入、删除、替换
 
         return dp[-1][-1]
+
 ```
 
 ----
@@ -456,8 +466,6 @@ class Solution(object):
     def longestPalindrome(self, s):
         n = len(s)
 
-        dp = [[0 for _ in range(n)] for _ in range(n)]  # dp[i][j]: s[i...j]子串是否为回文
-
         maxLen = 0
         ans = ""
 
@@ -465,7 +473,6 @@ class Solution(object):
         for center in range(n):  # 分别以每个元素为center
             l, r = center, center
             while l >= 0 and r < n and s[l] == s[r]:  # 向两边扩展的循环条件
-                dp[l][r] = 1
                 if r - l + 1 > maxLen:
                     maxLen = r - l + 1
                     ans = s[l : r + 1]
@@ -476,7 +483,6 @@ class Solution(object):
         for center in range(n):
             l, r = center, center + 1
             while l >= 0 and r < n and s[l] == s[r]:
-                dp[l][r] = 1
                 if r - l + 1 > maxLen:
                     maxLen = r - l + 1
                     ans = s[l : r + 1]
@@ -522,39 +528,35 @@ class Solution(object):
 
         dp = [[0 for _ in range(n)] for _ in range(n)]  # dp[i][j]: s[i...j]子串是否为回文
 
-        # 填充是否是回文
-        def isPalindrome(dp):
-            # 奇数(以center为中心, 向两边扩展)
-            for center in range(n):  # 分别以每个元素为center
-                l, r = center, center
-                while l >= 0 and r < n and s[l] == s[r]:  # 向两边扩展的循环条件
-                    dp[l][r] = 1
-                    l -= 1
-                    r += 1
+        # 奇数(以center为中心, 向两边扩展)
+        for center in range(n):  # 分别以每个元素为center
+            l, r = center, center
+            while l >= 0 and r < n and s[l] == s[r]:  # 向两边扩展的循环条件
+                dp[l][r] = 1
+                l -= 1
+                r += 1
 
-            # 偶数(以center, center+1为中心, 向两边扩展)
-            for center in range(n):
-                l, r = center, center + 1
-                while l >= 0 and r < n and s[l] == s[r]:
-                    dp[l][r] = 1
-                    l -= 1
-                    r += 1
+        # 偶数(以center, center+1为中心, 向两边扩展)
+        for center in range(n):
+            l, r = center, center + 1
+            while l >= 0 and r < n and s[l] == s[r]:
+                dp[l][r] = 1
+                l -= 1
+                r += 1
 
         # 递归回溯
-        land = []
         ans = []
-        def dfs(start):
-            if start == n: # 递归终止条件: 当start遍历到最后一个元素
+        def dfs(land, start):
+            if start == n:  # 递归终止条件: 当start遍历到最后一个元素
                 ans.append(land[:])
                 return
             for i in range(start, n):
                 if dp[start][i]:
                     land.append(s[start:i+1])
-                    dfs(i+1)
+                    dfs(land, i+1)
                     land.pop(-1)
 
-        isPalindrome(dp)
-        dfs(0)
+        dfs([], 0)
         return ans
 ```
 
@@ -699,7 +701,7 @@ class Solution(object):
 
         # dp[i] 在前i个房子中盗窃，获得的最大价值
         # dp[i] = max(偷第i个房子, 不偷第i个房子) = max(dp[i-2]+nums[i], dp[i-1])
-        dp = [0] * N
+        dp = [0 for _ in range(N)]
 
         dp[0] = nums[0]
         dp[1] = max(nums[1], nums[0])
@@ -738,9 +740,9 @@ class Solution(object):
             return dp[-1]
 
         # 由于0和N-1房子是邻居, 所以不能同时偷盗, 因此可以分为以下2种情况
-        # 没偷房子N-1, 偷的范围[0, N-2]
-        # 没偷房子0, 偷的范围[1, N-1]
-        return max(robMax(nums[0 : N - 1]), robMax(nums[1: N]))
+        #    没偷房子第N个房子, 偷的范围 [0, N) --> 0 <= i < n
+        #    没偷房子第0个房子, 偷的范围 (0, N] --> 0 < i <= n
+        return max(robMax(nums[0:-1]), robMax(nums[1:]))
 ```
 
 
