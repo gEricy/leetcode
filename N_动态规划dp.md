@@ -456,8 +456,67 @@ class Solution(object):
 ## 2.2. 🤩 回文子串、回文子序列
 
 
-### 2.2.1. 😭 [5] 最长回文子串
+### 2.2.1. 最长回文子序列
 
+#### 2.2.1.1. 😭 [516] 最长回文子序列
+
+
+解法1: dp
+
+```python
+class Solution(object):
+    def longestPalindromeSubseq(self, s):
+        n = len(s)
+
+        # [i...j] 最长回文子序列的长度
+        dp = [[0 for _ in range(n)] for _ in range(n)]
+
+        # 遍历[右上三角]: 从下到上，从左到右
+        for i in range(n-1, -1, -1):  # for i=n-1; i>=0; i--
+            for j in range(i, n):  # for j=i; i<n; i++
+                if i == j:
+                    dp[i][j] = 1
+                else:
+                    if s[i] == s[j]:
+                        dp[i][j] = dp[i+1][j-1] + 2
+                    else:
+                        dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+
+        return dp[0][n-1]
+```
+
+解法2: 问题转化 = 1.将字符串翻转 2.求两个字符串的最长公共子序列
+
+```python
+class Solution(object):
+    def longestPalindromeSubseq(self, s):
+        # 增加空字符串
+        s1 = "0" + s
+        s2 = "0" + s[::-1]
+
+        n = len(s1)
+
+        # s1[0...i][0...j]的最长公共子序列的长度
+        dp = [[0 for _ in range(n)] for _ in range(n)]
+
+        for i in range(n):
+            dp[0][i] = 0
+            dp[i][0] = 0
+
+        for i in range(1, n):
+            for j in range(1, n):
+                if s1[i] == s2[j]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+
+        return dp[-1][-1]
+```
+
+
+### 2.2.2. 最长回文子串
+
+#### 2.2.2.1. 😭 [5] 最长回文子串
 
 
 ```python
@@ -493,7 +552,7 @@ class Solution(object):
 ```
 
 
-### 2.2.2. 😭 [131] 分割回文串 ----- 不会呀~
+#### 2.2.2.2. 😭 [131] 分割回文串 ----- 不会呀~
 
 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是 回文串 。返回 s 所有可能的分割方案。
 
@@ -560,7 +619,7 @@ class Solution(object):
         return ans
 ```
 
-### 2.2.3. 😭 [132] 分割回文串 II ----- 不会呀~
+#### 2.2.2.3.  😭 [132] 分割回文串 II ----- 不会呀~
 
 给定一个字符串，要求将字符串划分若干段，每一段都是回文串，求最少的划分次数
 
@@ -624,60 +683,6 @@ class Solution(object):
 
 
 
-### 2.2.4. 😭 最长回文子序列 ----- 使用解法2~
-
-解法1
-
-```c
-int longestPalindromeSubseq(string s) {
-    int n = s.size();
-    // dp 数组全部初始化为 0
-    vector<vector<int>> dp(n, vector<int>(n, 0));
-    // base case
-    for (int i = 0; i < n; i++)
-        dp[i][i] = 1;
-    // 反着遍历保证正确的状态转移
-    for (int i = n - 1; i >= 0; i--) {
-        for (int j = i + 1; j < n; j++) {
-            // 状态转移方程
-            if (s[i] == s[j])
-                dp[i][j] = dp[i + 1][j - 1] + 2;
-            else
-                dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
-        }
-    }
-    // 整个 s 的最长回文子串长度
-    return dp[0][n - 1];
-}
-```
-
-解法2: 问题转化为 = 将字符串翻转，然后，求两个字符串的最长公共子序列
-
-```python
-class Solution(object):
-    def longestPalindromeSubseq(self, s):
-        # 增加空字符串
-        s1 = "0" + s
-        s2 = "0" + s[::-1]
-
-        n = len(s1)
-
-        # s1[0...i][0...j]的最长公共子序列的长度
-        dp = [[0 for _ in range(n)] for _ in range(n)]
-
-        for i in range(n):
-            dp[0][i] = 0
-            dp[i][0] = 0
-
-        for i in range(1, n):
-            for j in range(1, n):
-                if s1[i] == s2[j]:
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                else:
-                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-
-        return dp[-1][-1]
-```
 
 # 3. 序列型
 
@@ -794,77 +799,86 @@ class Solution(object):
 
 如果玩家 1 能成为赢家，返回 true 。如果两个玩家得分相等，同样认为玩家 1 是游戏的赢家，也返回 true 。你可以假设每个玩家的玩法都会使他的分数最大化。
 
-解：
-
-dp[i][j] 下标范围[i...j]内，当前玩家和另一个玩家的分数之差的最大值（注意：当前玩家不一定是先手）
-
-if ( i > j )  dp[i][j] = 0
-
-if ( i = j )  dp[i][j] = nums[i]  只剩下一个数字，当前玩家只能取这个数字
-
-if ( i < j )  dp[i][j] = max( nums[i]−dp[i+1][j], nums[j]−dp[i][j−1] )  当前玩家可以选择nums[i]或nums[j]，然后轮到另一个玩家在剩下的牌堆中选取。在两种方案中，当前玩家会选择最优的方案，使得自己的数量最大化
+解1: 暴力递归
 
 ```python
 class Solution(object):
     def predictTheWinner(self, nums):
         n = len(nums)
-        if n == 0 or n == 1 or n == 2:
-            return True
 
-        # dp[i][j] 表示[i...j]区间内，当前玩家和下一个玩家的分差最大值
-        dp = [ [0 for _ in range(n)] for _ in range(n)]
+        # 先手获取到的数字总和
+        def first(l, r):
+            # 相等的话，一定是先手拿到所有的数字
+            if l == r:
+                return nums[l]
+            # 先手的人，一定是从下面2种case取较大值
+            return max(nums[l] + last(l + 1, r), nums[r] + last(l, r - 1))
 
-        for i in range(n):
-            dp[i][i] = nums[i]
+        # 后手获取到的数字总和
+        def last(l, r):
+            # 相等的话，后手一定拿不到数字
+            if l == r:
+                return 0
+            # 后手的人，(因为2者都绝顶聪明)，所以，先手肯定给后手留下下面2种case的较小值
+            return min(first(l + 1, r), first(l, r - 1))
 
-        for i in range(n-2, -1, -1): # 从下到上 for (int i = n-2; i >= 0; i--)
-            for j in range(i+1, n):  # 从左到右 for (int j = i+1; j < n; j++)
-                dp[i][j] = max(nums[i] - dp[i+1][j], nums[j] - dp[i][j-1])
-
-        return dp[0][n-1] >= 0
+        return first(0, n - 1) >= last(0, n - 1)
 ```
 
+解1: 动态规划
+
+```python
+class Solution(object):
+    def predictTheWinner(self, nums):
+        n = len(nums)
+        
+        if n%2 == 0:
+            return True
+
+        f_dp = [[0 for _ in range(n)] for _ in range(n)]  # f_dp[i][j] 表示[i...j]先手拿到的最大值
+        l_dp = [[0 for _ in range(n)] for _ in range(n)]  # l_dp[i][j] 表示[i...j]后手拿到的最大值
+
+        for i in range(n-1, -1, -1):  # for i=n-1; i>=0; i--
+            for j in range(i, n):  # for j=i; j<0; j++
+                if i == j:
+                    f_dp[i][j] = nums[i]
+                    l_dp[i][j] = 0
+                else:
+                    f_dp[i][j] = max(nums[i] + l_dp[i+1][j], nums[j] + l_dp[i][j-1])
+                    l_dp[i][j] = min(f_dp[i+1][j], f_dp[i][j-1])
+
+        return f_dp[0][n-1] >= l_dp[0][n-1]
+```
 
 
 ### 4.2. [877] 石子游戏 mid
 
 解1：与 `[486] 预测赢家` 解法一样
 
-由于每次只能从行的开始或结束处取走整堆石子，因此可以保证剩下的石子堆一定是连续的。
-
-如果只剩下一堆石子，则当前玩家只能取走这堆石子。如果剩下多堆石子，则当前玩家可以选择从行的开始或结束处取走整堆石子，然后轮到另一个玩家在剩下的石子堆中取走石子。这是一个递归的过程，因此可以使用递归进行求解，递归过程中维护一个总数，表示 Alice 和 Bob 的石子数量之差，当游戏结束时，如果总数大于 0，则 Alice 赢得比赛，否则 Bob 赢得比赛
-
-dp[i][j] 下标范围[i...j]内，当前玩家与另一个玩家的石子数量之差的最大值（注意：当前玩家不一定是先手）
-
-if ( i > j )  dp[i][j] = 0  
-
-if ( i = j )  dp[i][j] = piles[i]  只剩下一堆石子，当前玩家只能取走这堆石子
-
-if ( i < j )  dp[i][j] = max( piles[i]−dp[i+1][j], piles[j]−dp[i][j−1] )  当前玩家可以选择取走piles[i]或piles[j]，然后轮到另一个玩家在剩下的石子堆中取走石子。在两种方案中，当前玩家会选择最优的方案，使得自己的石子数量最大化
-
-
-
 ```python
 class Solution(object):
     def stoneGame(self, piles):
         n = len(piles)
-        if n == 0 or n == 1 or n == 2:
+        
+        if n%2 == 0:
             return True
+        
+        f_dp = [[0 for _ in range(n)] for _ in range(n)]  # f_dp[i][j] 表示[i...j]先手拿到的最大值
+        l_dp = [[0 for _ in range(n)] for _ in range(n)]  # l_dp[i][j] 表示[i...j]后手拿到的最大值
 
-        # dp[i][j] 表示[i...j]区间内，当前玩家和下一个玩家的分差最大值
-        dp = [ [0 for _ in range(n)] for _ in range(n)]
+        for i in range(n-1, -1, -1):  # for i=n-1; i>=0; i--
+            for j in range(i, n):  # for j=i; j<0; j++
+                if i == j:
+                    f_dp[i][j] = piles[i]
+                    l_dp[i][j] = 0
+                else:
+                    f_dp[i][j] = max(piles[i] + l_dp[i+1][j], piles[j] + l_dp[i][j-1])
+                    l_dp[i][j] = min(f_dp[i+1][j], f_dp[i][j-1])
 
-        for i in range(n):
-            dp[i][i] = piles[i]
-
-        for i in range(n-2, -1, -1): # 从下到上 for (int i = n-2; i >= 0; i--)
-            for j in range(i+1, n):  # 从左到右 for (int j = i+1; j < n; j++)
-                dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])
-
-        return dp[0][n-1] >= 0
+        return f_dp[0][n-1] >= l_dp[0][n-1]
 ```
 
-解2：数学推断 --- 先手必胜
+解2：数学推断 --- 偶数个，先手必胜
 
 ```python
 class Solution(object):
@@ -881,7 +895,21 @@ class Solution(object):
 
 ---
 
-# 5. 背包型
+# 5. 股票问题 -- 买卖股票的最佳时机
+
+## 5.1. [121] 买卖股票的最佳时机
+
+## 5.2. [122] 买卖股票的最佳时机 2
+
+## 5.3. [123] 买卖股票的最佳时机 3
+
+## 5.4. [188] 买卖股票的最佳时机 4
+
+
+
+---
+
+# 6. 背包型
 
 ```
  0-1 背包问题
@@ -919,14 +947,3 @@ def package01(weight, val, n):
 
     return dp[-1][-1]
 ```
-
----
-
-# 6. 股票问题
-
-
----
-
-# 7. 扩展题
-
-[410] 分割数组的最大值 hard
