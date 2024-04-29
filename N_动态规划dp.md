@@ -87,7 +87,7 @@ class Solution(object):
             return 1
         if n == 2:
             return 2
-        
+
         # 初始化
         dp = [0] * 2
         dp[1 % 2] = 1
@@ -137,11 +137,11 @@ class Solution(object):
 
 请你计算并返回可以`凑成总金额的硬币组合数`。如果任何硬币组合都无法凑出总金额，返回 0 。
 
-假设每一种面额的硬币有无限个。 
+假设每一种面额的硬币有无限个。
 
 解题思路：
 
-- 定义子问题: problem(i) = sum( problem(i-coin[j]) ), coin[j] = 1,2,5 
+- 定义子问题: problem(i) = sum( problem(i-coin[j]) ), coin[j] = 1,2,5
 - 含义为凑成总金额i的硬币组合数 = 凑成总金额硬币 i-1, i-2, i-5,...的子问题之和
 
 
@@ -378,7 +378,7 @@ class Solution(object):
         ans = 0
         for i in range(1, m):
             for j in range(1, n):
-                if nums1[i] == nums2[j]: 
+                if nums1[i] == nums2[j]:
                     dp[i][j] = dp[i - 1][j - 1] + 1
                     ans = max(dp[i][j], ans)
 
@@ -416,7 +416,7 @@ class Solution(object):
                     dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
                 # 更新结果
                 ans = max(ans, dp[-1][-1])
-                
+
         return ans
 ```
 
@@ -659,16 +659,16 @@ class Solution(object):
                     l -= 1
                     r += 1
             return dp
-        
+
         MAX_INT = 2**32-1
 
         if s == "":
             return 0
 
         size = len(s)
-        
+
         dplr = plainstr(s)
-        
+
         dp = [0 for _ in range(size+1)]  # dp语义: "前"i个, 所以长度是 size+1
         dp[0] = 0  # 初始化: 空串可以被分成0个回文串
         for i in range(1,size+1):
@@ -716,7 +716,7 @@ class Solution(object):
 
         return dp[-1]
 ```
- 
+
 ### 3.2. [213] 打家劫舍 II
 
 你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
@@ -763,12 +763,12 @@ class Solution(object):
 ```python
 class Solution(object):
     def minCost(self, costs):
-        
+
         N = len(costs)
 
         if N == 0:
             return 0
-        
+
         dp = [ [0 for _ in range(N)] for _ in range(3)]
 
         # dp[i][j] 前i个房子，当第i个房子被刷成j颜色时，最小的花费，0<=j<颜色数
@@ -831,7 +831,7 @@ class Solution(object):
 class Solution(object):
     def predictTheWinner(self, nums):
         n = len(nums)
-        
+
         if n%2 == 0:
             return True
 
@@ -859,10 +859,10 @@ class Solution(object):
 class Solution(object):
     def stoneGame(self, piles):
         n = len(piles)
-        
+
         if n%2 == 0:
             return True
-        
+
         f_dp = [[0 for _ in range(n)] for _ in range(n)]  # f_dp[i][j] 表示[i...j]先手拿到的最大值
         l_dp = [[0 for _ in range(n)] for _ in range(n)]  # l_dp[i][j] 表示[i...j]后手拿到的最大值
 
@@ -897,7 +897,41 @@ class Solution(object):
 
 # 5. 股票问题 -- 买卖股票的最佳时机
 
+买卖次数 k 
+
 ## 5.1. [121] 买卖股票的最佳时机
+
+给定一个数组 prices ，它的第 i 个元素 prices[i] 表示一支给定股票第 i 天的价格。
+
+你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。
+
+返回你可以从这笔交易中获取的最大利润。如果你不能获取任何利润，返回 0 。
+
+注意：
+
+- 如果你最多只允许完成一笔交易（即买入和卖出一支股票） 
+- 你不能在买入股票前卖出股票
+
+思路: 最大利润 = 最小的谷之后的最大的峰。 因此，维持两个变量 minprice 和 maxprofit(ans)，它们分别对应迄今为止所得到的最小的谷值和最大的利润
+
+```python
+class Solution(object):
+    def maxProfit(self, prices):
+        n = len(prices)
+
+        ans = 0  # 最大利润
+        minPrice = 1000000 # 最小值 (股票的最低价值)
+
+        for i in range(n):
+            if prices[i] < minPrice:  # 更新股票的最低价值
+                minPrice = prices[i]
+            else:  # 如果当前值大于minPrice，那么，尝试更新最大利润
+                ans = max(ans, prices[i] - minPrice)
+
+        return ans
+```
+
+
 
 ## 5.2. [122] 买卖股票的最佳时机 2
 
