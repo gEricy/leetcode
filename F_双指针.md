@@ -7,22 +7,19 @@
 不要使用额外的空间，你必须在 原地 修改输入数组 并在使用 O(1) 额外空间的条件下完成。
 
 
-```C++
-class Solution {
-public:
-    int removeDuplicates(vector<int>& nums) {
-        int j = 0;
-        for (int i=0; i<nums.size(); i++) {
-            if (nums[i] != nums[j]) {
-                nums[++j] = nums[i];
-            }
-        }
-        return j+1;
-    }
-};
+```python
+class Solution(object):
+    def removeDuplicates(self, nums):
+        n = len(nums)
+        l = 0
+        for r in range(n):
+            if nums[l] != nums[r]:
+                l += 1
+                nums[l] = nums[r]
+        return l + 1
 ````
 
-1.2. [80] 删除有序数组中的重复项 II
+1.2. 😭[80] 删除有序数组中的重复项 II
 
 给你一个有序数组 nums ，请你 原地 删除重复出现的元素，使得出现次数超过两次的元素只出现两次 ，返回删除后数组的新长度。
 
@@ -60,19 +57,18 @@ public:
 
 元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。
 
-```c++
-class Solution {
-public:
-    int removeElement(vector<int>& nums, int val) {
-        int j = 0;
-        for (int i=0; i<nums.size(); i++) {
-            if (nums[i] != val) {
-                nums[j++] = nums[i];
-            }
-        }
-        return j;
-    }
-};
+```python
+class Solution(object):
+    def removeElement(self, nums, val):
+        n = len(nums)
+        l = 0
+        for r in range(n):
+            if nums[r] == val:
+                continue
+            else:
+                nums[l] = nums[r]
+                l += 1
+        return l
 ```
 
 ### 3. [283] 移动零
@@ -82,21 +78,20 @@ public:
 请注意 ，必须在不复制数组的情况下原地对数组进行操作。
 
  
-```c++
-class Solution {
-public:
-    void moveZeroes(vector<int>& nums) {
-        int j = 0;
-        for (int i=0; i<nums.size(); i++) {
-            if (nums[i] != 0) {
-                nums[j++] = nums[i];
-            }
-        }
-        for (; j<nums.size(); j++) {
-            nums[j] = 0;
-        }
-    }
-};
+```python
+class Solution(object):
+    def moveZeroes(self, nums):
+        n = len(nums)
+        l = 0
+        for r in range(n):
+            if nums[r] == 0:
+                continue
+            else:
+                nums[l] = nums[r]
+                l += 1
+        while l < n:  # 剩下的全部抹0
+            nums[l] = 0
+            l += 1
 ```
 
 ### 4. [88] 合并两个有序数组
@@ -115,6 +110,31 @@ nums2 = [2,5,6],       n = 3
 输出：[1,2,2,3,5,6]
 ```
 
+
+
+```python
+class Solution(object):
+    def merge(self, nums1, m, nums2, n):
+        r1 = m - 1
+        r2 = n - 1
+        k = m + n - 1
+        
+        while r1 >= 0 and r2 >= 0:
+            if nums1[r1] > nums2[r2]:
+                nums1[k] = nums1[r1]
+                r1 -= 1
+                k -= 1
+            else:
+                nums1[k] = nums2[r2]
+                r2 -= 1
+                k -= 1
+                
+        while r2 >= 0:
+            nums1[k] = nums2[r2]
+            r2 -= 1
+            k -= 1
+```
+
 ```c++
 class Solution {
 public:
@@ -131,13 +151,35 @@ public:
 };
 ```
 
-### 5. 😄[75] 颜色分类 / 荷兰国旗
+### 5. [75] 颜色分类 / 荷兰国旗
 
 给定一个包含红色、白色和蓝色、共 n 个元素的数组 nums ，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
 
 我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。
 
 必须在不使用库内置的 sort 函数的情况下解决这个问题。
+
+
+
+```python
+class Solution(object):
+    def sortColors(self, nums):
+        n = len(nums)
+        l = 0
+        r = n - 1
+        i = 0
+        while i <= r:
+            if nums[i] == 0:
+                nums[i], nums[l] = nums[l], nums[i]
+                l += 1
+                i += 1
+            elif nums[i] == 1:
+                i += 1
+                continue
+            elif nums[i] == 2:
+                nums[i], nums[r] = nums[r], nums[i]
+                r -= 1
+```
 
 ```c++
 class Solution {
@@ -172,6 +214,23 @@ public:
 
 
 - 面积area = (r-l) * min(height[r], height[l])
+
+
+
+```python
+class Solution(object):
+    def maxArea(self, height):
+        ans = 0
+        n = len(height)
+        l, r = 0, n - 1
+        while l < r:
+            ans = max(ans, (r - l) * min(height[l], height[r]))
+            if height[l] < height[r]:
+                l += 1
+            else:
+                r -= 1
+        return ans
+```
 
 ```c++
 class Solution {
@@ -246,9 +305,9 @@ public:
 ```python
 class Solution(object):
     def twoSum(self, nums, target):
-        hash = {}  # {nums[i], i}
+        hash = {}  # { 元素, 下标 } --- {nums[i], i}
         for i in range(len(nums)):
-            diff = target - nums[i]
+            diff = target-nums[i]
             if diff in hash:
                 return [i, hash[diff]]
             else:
@@ -270,20 +329,20 @@ class Solution(object):
 ```python
 class Solution(object):
     def twoSum(self, numbers, target):
-        l = 0
-        r = len(numbers)-1
+        n = len(numbers)
+        l, r = 0, n - 1
         while l < r:
             sum = numbers[l] + numbers[r]
             if sum == target:
-                return [l+1, r+1]
+                return [l + 1, r + 1]
             elif sum > target:
                 r -= 1
-            else:
+            elif sum < target:
                 l += 1
         return [-1, -1]
 ```
 
-### 9. 😄 [15] 三数之和
+### 9. 😭[15] 三数之和
 
 给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请
 
@@ -306,29 +365,26 @@ class Solution(object):
 ```python
 class Solution(object):
     def threeSum(self, nums):
-        ans = []
         n = len(nums)
         if n < 3:
             return []
-
         nums.sort()
-
-        for i in range(n-2):
-            if i > 0 and nums[i] == nums[i-1]: # 去重
+        ans = []
+        for i in range(n - 2):  # 固定一个数
+            if i > 0 and nums[i] == nums[i - 1]:  # 去重
                 continue
-            l, r = i+1, n-1
+            l, r = i + 1, n - 1
             while l < r:
-                sum = nums[i]+nums[l]+nums[r]
+                sum = nums[l] + nums[i] + nums[r]
                 if sum == 0:
                     ans.append([nums[i], nums[l], nums[r]])
                     l += 1
-                    while l < r and nums[l] == nums[l-1]: # 去重
+                    while l < r and nums[l] == nums[l - 1]:  # 去重
                         l += 1
                 elif sum > 0:
                     r -= 1
                 else:
                     l += 1
-                    
         return ans
 ```
 
