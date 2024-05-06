@@ -342,6 +342,8 @@ class Solution(object):
         return [-1, -1]
 ```
 
+
+
 ### 9. 😭[15] 三数之和
 
 给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。请
@@ -366,25 +368,25 @@ class Solution(object):
 class Solution(object):
     def threeSum(self, nums):
         n = len(nums)
-        if n < 3:
-            return []
         nums.sort()
         ans = []
+
         for i in range(n - 2):  # 固定一个数
-            if i > 0 and nums[i] == nums[i - 1]:  # 去重
+            if i > 0 and nums[i] == nums[i - 1]:  # 去重: 以固定的那个元素
                 continue
+            # 局部两数之和
             l, r = i + 1, n - 1
             while l < r:
-                sum = nums[l] + nums[i] + nums[r]
+                sum = nums[i] + nums[l] + nums[r]
                 if sum == 0:
                     ans.append([nums[i], nums[l], nums[r]])
                     l += 1
-                    while l < r and nums[l] == nums[l - 1]:  # 去重
+                    while l < r and nums[l] == nums[l - 1]:  # 去重: 局部两数之和的去重[l,r]
                         l += 1
-                elif sum > 0:
-                    r -= 1
-                else:
+                elif sum < 0:
                     l += 1
+                else:
+                    r -= 1
         return ans
 ```
 
@@ -459,22 +461,19 @@ class Solution(object):
 1. 右部分: [size-k, size-1]   k个数
 2. 左部分: [0, size-k-1]
 
-```c++
-class Solution {
-public:
-    void reverse(vector<int>& nums, int left, int right) {
-        while (left < right) {
-            swap(nums[left++], nums[right--]);
-        }
-    }
-    void rotate(vector<int>& nums, int k) {
-        int size = nums.size();
-        k = k % size;
-        if (k==0) return;
-        reverse(nums, size-k, size-1); // 右部分
-        reverse(nums, 0, size-k-1);    // 左部分
-        reverse(nums, 0, size-1);      // 全部
-    }
-};
+```python
+class Solution(object):
+    def rotate(self, nums, k):
+        def reverse(nums, l, r):
+            while l < r:
+                nums[l], nums[r] = nums[r], nums[l]
+                l += 1
+                r -= 1
+
+        n = len(nums)
+        k %= n
+        reverse(nums, n - k, n-1)
+        reverse(nums, 0, n - k-1)
+        reverse(nums, 0, n - 1)
 ```
 
