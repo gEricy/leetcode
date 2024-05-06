@@ -458,8 +458,8 @@ class Solution(object):
 
 分割规则: 先分k个数组成右部分，剩下的就是左部分
 
-1. 右部分: [size-k, size-1]   k个数
-2. 左部分: [0, size-k-1]
+1. 以k为界限，分成左右2部分 `[0,n-k-1]` `[n-k,n-1]`
+2. 先将左右2部分分别翻转，再整体翻转
 
 ```python
 class Solution(object):
