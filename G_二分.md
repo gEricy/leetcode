@@ -203,34 +203,36 @@ class Solution(object):
 
 ```python
 class Solution(object):
-    def search(self, nums, target):
-        l, r = 0, len(nums)-1
-        while l+1 < r:
-            mid = (l+r)/2
-            if target == nums[mid]:
-                return mid
-            if target == nums[l]:
-                return l
-            if target == nums[r]:
-                return r
-            # 锁定单调区间
-            if nums[l] < nums[mid]:
-                if nums[l] < target < nums[mid]:
-                    r = mid
-                else:
-                    l = mid
-            else:
-                if nums[mid] < target < nums[r]:
-                    l = mid
-                else:
-                    r = mid
-
-        if target == nums[l]:
-            return l
-        if target == nums[r]:
-            return r
-
-        return -1
+  def search(self, nums, target):
+    n = len(nums)
+    l, r = 0, n - 1
+    while l + 1 < r:
+      mid = (l + r) / 2
+      if nums[mid] == target:
+        return mid
+      if nums[l] == target:
+        return l
+      if nums[r] == target:
+        return r
+      
+      # 先锁定单调区间
+      if nums[l] < nums[mid]:  # 左边是单调区间
+        if nums[l] < target < nums[mid]:
+          r = mid
+        else:
+          l = mid
+      else:  # 右边是单调区间
+        if nums[mid] < target < nums[r]:
+          l = mid
+        else:
+          r = mid
+                
+    if nums[l] == target:
+      return l
+    if nums[r] == target:
+      return r
+    
+    return -1
 ```
 
 ### 2.2.2. 😄 寻找旋转排序数组中的最小值
@@ -240,50 +242,48 @@ class Solution(object):
 - `升序数组：已知一个长度为 n 的数组，预先按照升序排列，经由 1 到 n 次 旋转 后，得到输入数组`
 
 
-[153] 寻找旋转排序数组中的最小值 --- 元素互不相同
+[153] 😄寻找旋转排序数组中的最小值 --- 元素互不相同
 
 ```python
 class Solution(object):
-    def findMin(self, nums):
-        if len(nums) == 0:
-            return 0
-        if len(nums) == 1:
-            return nums[0]
+  def findMin(self, nums):
+    n = len(nums)
+    if n == 0:
+      return 0
+    if n == 1:
+      return nums[0]
 
-        l, r = 0, len(nums)-1
-        while l+1 < r:
-            mid = (l+r)/2
-            if nums[mid] <= nums[r]:
-                r = mid
-            else:
-                l = mid
-        return min(nums[l], nums[r])
+    l, r = 0, n - 1
+    while l + 1 < r:
+      mid = (l + r) / 2
+      if nums[mid] >= nums[r]:
+        l = mid
+      else:
+        r = mid
+    return min(nums[l], nums[r])
 ```
 
-[154] 寻找旋转排序数组中的最小值 II --- 元素可能相同
+[154] 😄寻找旋转排序数组中的最小值 II --- 元素可能相同
 
 ```python
 class Solution(object):
-    def findMin(self, nums):
-        if len(nums) == 0:
-            return 0
-        if len(nums) == 1:
-            return nums[0]
+  def findMin(self, nums):
+    n = len(nums)
+    if n == 0:
+      return 0
+    if n == 1:
+      return nums[0]
 
-        l, r = 0, len(nums)-1
-        while l+1 < r:
-            if nums[r] == nums[r-1]:  # +++
-                r -= 1
-                continue
-            if nums[l] == nums[l+1]:  # +++
-                l += 1
-                continue
-            mid = (l+r)/2
-            if nums[mid] <= nums[r]:
-                r = mid
-            else:
-                l = mid
-        return min(nums[l], nums[r])
+    l, r = 0, n - 1
+    while l + 1 < r:
+      mid = (l + r) / 2
+      if nums[mid] == nums[r]:  # 相等时，不能莽撞的丢掉某一部分，但是可以忽略节点nums[r]
+        r -= 1
+      elif nums[mid] > nums[r]:
+        l = mid
+      else:
+        r = mid
+    return min(nums[l], nums[r])
 ```
 
 ## 2.3. 变种题
@@ -297,22 +297,36 @@ class Solution(object):
 解题思路: 相邻的两个元素 `nums[mid],nums[mid-1]` 或 `nums[mid],nums[mid+1]`，判断是否出现逆序
 
 
+- 关键点：相邻的两个元素一定不相等，因此一定会出现峰值
+
+对于当前的下标范围[l,r]，我们随机选择一个下标i
+1. 如果当前值nums[i]是峰值，直接返回下标i
+2. 若nums[mid] > nums[mid + 1]，那么峰值肯定在[l,mid]中，去[l,mid]范围内继续随机选择下标i，继续查找
+3. 若nums[mid] < nums[mid + 1]，那么峰值肯定在[mid,r]中，去[mid,r]范围内继续随机选择下标i，继续查找
+
+在上面的算法中，我们随机选择下标i，就设定为[l,r]的中点，那么，每次可行的下标范围会减少一半，成为一个类似二分查找的方法
+
 ```python
 class Solution(object):
-    def findPeakElement(self, nums):
-        l,r = 0,len(nums)-1
-        while l+1<r:
-            mid=(l+r)/2
-            if nums[mid] > nums[mid+1]:
-                r=mid
-            else:
-                l=mid
-        return l if nums[l]>nums[r] else r
+  def findPeakElement(self, nums):
+    n = len(nums)
+    l, r = 0, n - 1
+    while l + 1 < r:
+      mid = (l + r) / 2
+      if nums[mid - 1] < nums[mid] and nums[mid] > nums[mid + 1]:  # 如果当前值nums[i]是峰值，直接返回下标i
+        return mid
+      if nums[mid] > nums[mid + 1]:
+        r = mid
+      else:
+        l = mid
+    return l if nums[l] > nums[r] else r
 ```
 
 
 
 ### 2.3.2. 😄[69] x 的平方根 
+
+
 
 ```python
 class Solution(object):
@@ -353,19 +367,20 @@ x^n =
 
 ```python
 class Solution(object):
-    def pow(self, x, n):
-        if n == 0:
-            return 1
-        base = pow(x, n//2) # 先求出base
-        if n % 2 == 0:  # 偶数
-            return base * base
-        else:           # 奇数
-            return base * base * x
+  def myPow(self, x, n):
+    def pow(x, n):
+      if n == 0:
+        return 1
+      base = pow(x, n / 2)
+      if n % 2 == 0:
+        return base * base
+      else:
+        return base * base * x
 
-    def myPow(self, x, n):
-        x = 1/x if n < 0 else x  # 幂次n<0, 底数取倒数
-        n = abs(n)
-        return self.pow(x, n)
+    if n < 0:
+      return 1 / pow(x, -n)
+    else:
+      return pow(x, n)
 ```
 
 ---
@@ -380,9 +395,7 @@ class Solution(object):
 
 分析：O(log (m+n)) ==> 二分
 
-```
 
-```
 
 
 
