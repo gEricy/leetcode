@@ -240,25 +240,25 @@ class Solution(object):
 
 ```python
 class Solution(object):
-    def removeDuplicates(self, s, k):
-        stack = [] # [ch, 次数]
-        for ch in s:
-            if stack:
-                char, cnt = stack[-1]
-                if ch == char:
-                    if cnt == k-1:
-                        stack.pop(-1)
-                    else:
-                        stack[-1][1] += 1
-                else:
-                    stack.append([ch, 1])
-            else:
-                stack.append([ch, 1])
+  def removeDuplicates(self, s, k):
+    stack = []  # [ch, 次数]
+    for ch in s:
+      if stack:
+        s_ch, s_cnt = stack[-1]
+        if s_ch == ch:
+          if s_cnt == k - 1:
+            stack.pop(-1)
+          else:
+            stack[-1][1] += 1
+        else:
+          stack.append([ch, 1])
+      else:
+        stack.append([ch, 1])
 
-        ans = ""
-        for (ch, cnt) in stack:
-            ans += ch*cnt
-        return ans
+    ans = ""
+    for ch, cnt in stack:
+      ans += ch * cnt
+    return ans
 ```
 
 ### 2.7. 😄 [394] 字符串解码
@@ -359,7 +359,7 @@ class Solution(object):
         stack = []
         # 1.保持单调栈
         for ch in num:
-            while stack and ch < stack[-1] and k > 0:
+            while stack and ch < stack[-1] and k > 0:  # 单调递增栈
                 stack.pop(-1)
                 k -= 1
             stack.append(ch)
