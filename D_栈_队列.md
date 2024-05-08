@@ -1,4 +1,4 @@
-
+- [496] 下一个更大元素 I
 - [394] 字符串解码
 
 
@@ -267,6 +267,9 @@ class Solution(object):
 
 编码规则为: k[encoded_string]，表示其中方括号内部的 encoded_string 正好重复 k 次。注意 k 保证为正整数。
 
+- 每次入栈和出栈都更新`cur_num`和`ans_str`
+
+
 ```c
 示例 1：
 输入：s = "3[a]2[bc]"
@@ -279,23 +282,20 @@ class Solution(object):
 ```python
 class Solution(object):
   def decodeString(self, s):
-    stack = [] # [cur_str, num]
-    cur_str = ""
-    cur_num = 0
+    stack = []
+    cur_num, ans_str = 0, ""
     for ch in s:
-      if ch >= '0' and ch <= '9': # 数字
+      if '0' <= ch <= '9':  # 数字
         cur_num = cur_num * 10 + int(ch)
-      elif ch == '[': # 入栈
-        stack.append([cur_num, cur_str])
-        cur_num = 0
-        cur_str = ""
-      elif ch == ']': # 出栈
-        num, str = stack.pop(-1)
-        cur_num = 0
-        cur_str = str + num * cur_str
-      else: # 字母
-        cur_str += ch
-    return cur_str
+      elif ch == '[':  # 入栈
+        stack.append([cur_num, ans_str])
+        cur_num, ans_str = 0, ""
+      elif ch == ']':  # 出栈
+        stack_num, stack_str = stack.pop(-1)
+        cur_num, ans_str = 0, stack_str + stack_num * ans_str
+      else:  # 字母
+        ans_str += ch
+    return ans_str
 ```
 
 --- 
