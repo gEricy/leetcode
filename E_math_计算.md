@@ -32,23 +32,18 @@ public:
 
 该解法，既高效，又可以避免整数溢出的风险
 
-```c
-class Solution {
-public:
-    bool isPalindrome(int x) {
-        // 特殊数字判断: 大于0 && 末尾数字为0 (一定不是回文数)
-        if (x > 0 && x % 10 == 0)
-            return false;
-        
-        int xT = 0;
-        while (x > xT) {
-            xT = xT * 10 + x % 10;
-            x = x / 10;
-        }
+```python
+class Solution(object):
+    def isPalindrome(self, x):
+        if x > 0 and x % 10 == 0:
+            return False
 
-        return x == xT ? true : xT / 10 == x;
-    }
-};
+        xx = 0
+        while x > xx:
+            xx = xx * 10 + x % 10
+            x /= 10
+            
+        return True if x == xx else xx / 10 == x
 ```
 
 # 2.字符串
@@ -96,6 +91,31 @@ public:
 };
 ```
 
+
+
+```python
+class Solution(object):
+    def multiply(self, num1, num2):
+        m = len(num1)
+        n = len(num2)
+
+        vec = [0 for _ in range(m + n)]
+
+        for i in range(m - 1, -1, -1):
+            for j in range(n - 1, -1, -1):
+                sum = vec[i + j + 1] + int(num1[i]) * int(num2[j])
+                vec[i + j + 1] = sum % 10
+                vec[i + j] += sum / 10
+
+        ans = ""
+        for v in vec:
+            ans += str(v)
+
+        ans = ans.lstrip("0")
+
+        return "0" if ans == "" else ans
+```
+
 --- 
 
 # 3.基本计算器
@@ -125,7 +145,7 @@ class Solution:
         s += '+' # 末尾补充一个+（是为了最后一个数字也能参与计算）
         
         for ch in s:
-            if ch >= '0' and ch <= '9': # 数字
+            if '0' <= ch <= '9': # 数字
                 cur_num = cur_num * 10 + (int(ch) - int('0'))
             if ch in '+-/*': # 运算符号
                 # 1.加减: 直接放入结果集   乘除: 弹出栈顶元素，和当前数运算完成后，重新放入栈顶
