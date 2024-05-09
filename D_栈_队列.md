@@ -1,4 +1,4 @@
-- [496] 下一个更大元素 I
+
 - [394] 字符串解码
 
 
@@ -195,7 +195,7 @@ class Solution(object):
   def makeGood(self, s):
     stack = []
     for ch in s:
-      if stack and abs(ord(stack[-1]) - ord(ch)) == abs(ord('a')-ord('A')):
+      if stack and abs(ord(stack[-1]) - ord(ch)) == abs(ord('a')-ord('A')):  # ord() 返回字母的ASCII对应的十进制整数
         stack.pop(-1)
       else:
         stack.append(ch)
