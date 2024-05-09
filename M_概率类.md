@@ -323,7 +323,7 @@ class Solution(object):
         idx = 1
         while cur:
             random_idx = random.randint(0, idx)
-            if random_idx == 0:  # 如果随机下标在蓄水池下标内，则更新ans
+            if random_idx == pool_idx:  # 如果随机下标在蓄水池下标内，则更新ans
                 ans = cur.val
             idx += 1
             cur = cur.next
