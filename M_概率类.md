@@ -22,9 +22,9 @@
 
 ---
 
-# 2. 😄 抛硬币
+# 2. 抛硬币
 
-### 2.1. 甲乙轮流抛硬币，正面胜，先抛的人优势多大？
+### 😄2.1. 甲乙轮流抛硬币，正面胜，先抛的人优势多大？
 
 思路：
 
@@ -45,7 +45,7 @@
 
 结论: 先投硬币获胜的概率更大，胜率是2/3
 
-### 2.2. 甲乙玩掷硬币的游戏。连续抛掷同一枚硬币，如果最近三次硬币抛掷结果是“正反反”，则甲胜；如果是“反反正”，则乙胜。问：谁胜的概率更高？
+### 😄2.2. 甲乙玩掷硬币的游戏。连续抛掷同一枚硬币，如果最近三次硬币抛掷结果是“正反反”，则甲胜；如果是“反反正”，则乙胜。问：谁胜的概率更高？
 
 
 ① 先说一个小结论:
@@ -123,19 +123,19 @@ int Rand(){
     # rand7():                 [1,2,...,7]
     # rand7()-1:               [0,1,...,6]
     # 7*(rand7()-1):           [0,7,...,42]
-    # 7*(rand7()-1)+rand7():   [1,49]   等概率生成[1,49]的随机数
+    # 7*(rand7()-1)+rand7()-1: [0,48]   等概率生成[0,48]的随机数
     # 
-    # 有效数字x ∈ [1,40]
+    # 有效数字x ∈ [0,39]
     # 
-    # [1,40],再%10           --> [0,1,...,9]   等概率生成[0,9]中的随机数
-    # 再+1                   --> [1,2,...,10]  等概率生成[1,10]中的随机数
+    # [0,39] = [0,9]+[10,19]+[20,29]+[30,39],再%10  --> [0,1,...,9]   等概率生成[0,9]中的随机数
+    # 再+1                                          --> [1,2,...,10]  等概率生成[1,10]中的随机数
 
 class Solution(object):
-    def rand10(self):
-        while True:
-            x = 7 * (rand7()-1) + rand7()# [1,49]
-            if x <= 40:
-                return x%10 + 1
+  def rand10(self):
+    while 1:
+      xx = rand7() + (rand7() - 1) * 7 - 1
+      if xx < 40:
+        return xx % 10 + 1
 ```
 
 扩展: 用 randM() 实现 randN()
@@ -166,15 +166,41 @@ int rand300000() {
 2. 从倒数第二个位置开始，将它和前面位置中随机一个位置上的数字交换
 3. 依次地，按照上述逻辑，直到遍历完数组中的每个元素
 
+
 - 总结: 从后向前，从 `nums[0] ~ nums[i]` 随机选取一个元素 与 `nums[i]` 做交换
 
 
 ```c++
 void shuffle(vector<int>& arr) {
 	for (int i = arr.size()-1; i >= 0; i--){
-		swap(arr[i], arr[rand() % (i+1)]); // i 与 [0,i] 交换
+		int rand_idx = rand() % (i+1);
+		swap(arr[i], arr[rand_idx]); // i 与 [0,i] 交换
 	}
 }
+```
+
+[384] 打乱数组
+
+```python
+class Solution(object):
+
+    def __init__(self, nums):
+        self.nums = nums
+
+    def reset(self):
+        return self.nums
+
+    def shuffle(self):
+        tmp_nums = self.nums[:]  # 深拷贝
+        n = len(tmp_nums)
+
+        # 每次选择最后一个元素last_idx，和前面的元素[0...last_idx]做交换
+        last_idx = n-1
+        while last_idx >= 0:  # for( last_idx = n-1; last_idx >=0 ; last_idx--) 
+            rand_idx = random.randint(0, last_idx)  # [0, last_idx]的随机数
+            tmp_nums[rand_idx], tmp_nums[last_idx] = tmp_nums[last_idx], tmp_nums[rand_idx]
+            last_idx -= 1
+        return tmp_nums
 ```
 
 ---
@@ -198,13 +224,11 @@ vector<int> Sampling(vector<int> nums, int n, int m) {
         pool.push_back(nums[i]);
     }
     
+    // 后m个元素
     for (int i=m; i<n; i++) {
-         // 返回[0,i]中的随机下标
-         int idx = randIdx(0, i); 
-         if (0 <= idx < m) { // 如果idx是在蓄水池中，则交换
-            swap(nums[i], nums[idx]);
-         } else {
-            // 如果idx不在池子中，则不做处理
+         int rand_idx = randIdx(0, i); // 返回[0,i]中的随机下标
+         if (0 <= rand_idx < m) { // 如果idx是在蓄水池中，则交换
+            swap(nums[i], nums[rand_idx]);
          }
     }
     
@@ -259,6 +283,7 @@ int rand_i(int i) {
 vector<int> Sampling(vector<int> nums, int n, int m) {
     // 前m个元素，构成蓄水池
     vector<int> pool;
+    
     for (int i=0; i<m; i++) {
         pool.push_back(nums[i]);
     }
@@ -268,8 +293,6 @@ vector<int> Sampling(vector<int> nums, int n, int m) {
          int idx = rand_i(i); 
          if (0 <= idx < m) { // 如果idx是在蓄水池中，则交换
             swap(nums[i], nums[idx]);
-         } else {
-            // 如果idx不在池子中，则不做处理
          }
     }
     
@@ -279,10 +302,38 @@ vector<int> Sampling(vector<int> nums, int n, int m) {
 ```
 
 
----
-
-# 6. 其他题
-
 [382] 链表随机节点
 
+```python
+class Solution(object):
+
+    def __init__(self, head):
+        self.head = head
+
+    def getRandom(self):  # 蓄水池抽样算法，只不过蓄水池的大小为1
+        if not self.head:
+            return -1
+
+        # 初始化蓄水池: 将第一个元素放入蓄水池
+        ans = self.head.val
+        pool_idx = 0
+
+        # 遍历剩下的元素
+        cur = self.head.next
+        idx = 1
+        while cur:
+            random_idx = random.randint(0, idx)
+            if random_idx == 0:  # 如果随机下标在蓄水池下标内，则更新ans
+                ans = cur.val
+            idx += 1
+            cur = cur.next
+
+        return ans
+```
+
 [398] 随机数索引
+
+[497] 非重叠矩形中的随机点
+
+[519] 随机翻转矩阵
+
