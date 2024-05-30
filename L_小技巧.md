@@ -20,6 +20,21 @@
 ]
 ```
 
+```python
+class Solution(object):
+    def rotate(self, matrix):
+        m = len(matrix)
+        n = len(matrix[0])
+
+        # 上下翻转
+        for i in range(m/2):
+            for j in range(n):
+                matrix[i][j], matrix[m-1-i][j] = matrix[m-1-i][j], matrix[i][j]
+        # 对角线翻转
+        for i in range(1, m):
+            for j in range(i):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+```
 
 ```c++
 class Solution {
@@ -129,6 +144,24 @@ public:
 给定一个大小为 n 的数组 nums ，返回其中的多数元素。多数元素是指在数组中出现次数 大于 ⌊ n/2 ⌋ 的元素。
 
 
+```python
+class Solution(object):
+    def majorityElement(self, nums):
+        n = len(nums)
+        cand = -1   # 候选者
+        cnt = 0     # 出现次数
+        for num in nums:
+            if cnt == 0:
+                cnt += 1
+                cand = num
+            else:
+                if cand == num:
+                    cnt += 1
+                else:
+                    cnt -= 1
+        return cand
+```
+
 ```c++
 class Solution {
 public:
@@ -203,6 +236,20 @@ class Solution(object):
 
 ### 3.1. [41] 缺失的第一个正数
 
+```python
+class Solution(object):
+    def firstMissingPositive(self, nums):
+        n = len(nums)
+        for i in range(n):
+            # 将当前元素nums[i]，移动到它应该去的位置(即:下标为nums[i]-1的位置)
+            while 1 <= nums[i] <= n and nums[i] != nums[nums[i]-1]:
+                nums[nums[i]-1], nums[i] = nums[i], nums[nums[i]-1]
+        for i in range(n):
+            if i+1 != nums[i]:
+                return i+1
+        return n + 1
+```
+
 ```c++
 class Solution {
 public:
@@ -239,6 +286,20 @@ public:
 [2,3]
 ```
 
+```python
+class Solution(object):
+    def findDuplicates(self, nums):
+        n = len(nums)
+        for i in range(n):
+            while 1 <= nums[i] <= n and nums[i] != nums[nums[i] - 1]:
+                nums[nums[i] - 1], nums[i] = nums[i], nums[nums[i] - 1]
+        ans = []
+        for i in range(n):
+            if i + 1 != nums[i]:
+                ans.append(nums[i])
+        return ans
+```
+
 ```c++
 class Solution {
 public:
@@ -264,9 +325,23 @@ public:
 ### 3.3. [287] 寻找重复数
 
 ```python
-给定一个包含 n + 1 个整数的数组 nums，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。
-输入: [1,3,4,2,2]
-输出: 2
+给定一个包含 n + 1 个整数的数组 nums ，其数字都在 [1, n] 范围内（包括 1 和 n），可知至少存在一个重复的整数。
+假设 nums 只有 一个重复的整数 ，返回 这个重复的数 。
+你设计的解决方案必须 不修改 数组 nums 且只用常量级 O(1) 的额外空间
+```
+
+```python
+class Solution(object):
+    def findDuplicate(self, nums):
+        n = len(nums)
+        for i in range(n):
+            while 1 <= nums[i] <= n and nums[i] != nums[nums[i] - 1]:
+                nums[nums[i] - 1], nums[i] = nums[i], nums[nums[i] - 1]
+        print(nums)
+        for i in range(n):
+            if i + 1 != nums[i]:
+                return nums[i]
+        return -1
 ```
 
 ```c++
@@ -328,6 +403,32 @@ class Solution(object):
                 else:
                     if y2 >= y1:
                         ans[-1][1] = y2
+        return ans
+```
+
+```python
+class Solution(object):
+    def merge(self, intervals):
+        def cmp_f(x, y):  # 按照第一个元素[升序]排序
+            return cmp(x, y)
+
+        intervals.sort(cmp_f)
+
+        ans = []
+        for cur in intervals:
+            if len(ans) == 0:
+                ans.append(cur)
+            else:
+                last = ans[-1]
+                if cur[0] > last[1]:
+                    ans.append(cur)
+                elif cur[0] == last[1]:
+                    ans[-1][1] = cur[1]
+                else:
+                    if last[1] > cur[1]:
+                        continue
+                    else:
+                        ans[-1][1] = cur[1]
         return ans
 ```
 
