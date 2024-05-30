@@ -6,24 +6,22 @@ golang多线程打印
 ```go
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "sync"
 
-func f() {
+func main() {
+	wg := sync.WaitGroup{}
+
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 
-	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 10; i++ {
-			<-ch1
-			fmt.Println("A", i*2)
+			println("[1] A")
 			ch2 <- 1
+			<-ch1
 		}
 	}()
 
@@ -31,22 +29,14 @@ func f() {
 		defer wg.Done()
 		for i := 0; i < 10; i++ {
 			<-ch2
-			fmt.Println("B", i*2+1)
-			if i == 9 {
-				break
-			}
+			println("[2] B")
 			ch1 <- 1
 		}
 	}()
 
-	ch1 <- 1
-
 	wg.Wait()
 }
 
-func main() {
-	f()
-}
 ```
 
 
@@ -56,25 +46,23 @@ func main() {
 ```go
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "sync"
 
-func f() {
+func main() {
+	wg := sync.WaitGroup{}
+
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 	ch3 := make(chan int)
 
-	var wg sync.WaitGroup
 	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 10; i++ {
-			<-ch1
-			fmt.Println("cat")
+			println("[1] A")
 			ch2 <- 1
+			<-ch1
 		}
 	}()
 
@@ -82,7 +70,7 @@ func f() {
 		defer wg.Done()
 		for i := 0; i < 10; i++ {
 			<-ch2
-			fmt.Println("fish")
+			println("[2] B")
 			ch3 <- 1
 		}
 	}()
@@ -91,20 +79,11 @@ func f() {
 		defer wg.Done()
 		for i := 0; i < 10; i++ {
 			<-ch3
-			fmt.Println("dog")
-			if i == 9 {
-				break
-			}
+			println("[3] C")
 			ch1 <- 1
 		}
 	}()
 
-	ch1 <- 1
-
 	wg.Wait()
-}
-
-func main() {
-	f()
 }
 ```
