@@ -443,45 +443,51 @@ public:
 class Solution {
 public:
     Node* copyRandomList(Node* head) {
-        if (!head) return head;
 
+        // 1.遍历第一次: 复制节点 && 连接成串
+        //      [1 -> 2 -> 3 -> X] 变成 [1 -> 1 -> 2 -> 2 -> 3 -> 3 -> X]
         Node* cur = head;
-        
-        // 遍历第1次，复制节点
         while (cur) {
-            // 拷贝: 复制一个节点
-            Node *newNode = new Node(cur->val, cur->next, NULL);
-            // 插入
-            cur->next = newNode;
-            // cur向后移动
-            cur = cur->next->next;
-        }
-
-        // 遍历第二次，顺便给random指针赋值
-        cur = head;
-        while (cur) {
-            cur->next->random = cur->random ? cur->random->next : NULL;
-            cur = cur->next->next;
-        }
-
-        // 遍历第三次，拆分链表
-        Node head1(0,NULL,NULL); Node* cur1 = &head1; // 旧链表
-        Node head2(0,NULL,NULL); Node* cur2 = &head2; // 新链表
-
-        cur = head;
-        while (cur) {
-            // 新链表插入新节点
-            cur2->next = cur->next; cur2 = cur2->next;
-            // 旧链表插入旧节点
-            cur1->next = cur; cur1 = cur1->next;
+            // 先保存后继
+            Node* post = cur->next;
+            // 新创建节点 && 插入节点
+            Node* newNode = new Node(cur->val);
+            cur->next = newNode; newNode->next = post;
             // 向后遍历
-            cur = cur->next->next;
+            cur = post;
         }
 
-        cur1->next = nullptr; // 一定要设置为空
-        cur2->next = nullptr; // 一定要设置为空
+        // 2.遍历第二次: 给random赋值
+        cur = head;
+        while (cur && cur->next) {
+            cur->next->random = cur->random ? cur->random->next : NULL; // 赋值
+            cur = cur->next->next; // 向后遍历
+        }
 
-        return head2.next;
+
+        // 3.遍历第三次: 拆分链表
+        Node L1(0,NULL,NULL); Node* c1 = &L1;
+        Node L2(0,NULL,NULL); Node* c2 = &L2;
+
+        cur = head;
+        int i = 0;
+
+        while (cur) {
+            if (i % 2 == 0) {
+                c1->next = cur;
+                c1 = c1->next;
+            } else {
+                c2->next = cur;
+                c2 = c2->next;
+            }
+            cur = cur->next; // 向后遍历
+            i++;
+        }
+
+        c1->next = NULL;
+        c2->next = NULL;
+
+        return L2.next;
     }
 };
 ```
