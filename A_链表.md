@@ -349,31 +349,34 @@ public:
 class Solution {
 public:
     ListNode *detectCycle(ListNode *head) {
-        if (!head) return head;
 
-        // 快慢指针一起走
-        bool isCycle = false;
-        ListNode* fast = head;
-        ListNode* slow = head;
-        while (fast && fast->next) { // 循环退出条件: 有环，走到相交的点、无环，fast走到null
-            fast = fast->next->next;
-            slow = slow->next;
-            if (slow == fast) {
-                isCycle = true;
+        bool hasCycle = false;
+        ListNode* f = head;
+        ListNode* s = head;
+        while (f && f->next) {
+            s = s->next;
+            f = f->next->next;
+            if (s == f) { // 存在环(此时，s和f都指向一个节点，但是该节点不一定是第一个相交节点)
+                hasCycle = true;
                 break;
             }
         }
-        // 无环
-        if (!isCycle) {
+
+        if (!hasCycle) { // 无环
             return NULL;
         }
-        // 有环，慢指针重新指向head，快慢指针一起走，再次相遇的点就是第一个入口点
-        slow = head;
-        while (slow != fast) {
-            fast = fast->next;
-            slow = slow->next;
+
+        // 有环，[慢/快指针] 重新指向head，快慢指针一步步走，再次相遇的点就是第一个入口点
+        f = head;
+        while (1) {
+            if (s == f) {
+                return s;
+            }
+            s = s->next;
+            f = f->next;
         }
-        return slow;
+
+        return NULL;
     }
 };
 ```
