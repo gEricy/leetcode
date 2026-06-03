@@ -196,35 +196,34 @@ public:
 ```c++
 class Solution {
 public:
-    map<int, int> map; // key,val = 中序遍历的值, 下标
+    map<int, int> map; // key,root_val = 中序遍历的值, 下标
 
     TreeNode* build(
         vector<int>& preorder, int l_preorder, int r_preorder,
-        vector<int>& inorder, int l_inorder, int r_inorder
-    ) {
+        vector<int>& inorder, int l_inorder, int r_inorder) {
+
         if (l_preorder > r_preorder || l_inorder > r_inorder) {
-            return nullptr;
+            return NULL;
         }
-
-        int root_val = preorder[l_preorder]; // 根节点: 前序遍历的第一个节点
-        int inorder_idx = map[root_val];     // 根节点将中序遍历分为2段
-
-        int lcnt = inorder_idx - l_inorder;  // 左段元素个数
-        int rcnt = r_inorder - inorder_idx;  // 右段元素个数
-
-        TreeNode* root = new TreeNode(root_val);
-        root->left = build(preorder, l_preorder+1, l_preorder+lcnt, inorder, l_inorder, inorder_idx-1);
-        root->right = build(preorder, l_preorder+lcnt+1, r_preorder, inorder, inorder_idx+1, r_inorder);
         
-        return root;    
+        int root_val = preorder[l_preorder]; // 根节点
+        int idx = map[root_val];             // 中序遍历的下标
+        int cntL = idx-1 - l_inorder +1;
+        
+        TreeNode* root = new TreeNode(root_val);
+        root->left = build(preorder, l_preorder+1, l_preorder+cntL, inorder, l_inorder, idx-1);
+        root->right = build(preorder, l_preorder+cntL+1, r_preorder, inorder, idx+1, r_inorder);
+
+        return root;
     }
+
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
-        // 构造中序遍历哈希表
-        for (int i=0; i<inorder.size(); i++){
+        int size = inorder.size();
+        for (int i=0; i<size; i++) { // 构造中序遍历哈希表
             map[inorder[i]] = i;
         }
         // 创建二叉树
-        return build(preorder, 0, preorder.size()-1, inorder, 0, inorder.size()-1);
+        return build(preorder, 0, size-1, inorder, 0, size-1);
     }
 };
 ```
