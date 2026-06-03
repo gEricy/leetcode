@@ -242,34 +242,34 @@ public:
 ```c++
 class Solution {
 public:
-    map<int, int> map;
+    map<int, int> inorderMap; // (值,下标)
 
     TreeNode* build(
-        vector<int>& inorder, int l_inorder, int r_inorder,
-        vector<int>& postorder, int l_postorder, int r_postorder
+        vector<int>& postorder, int l_postorder, int r_postorder,
+        vector<int>& inorder, int l_inorder, int r_inorder
     ) {
-        if (l_inorder > r_inorder || l_postorder > r_postorder) 
-            return nullptr;
+        if (l_postorder > r_postorder || l_inorder > r_inorder) {
+            return NULL;
+        }
 
-        int root_val = postorder[r_postorder]; // 根节点: 后序遍历的最后一个节点
-        int inorder_idx = map[root_val];       // 根节点将中序遍历分为2段
-
-        int lcnt = inorder_idx - l_inorder;    // 左段元素个数
-        int rcnt = r_inorder - inorder_idx;    // 右段元素个数
+        int root_val = postorder[r_postorder];      // 后序遍历的首节点，一定是根节点
+        int idx = inorderMap[root_val];             // 根节点，将中序遍历分割成2半
+        int leftCnt = idx-1 - l_inorder + 1;        // 左边节点的个数
 
         TreeNode* root = new TreeNode(root_val);
-        root->left = build(inorder, l_inorder, inorder_idx-1, postorder, l_postorder, l_postorder+lcnt-1);
-        root->right = build(inorder, inorder_idx+1, r_inorder, postorder, l_postorder+lcnt, r_postorder-1);
+        root->left = build(postorder, l_postorder, l_postorder+leftCnt-1, inorder, l_inorder, idx-1);
+        root->right = build(postorder, l_postorder+leftCnt, r_postorder-1, inorder, idx+1, r_inorder);
 
         return root;
     }
+    
     TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
-        // 构造中序遍历哈希表
-        for (int i=0; i<inorder.size(); i++) {
-            map[inorder[i]] = i;
+        int size = postorder.size();
+        for (int i=0;i<size;i++){
+            inorderMap[inorder[i]] = i;
         }
-        // 创建二叉树
-        return build(inorder, 0, inorder.size()-1, postorder, 0, postorder.size()-1);
+
+        return build(postorder, 0, size-1, inorder, 0, size-1);
     }
 };
 ```
