@@ -144,44 +144,37 @@ public:
 ```cpp
 class Solution {
 public:
-    // 反转[left,right]之间的链表
-    void reverseKGroup(ListNode* left, ListNode* right) {
-        if (left == right) return;
-        
-        ListNode* pre = nullptr;
-        ListNode* cur = left;
-        while (cur != right) {
-            ListNode* post = cur->next;
-            cur->next = pre;
-            pre = cur; cur = post;
-        } // 循环退出后，此时: cur指向right; right和right前一个节点还未翻转
-        
-        cur->next = pre;
-    }
-    
     ListNode* reverseKGroup(ListNode* head, int k) {
-        if (!head) {
-            return head;
+        // 统计节点个数
+        int n = 0;
+        for (ListNode* cur = head; cur; cur = cur->next) {
+            n++;
         }
 
-        // 锁定翻转区间[left,right]
-        ListNode* left = head;
-        ListNode* right = head;
-        for (int i=1; i<k; i++) { // 遍历结束时，[left,right]就是待反转的区间了
-            right = right->next;
-            if (!right) {
-                return head;
+        ListNode dummy; dummy.next = head;
+
+        ListNode* pre0 = &dummy; ListNode* pre = pre0;
+        ListNode* cur0 = head;  ListNode* cur = cur0;
+
+        while (n >= k) {
+            // K个一组反转
+            for (int i=1; i<=k; i++) {
+                ListNode* post = cur->next;
+                cur->next = pre; // 反指
+                pre = cur; cur = post;
             }
+            // 重新连接
+            pre0->next = pre;
+            cur0->next = cur;
+
+            // 重新初始化指针
+            pre0 = cur0; pre = cur0;
+            cur0 = cur;  cur = cur;
+
+            n -= k;
         }
 
-        // 反转后半部分
-        ListNode* part2 = reverseKGroup(right->next, k);
-        // 反转前半段
-        reverseKGroup(left, right);
-        // 重连
-        left->next = part2;
-        // 返回新的头结点
-        return right;
+        return dummy.next;
     }
 };
 ```
