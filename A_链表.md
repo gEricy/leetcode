@@ -145,31 +145,35 @@ public:
 class Solution {
 public:
     ListNode* reverseKGroup(ListNode* head, int k) {
-        // 统计节点个数
-        int n = 0;
-        for (ListNode* cur = head; cur; cur = cur->next) {
-            n++;
-        }
 
         ListNode dummy; dummy.next = head;
 
-        ListNode* pre0 = &dummy; ListNode* pre = pre0;
-        ListNode* cur0 = head;  ListNode* cur = cur0;
+        // 1.统计节点数量
+        int n = 0;
+        for(ListNode* c=head; c; c=c->next) {
+            n++;
+        }
 
+        ListNode* pre0 = &dummy; ListNode* pre = pre0;
+        ListNode* cur0 = head;   ListNode* cur = cur0;
+
+        // 节点数超过k
         while (n >= k) {
-            // K个一组反转
+
+            // K个一组，执行反转
             for (int i=1; i<=k; i++) {
                 ListNode* post = cur->next;
-                cur->next = pre; // 反指
+                cur->next = pre;
                 pre = cur; cur = post;
             }
+
             // 重新连接
             pre0->next = pre;
             cur0->next = cur;
 
-            // 重新初始化指针
+            // 更新指针: 后移
             pre0 = cur0; pre = cur0;
-            cur0 = cur;  cur = cur;
+            cur0 = cur;
 
             n -= k;
         }
