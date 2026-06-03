@@ -82,23 +82,23 @@ public:
 ```c++
 class Solution {
 public:
-    vector<int> preorderTraversal(TreeNode* root) {
-        vector<int> ans;
+    vector<int> inorderTraversal(TreeNode* root) {
+         vector<int> ans;
 
-        TreeNode* p = root;
-        stack<TreeNode*> s;
+         TreeNode* p = root;
+         stack<TreeNode*> s;
 
-        while (p || !s.empty()) {
-            while(p) { // 左子树一直进栈
-                s.push(p); 
-                p = p->left;
-            }
-            // 没有左子树，就出栈，然后访问栈顶的右子树
-            TreeNode* top = s.top(); s.pop(); ans.push_back(p->val);
-            p = top->right;
-        }
+         while (p || !s.empty()) {
+             while(p) { // 左子树一直进栈
+                 s.push(p);
+                 p = p->left;
+             }
+             // 没有左子树，就出栈，然后访问栈顶的右子树
+             TreeNode* top = s.top(); s.pop(); ans.push_back(top->val);
+             p = top->right;
+         }
 
-        return ans;
+         return ans;
     }
 };
 ```
