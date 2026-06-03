@@ -504,22 +504,21 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head) return head;
-
-        ListNode dummy; dummy.next = head;
-
-        ListNode* pre = &dummy;
+        if (!head) {
+            return head;
+        }
         ListNode* cur = head;
 
         while (cur) {
-            if (cur->next && cur->next->val == cur->val) {
-                cur->next = cur->next->next; // 删除节点
-            } else {
-                cur = cur->next;
+            ListNode* post = cur->next; // 后继
+            while (post && cur->val == post->val) { // if [后面元素的值] == [cur值]，一直后移
+                post = post->next;
             }
+            cur->next = post; // 删除“中间相同的元素”
+            cur = cur->next;  // 向后遍历
         }
 
-        return dummy.next;
+        return head;
     }
 };
 ```
