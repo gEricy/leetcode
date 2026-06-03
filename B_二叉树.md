@@ -158,10 +158,11 @@ public:
         Q.push(root);
 
         while (!Q.empty()) {
-            int size = Q.size(); // 当前队列中的元素，就是本层的所有元素
             vector<int> level;
+            int size = Q.size(); // 当前队列中的元素，就是本层的所有元素
             while (size--) {
-                TreeNode* cur = Q.front(); Q.pop(); level.push_back(cur->val);
+                TreeNode* cur = Q.front(); Q.pop();
+                level.push_back(cur->val);
                 if (cur->left) Q.push(cur->left);
                 if (cur->right) Q.push(cur->right);
             }
