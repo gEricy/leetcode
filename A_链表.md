@@ -401,7 +401,8 @@ public:
 ```cpp
 class Solution {
 public:
-    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) { 
+
         ListNode dummy;
         ListNode* cur = &dummy;
 
@@ -410,20 +411,17 @@ public:
 
         int carry = 0;
         while (p || q) { // 只要有一个链表不为空，就一直向后迭代
-            int pval = p ? p->val : 0;
-            int qval = q ? q->val : 0;
-            if(p) p = p->next;
-            if(q) q = q->next;
+            int val = (p ? p->val:0) + (q ? q->val:0) + carry;
 
-            int sum = pval + qval + carry;
-
-            cur->next = new ListNode(sum%10);
+            carry = val / 10;
+            cur->next = new ListNode(val % 10);
             cur = cur->next;
 
-            carry = sum/10;
+            if (p) { p = p->next; }
+            if (q) { q = q->next; }
         }
 
-        if(carry > 0) {
+        if (carry) {
             cur->next = new ListNode(carry);
         }
 
