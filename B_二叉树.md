@@ -36,19 +36,16 @@ public:
     vector<int> preorderTraversal(TreeNode* root) {
         vector<int> ans;
 
-        if (!root) return ans;
-
         TreeNode* p = root;
-        stack<TreeNode*> S;
+        stack<TreeNode*> s;
 
-        while (p || !S.empty()) {
-            // 左子树存在，就让左子树一直进栈
-            while (p) {
-                S.push(p); ans.push_back(p->val);
+        while (p || !s.empty()) {
+            while(p) { // 左子树一直进栈
+                s.push(p); ans.push_back(p->val);
                 p = p->left;
             }
-            // 不存在左子树了，弹出栈顶元素，p指向右子树
-            TreeNode* top = S.top(); S.pop();
+            // 没有左子树，就出栈，然后访问栈顶的右子树
+            TreeNode* top = s.top(); s.pop();
             p = top->right;
         }
 
