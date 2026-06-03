@@ -103,34 +103,34 @@ public:
 class Solution {
 public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        if (!head || left == right) return head;
-
-        // 增加伪头结点
-        ListNode dummy;
-        dummy.next = head;
+        ListNode dummy; dummy.next = head;
 
         ListNode* pre = &dummy;
-        ListNode* cur = dummy.next;
+        ListNode* cur = head;
 
-        // 寻找翻转的点
-        int i = 1;
-        for (; i < left; i++) { // 寻找最左面的节点，假设left = 1，其实已经找到了
+        // 1.查找[left节点]
+        int i=1;
+        while (i < left) { // cur指向[left节点]
             pre = cur;
             cur = cur->next;
+            i++;
         }
-        ListNode* pre1 = pre;
-        ListNode* cur1 = cur;
 
-        // 边遍历，边翻转: 翻转[left,right]区间内的节点
-        for (; i <= right; i++) { // 循环退出时，cur指向第right个节点的后继
+        // 2.保存指针: 用于后面连接链表
+        ListNode* pre0 = pre;
+        ListNode* cur0 = cur;
+
+        // 3.反转[left,right]
+        while(i <= right) {
             ListNode* post = cur->next;
             cur->next = pre;
             pre = cur; cur = post;
+            i++;
         }
 
-        // 重新连接新链表
-        pre1->next = pre;
-        cur1->next = cur;
+        // 4.连接链表
+        pre0->next = pre;
+        cur0->next = cur;
 
         return dummy.next;
     }
