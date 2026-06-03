@@ -531,27 +531,25 @@ public:
 class Solution {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
-        if (!head) return head;
-
-        ListNode dummy; dummy.next = head;
+        ListNode dummy;
+        dummy.next = head;
 
         ListNode* pre = &dummy;
         ListNode* cur = head;
 
         while (cur) {
-            bool hasEqual = false;
-            ListNode* ptr = cur->next;
-            while (ptr && ptr->val == cur->val) {
-                hasEqual = true;
-                ptr = ptr->next;
+            bool isSame = false;
+            ListNode* post = cur->next;
+            while (post && cur->val == post->val) {
+                post = post->next;
+                isSame = true;
             }
-            if (hasEqual) {
-                pre->next = ptr; // 删除
-                cur = ptr;
+            if (isSame) {
+                pre->next = post;
             } else {
-                pre = pre->next;
-                cur = cur->next;
+                pre = cur;
             }
+            cur = post;
         }
 
         return dummy.next;
