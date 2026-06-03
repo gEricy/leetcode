@@ -242,23 +242,25 @@ public:
 - 求两个相交链表的交点
 
 解题思路：
-1. 循环条件：p != q
-2. p、q分别遍历L1+L2、L2+L1
+- p遍历 L1、L2
+- q遍历 L2、L1
 
 ```cpp
 class Solution {
 public:
-    // 思想：L1+L2 == L2+L1
     ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
-        ListNode* p = headA;
-        ListNode* q = headB;
-        // 无论如何，p==q一定会存在
-        //     ----> 循环退出条件: p和q走到交点，走到链表结尾
-        while (p != q) {
-            p = p ? p->next : headB; // p,q走到链表尾部, 就切换到对方的链表头
-            q = q ? q->next : headA;
+        ListNode* pA = headA;
+        ListNode* pB = headB;
+
+        while (pA || pB) { // 只要任何一个没结束，就向后遍历
+            if (pA == pB) { // 相交节点
+                return pA;
+            }
+            pA = pA ? pA->next : headB; // pA如果走到头，就去遍历headB
+            pB = pB ? pB->next : headA; // pB如果走到头，就去遍历headA
         }
-        return p;
+
+        return NULL;
     }
 };
 ```
