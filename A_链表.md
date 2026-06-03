@@ -2,7 +2,7 @@
 1. 向前走N步、指向第N个节点：for(int i=0; ???; i++)
 
 难题集合
-- [25] K个一组翻转链表
+- 😭[25] K 个一组翻转链表
 - [148] 排序链表
 - [23] 合并K个升序链表（逻辑简单，使用到stl库不好记）
 
@@ -196,38 +196,38 @@ public:
 ```cpp
 class Solution {
 public:
-    ListNode* getMidNode(ListNode* head) {
-        ListNode* fast = head;
-        ListNode* slow = head;
-        while (fast && fast->next) {
-            fast = fast->next->next;
-            slow = slow->next;
+    // 获取中间节点的后继
+    ListNode* getMidNodePost(ListNode* head) {
+        ListNode* s = head;
+        ListNode* f = head;
+        while (f && f->next) {
+            s = s->next;
+            f = f->next->next;
         }
-        return fast ? slow->next : slow;
+        return f ? s->next : s;
     }
-
     bool isPalindrome(ListNode* head) {
-        if (!head) {
+        if (!head || !head->next) {
             return true;
         }
-        // 查询中间节点
-        ListNode* midNode = getMidNode(head); 
-        
-        // 将后半部分放入栈
-        stack<int> s;
-        while (midNode) {
-            s.push(midNode->val);
-            midNode = midNode->next;
+        // 1.找中间节点的后继
+        ListNode* midNodePost = getMidNodePost(head);
+
+        // 2.将后半段全部入栈
+        stack<ListNode*> S;
+        while (midNodePost) {
+            S.push(midNodePost);
+            midNodePost = midNodePost->next;
         }
 
-        // cmp: 出栈元素、前半部分
+        // 3.后半段出栈，和前半段对比val
         ListNode* cur = head;
-        while (!s.empty() ) {
-            if (s.top() != cur->val) {
+        while (!S.empty()) {
+            ListNode* top = S.top(); S.pop();
+            if (cur->val != top->val) {
                 return false;
             }
             cur = cur->next;
-            s.pop();
         }
 
         return true;
