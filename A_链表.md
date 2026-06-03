@@ -564,29 +564,28 @@ public:
 class Solution {
 public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-        ListNode dummy;
-        ListNode* cur = &dummy;
+        ListNode head;
+        ListNode* cur = &head;
 
-        ListNode* p = list1;
-        ListNode* q = list2;
-
-        while (p && q) {
-            int val;
-            if (p->val <= q->val) {
-                val = p->val;
-                p = p->next;
+        while (list1 && list2) {
+            if (list1->val < list2->val) {
+                cur->next = list1;
+                list1 = list1->next;
             } else {
-                val = q->val;
-                q = q->next;
+                cur->next = list2;
+                list2 = list2->next;
             }
-            cur->next = new ListNode(val);
             cur = cur->next;
         }
-
-        if (p) cur->next = p;
-        if (q) cur->next = q;
-
-        return dummy.next;
+        while (list1) {
+            cur->next = list1; cur = cur->next;
+            list1 = list1->next;
+        }
+        while (list2) {
+            cur->next = list2; cur = cur->next;
+            list2 = list2->next;
+        }
+        return head.next;
     }
 };
 ```
