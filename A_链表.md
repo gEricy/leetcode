@@ -86,10 +86,10 @@ public:
         // 递归后半部分
         ListNode* part2Head = swapPairs(head->next->next);
         // 处理前半部分
-        ListNode* newHead = head->next;
-        newHead->next = head; // 反指
-        head->next = part2Head;
-        return newHead;
+        ListNode* newHead = head->next; // 新头结点
+        newHead->next = head;     // 反指
+        head->next = part2Head;   // 连接 part1 和 part2
+        return newHead;           // 返回新头结点
     }
 };
 ```
