@@ -282,27 +282,26 @@ public:
 class Solution {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
-        if (!head) return head;
-
         ListNode dummy;
         dummy.next = head;
 
+        // 快指针: 先走n步骤
         ListNode* fast = head;
-        ListNode* slow = head;
-        while (n--) { // 快指针先走n步
+        while (fast && n) {
             fast = fast->next;
+            n--;
         }
 
-        // 快慢指针一起走，当快指针走到null，慢指针指向[倒数第N个结点]
         ListNode* pre = &dummy;
-        while (slow && fast) {
-            pre = pre->next;
-            slow = slow->next;
+
+        ListNode* slow = head; // 快慢指针一起走，当fast走到NULL时，slow指向“被删除节点”
+        while(fast) {
             fast = fast->next;
+            pre = slow;
+            slow = slow->next;
         }
 
-        // 删除[倒数第N个结点]
-        pre->next = slow->next;
+        pre->next = slow->next; // 删除
 
         return dummy.next;
     }
