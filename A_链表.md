@@ -84,12 +84,11 @@ public:
             return head;
         }
         // 递归后半部分
-        ListNode* postHead = swapPairs(head->next->next);
+        ListNode* part2Head = swapPairs(head->next->next);
         // 处理前半部分
         ListNode* newHead = head->next;
-        newHead->next = head;
-        newHead->next->next = postHead;
-
+        newHead->next = head; // 反指
+        head->next = part2Head;
         return newHead;
     }
 };
