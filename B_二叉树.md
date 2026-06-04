@@ -1220,50 +1220,44 @@ public:
 
 ```c++
 class Solution {
-    // 判断 p或q 是否在在树root上（只要有一个在root，就返回true）
-    bool find(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (!root) {
-            return NULL;
-        }
-        return root == p || root == q || find(root->left, p, q) || find(root->right, p, q);
-    }
 public:
+    TreeNode* dfs(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root || root==p || root==q) return root;
+
+        TreeNode* L = dfs(root->left, p, q);
+        TreeNode* R = dfs(root->right, p, q);
+        if (L && R) return root; // p\q分别在root的左右子树 ---> root就是最近公共祖先
+        return L ? dfs(L, p, q) : dfs(R, p, q); // p\q都在左子树上 ? [去左子树查] : [去右子树查]
+    }
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (!root || root == p || root == q) {
-            return root;
-        }
-        bool lflag = find(root->left, p, q);
-        bool rflag = find(root->right, p, q);
-        if (lflag && rflag) { // √ √ 如果p,q分别在左右子树，那么root一定是最近公共祖先
-            return root;
-        } else if (!lflag && !rflag) { // X X 
-            return NULL;
-        } else if (lflag && !rflag) { // √ X 如果p,q都在左子树，那么继续递归在左子树寻找
-            return lowestCommonAncestor(root->left, p, q);
-        } else { // X √ 如果p,q都在右子树，那么继续递归在右子树寻找
-            return lowestCommonAncestor(root->right, p, q);
-        }
+        if (!root || root==p || root==q) return root;
+        return dfs(root, p, q);
     }
 };
 ```
 
 ### 7.2. [235] 二叉搜索树的最近公共祖先
 
+- 因为是二叉搜索树BST🌲，所以，使用 root、p\q 的值对比
+
 
 ```c++
 class Solution {
 public:
-    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (!root || !p || !q)
-            return nullptr;
-        
-        if (p->val > root->val && q->val > root->val) {        // p,q > root, 查找右子树
-            return lowestCommonAncestor(root->right, p, q);
-        } else if (p->val < root->val && q->val < root->val) { // p,q < root, 查找左子树
-            return lowestCommonAncestor(root->left, p, q);
-        } else {                                               // 一个大, 一个小, 返回root
+    TreeNode* dfs(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root || root==p || root==q) return root;
+
+        if (root->val > p->val && root->val > q->val) { // root > p\q --> 去左子树查
+            return dfs(root->left, p, q);
+        } else if (root->val < p->val && root->val < q->val) { // root < p\q --> 去右子树查
+            return dfs(root->right, p, q);
+        } else { // root在p\q之间 --> root就是最近公共祖先
             return root;
         }
+    }
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root || root==p || root==q) return root;
+        return dfs(root, p, q);
     }
 };
 ```
