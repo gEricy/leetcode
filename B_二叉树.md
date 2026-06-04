@@ -416,6 +416,8 @@ public:
 
 给你两棵二叉树 root 和 subRoot 。检验 root 中是否包含和 subRoot 具有相同结构和节点值的子树。如果存在，返回 true ；否则，返回 false 。
 
+1. 先写isSameTree
+2. 再写
 
 ```c++
 class Solution {
@@ -451,6 +453,8 @@ bool dfs(TreeNode* T1, TreeNode* T2) {
 ```
 
 ### 3.8. [226] 翻转二叉树
+
+注意：这个题目是“交换节点”，不是“交换值”
 
 ```c++
 class Solution {
