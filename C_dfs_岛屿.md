@@ -3,41 +3,51 @@
 
 ### 1. [200] 岛屿数量
 
+进入dfs条件: grid[x][y] == 1
+
+递归终止条件: 
+
+1. x,y越界
+2. grid[x][y] == 0
+
+执行动作: 岛屿 --> 海洋
+
+
 ```c++
 class Solution {
-    int m, n;
 public:
-    // dfs结束后，会将为'1'的位置，改成'0
+    int m;
+    int n;
     void dfs(vector<vector<char>>& grid, int x, int y) {
-        if (x < 0 || x >= m || y < 0 || y >= n)  // 不在岛屿内
-            return;
+        // 越界
+        if (x < 0 || x >= m || y < 0 || y >= n) return;
 
-        if (grid[x][y] == '0')  // 节点不是岛屿
-            return;
+        // 当前节点不是岛屿
+        if (grid[x][y] != '1') return;
 
-        grid[x][y] = '0'; // 将岛屿变成陆地
+        grid[x][y] = '0'; // 岛屿 --> 海洋
 
-        dfs(grid, x, y+1);
         dfs(grid, x+1, y);
-        dfs(grid, x, y-1);
         dfs(grid, x-1, y);
+        dfs(grid, x, y+1);
+        dfs(grid, x, y-1);
     }
 
     int numIslands(vector<vector<char>>& grid) {
+        int ans = 0;
+
         m = grid.size();
         n = grid[0].size();
-        int cnt = 0;
-
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == '1') {
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (grid[i][j]=='1') { // 是岛屿
                     dfs(grid, i, j);
-                    cnt++;
+                    ans++;
                 }
             }
         }
 
-        return cnt;
+        return ans;
     }
 };
 ```
@@ -47,36 +57,36 @@ public:
 
 ```c++
 class Solution {
-private:
+public:
     int m;
     int n;
-public:
-    // 深度优先遍历: 一直将岛屿变成陆地
-    // 返回值: 包含(x,y)的岛屿的面积
+
     int dfs(vector<vector<int>>& grid, int x, int y) {
-        if (x < 0 || x >= m || y < 0 || y >= n)  // 不在岛屿内
-            return 0;
+        // 越界
+        if (x<0 || x>=m || y<0 || y>=n) return 0;
 
-        if (grid[x][y] != 1)  // 节点不是岛屿
-            return 0;
+        if (grid[x][y] != 1) return 0; // 不是岛屿
 
-        grid[x][y] = 0; // 将岛屿变成陆地
+        grid[x][y] = 0; // 岛屿 --> 海洋
 
-        return 1 + dfs(grid, x, y+1)
-                 + dfs(grid, x+1, y)
-                 + dfs(grid, x, y-1)
-                 + dfs(grid, x-1, y);
+        return 1 +
+            dfs(grid, x+1, y) +
+            dfs(grid, x-1, y) +
+            dfs(grid, x, y+1) +
+            dfs(grid, x, y-1);
     }
 
     int maxAreaOfIsland(vector<vector<int>>& grid) {
-        m = grid.size();
-        n = grid[0].size();
-        
         int ans = 0;
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                ans = max( ans, dfs(grid, i, j) );
+        m = grid.size();
+        n = grid[0].size();
+
+        for (int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                if (grid[i][j] == 1) {
+                    ans = max(ans, dfs(grid, i, j));
+                }
             }
         }
 
