@@ -20,17 +20,21 @@ public:
     int n;
     void dfs(vector<vector<char>>& grid, int x, int y) {
         // 越界
-        if (x < 0 || x >= m || y < 0 || y >= n) return;
+        if (x<0 || x>=m || y<0 || y>=n) return;
 
-        // 当前节点不是岛屿
-        if (grid[x][y] != '1') return;
-
-        grid[x][y] = '0'; // 岛屿 --> 海洋
-
-        dfs(grid, x+1, y);
-        dfs(grid, x-1, y);
-        dfs(grid, x, y+1);
-        dfs(grid, x, y-1);
+        switch (grid[x][y]) {
+            case '0': // 大海
+                return;
+            case '1': // 岛屿(未遍历过)
+                grid[x][y] = '2'; // 标记为(已遍历过) --> 防止递归死循环
+                dfs(grid, x+1, y);
+                dfs(grid, x-1, y);
+                dfs(grid, x, y+1);
+                dfs(grid, x, y-1);
+                return;
+            case '2': // 岛屿(已遍历过)
+                return;
+        }
     }
 
     int numIslands(vector<vector<char>>& grid) {
@@ -64,16 +68,20 @@ public:
     int dfs(vector<vector<int>>& grid, int x, int y) {
         // 越界
         if (x<0 || x>=m || y<0 || y>=n) return 0;
-
-        if (grid[x][y] != 1) return 0; // 不是岛屿
-
-        grid[x][y] = 0; // 岛屿 --> 海洋
-
-        return 1 +
-            dfs(grid, x+1, y) +
-            dfs(grid, x-1, y) +
-            dfs(grid, x, y+1) +
-            dfs(grid, x, y-1);
+        switch (grid[x][y]) {
+        case 0: // 大海
+            return 0;
+        case 1: // 岛屿(未遍历过)
+            grid[x][y] = 2; // 标记为(已遍历过) --> 防止递归死循环
+            return 1 +
+                dfs(grid, x+1, y) +
+                dfs(grid, x-1, y) +
+                dfs(grid, x, y+1) +
+                dfs(grid, x, y-1);
+        case 2: // 岛屿(已遍历过)
+            return 0;
+        }
+        return 0;
     }
 
     int maxAreaOfIsland(vector<vector<int>>& grid) {
@@ -113,21 +121,22 @@ public:
     int n;
     int dfs(vector<vector<int>>& grid, int x, int y) {
 
-        { // 遇到了边 --> 周长+1
-            if (x<0 || x>=m || y<0 || y>=n) return 1; // 越界
-            if (grid[x][y] == 0) return 1; // 0 不是岛屿
+        if (x<0 || x>=m || y<0 || y>=n) return 1; // 越界 --> 碰到周围的线
+
+        switch (grid[x][y]) {
+        case 0: // 大海 --> 碰到周围的线
+            return 1;
+        case 1: // 岛屿(未遍历过)
+            grid[x][y] = 2;
+            return
+                dfs(grid, x+1, y) +
+                dfs(grid, x-1, y) +
+                dfs(grid, x, y+1) +
+                dfs(grid, x, y-1);
+        case 2: // 岛屿(已遍历过)
+            return 0;
         }
-
-        // 2 岛屿已涂上颜色 --> 不重复累加
-        if (grid[x][y] == 2) return 0;
-
-        grid[x][y] = 2; // 岛屿 --> 涂上颜色
-
-        return
-            dfs(grid, x+1, y) +
-            dfs(grid, x-1, y) +
-            dfs(grid, x, y+1) +
-            dfs(grid, x, y-1);
+        return 0;
     }
 
     int islandPerimeter(vector<vector<int>>& grid) {
@@ -144,7 +153,6 @@ public:
         }
 
         return ans;
-        
     }
 };
 ```
