@@ -554,26 +554,28 @@ void inorder(TreeNode* root) {
 ```c++
 class Solution {
 public:
-    TreeNode* pre = NULL; // 前驱
-    bool ans = true;
-    void inOrder(TreeNode* root) {
-        if (!root) return;
+    TreeNode* pre;
+    bool dfs(TreeNode* root) {
+        if (!root) return true;
+        
+        bool lf = dfs(root->left);
+        if (!lf) return false;
 
-        inOrder(root->left);
-
-        if (pre) {
+        if (!pre) {
+            // do nothing
+        } else {
             if (pre->val >= root->val) {
-                ans = false;
-                return;
+                return false;
             }
         }
+
         pre = root;
 
-        inOrder(root->right);
+        return dfs(root->right);
     }
     bool isValidBST(TreeNode* root) {
-        inOrder(root);
-        return ans;
+        pre = NULL;
+        return dfs(root);
     }
 };
 ```
