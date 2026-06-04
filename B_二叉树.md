@@ -781,26 +781,29 @@ int small(TreeNode* root) {
 分析: 以root为根的二叉树的直径 = height(root->left) + height(root->right)
 
 ```c++
-class Solution {
+class Solution { 
 public:
-    int diameter; // 直径 = 左子树高度 + 右子树高度
+    int ans = 0;
 
-    int depth(TreeNode* root) {
-        if (!root)
-            return 0;
+    int depth(TreeNode* root) { // 高度
+        if(!root) return 0;
+        return 1 + max(depth(root->left), depth(root->right));
+    }
 
-        int L = depth(root->left);
-        int R = depth(root->right);
-
-        // cout << root->val << ' ' << L + R << endl; // 以root为根的最大直径
-        diameter = max(diameter, L + R);
-        
-        return 1 + max(L, R);
+    void dfs(TreeNode* root) {
+        if(!root) return;
+        // root直径 = 高度(root->left) + 高度(root->right)
+        ans = max(ans, depth(root->left) + depth(root->right));
+        // 左子树
+        dfs(root->left);
+        // 右子树
+        dfs(root->right);
     }
 
     int diameterOfBinaryTree(TreeNode* root) {
-        depth(root);
-        return diameter;
+        if(!root) return 0;
+        dfs(root);
+        return ans;
     }
 };
 ```
@@ -822,17 +825,25 @@ public:
 
 ```c++
 class Solution {
-    int ans = 0;
 public:
-    int count(TreeNode* root) { // count递归函数的定义: 以root为根的节点值的和
+    int ans=0;
+
+    int count(TreeNode* root) { // 节点总和
         if (!root) return 0;
-        int lc = count(root->left);
-        int rc = count(root->right);
-        ans += abs(lc-rc); // root的坡度 = abs(lc - rc)
-        return root->val + lc + rc;
+        return root->val + count(root->left) + count(root->right);
+    }
+    void dfs(TreeNode* root) {
+        if (!root) return;
+        // root坡度 = abs{ 节点总和(root->left) - 节点总和(root->right) }
+        ans += abs( count(root->left) - count(root->right) );
+        // 累加 左子树
+        dfs(root->left);
+        // 累加 右子树
+        dfs(root->right);
     }
     int findTilt(TreeNode* root) {
-        count(root);
+        if (!root) return 0;
+        dfs(root);
         return ans;
     }
 };
