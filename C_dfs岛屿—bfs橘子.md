@@ -185,25 +185,27 @@ class Solution(object):
 
         queue = []
 
-        # 先把烂橘子放入队列
+        # 1. 先把烂橘子放入队列
         for i in range(m):
             for j in range(n):
                 if grid[i][j] == 2:
                     queue.append((i,j))
         
         time = -1
-        # BFS
-        while queue:
+        
+        while queue: # 队列不空
+
+            # 执行该轮腐烂
             size = len(queue)
-            while size>0:
+            while size > 0:
                 size -= 1;
-                i, j = queue.pop(0)
-                for x,y in [(1,0), (-1,0), (0,1), (0,-1)]:
+                i, j = queue.pop(0) # 取出来腐烂的橘子
+                for x,y in [(1,0), (-1,0), (0,1), (0,-1)]: 
                     i_next = i+x
                     j_next = j+y
                     if 0<=i_next<m and 0<=j_next<n and grid[i_next][j_next]==1:
-                        grid[i_next][j_next] = 2
-                        queue.append((i_next, j_next))
+                        grid[i_next][j_next] = 2 # 腐烂它周边的橘子 && 并将烂橘子重新放入Queue
+                        queue.append((i_next, j_next)) # 
             time += 1
         
         for i in range(m):
