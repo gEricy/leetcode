@@ -544,6 +544,8 @@ void inorder(TreeNode* root) {
     }
     pre = root;
 
+    // do work
+
     inorder(root->right);
 }
 ```
