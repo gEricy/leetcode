@@ -1094,6 +1094,43 @@ public:
 判断一棵树是否为完全二叉树
 
 ```c++
+// 模板写法
+
+class Solution {
+public:
+    bool isCompleteTree(TreeNode* root) {
+        if (!root) return true;
+
+        queue<TreeNode*> Q;
+        Q.push(root);
+
+        while (!Q.empty()) {
+            int size = Q.size();
+            while (size--) {
+                TreeNode* cur = Q.front(); Q.pop();
+                if (!cur) { // 空节点，退出 (判断queue中是否有 非nil 节点)
+                    goto end;
+                }
+                Q.push(cur->left);  // (即使左右子树=nil)，也将 --> 左右子树直接进queue
+                Q.push(cur->right); // (即使左右子树=nil)，也将 --> 左右子树直接进queue
+            }
+        }
+
+end:
+        while (!Q.empty()) {
+            TreeNode* cur = Q.front(); Q.pop();
+            if (cur) return false; // 存在 非nil 节点 --> 不是完全二叉树
+        }
+
+        return true;
+    }
+};
+
+```
+
+```c++
+// 简单写法
+
 class Solution {
 public:
     bool isCompleteTree(TreeNode* root) {
