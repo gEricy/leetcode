@@ -532,14 +532,15 @@ public:
 
 ```C++
 TreeNode* pre; // 前驱节点
-
 void inorder(TreeNode* root) {
     if(!root)
         return;
     inorder(root->left);
 
-    {
-        /* -- work code -- */
+    if (!pre) { // 第一次进来，pre还是null
+        // do nothing
+    } else {
+        // do work
     }
     pre = root;
 
