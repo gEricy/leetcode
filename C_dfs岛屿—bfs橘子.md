@@ -170,6 +170,43 @@ public:
 
 # bfs 广度优先遍历
 
+```c++
+// 二叉树的层序遍历 bfs
+
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+
+        if (!root) return ans;
+
+        queue<TreeNode*> Q;
+
+        // 1. 先将root进入队列
+        Q.push(root); 
+
+        while (!Q.empty()) { // 循环退出条件
+
+            // 执行该轮遍历
+            vector<int> level;
+            int size = Q.size(); 
+            while (size--) {
+                TreeNode* cur = Q.front(); Q.pop(); // 取出来
+                level.push_back(cur->val);
+                if (cur->left) Q.push(cur->left); // 左子树进入Queue
+                if (cur->right) Q.push(cur->right);
+            }
+            ans.push_back(level);
+
+        }
+
+        return ans;
+    }
+};
+```
+
+### [994] 腐烂的橘子
+
 - 队列 queue
 
 ```python
@@ -193,7 +230,7 @@ class Solution(object):
         
         time = -1
         
-        while queue: # 队列不空
+        while queue: # 循环退出条件
 
             # 执行该轮腐烂
             size = len(queue)
@@ -205,7 +242,7 @@ class Solution(object):
                     j_next = j+y
                     if 0<=i_next<m and 0<=j_next<n and grid[i_next][j_next]==1:
                         grid[i_next][j_next] = 2 # 腐烂它周边的橘子 && 并将烂橘子重新放入Queue
-                        queue.append((i_next, j_next)) # 
+                        queue.append((i_next, j_next)) 
             time += 1
         
         for i in range(m):
