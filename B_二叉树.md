@@ -452,7 +452,7 @@ bool dfs(TreeNode* T1, TreeNode* T2) {
 }
 ```
 
-### 3.8. [226] 翻转二叉树
+### 3.8.😄 [226] 翻转二叉树
 
 注意：这个题目是“交换节点”，不是“交换值”
 
@@ -540,11 +540,11 @@ void inorder(TreeNode* root) {
     if (!pre) { // 第一次进来，pre还是null
         // do nothing
     } else {
-        // do work
+        // do work 😄
     }
     pre = root;
 
-    // do work
+    // do work 😄
 
     inorder(root->right);
 }
@@ -659,7 +659,7 @@ public:
 };
 ```
 
-### 4.5. 面试题 04.06. 后继者 
+### 4.5.😄 面试题 04.06. 后继者 
 
 设计一个算法，找出二叉搜索树中指定节点的“下一个”节点（也即中序后继）。
 
@@ -704,63 +704,41 @@ public:
 };
 ``` 
 
-### 4.6. [230] 二叉搜索树中第K小的元素
+### 4.6.😄 [230] 二叉搜索树中第K小的元素
 
-解法1: 中序遍历非递归
+
 
 ```c++
 class Solution {
 public:
-    int kthSmallest(TreeNode* root, int k) {
-        if (!root) return -1;
+    TreeNode* ans = NULL;
+    TreeNode* pre = NULL;
 
-        TreeNode* p = root;
-        stack<TreeNode*> S;
+    int kk; // 简化代码
 
-        while (p || !S.empty()) {
-            while (p) {
-                S.push(p);
-                p = p->left;
-            }
-            TreeNode* top = S.top(); S.pop(); k--;
-            if (k == 0) {
-                return top->val;
-            }
-            p = top->right;
+    void dfs(TreeNode* root) {
+        if (!root) return;
+
+        dfs(root->left);
+
+        if (!pre) {
+
+        } else {
+
         }
-
-        return -1;
-    }
-};
-```
-
-解法2: 中序遍历递归
-
-```c++
-class Solution {
-    TreeNode* pre = nullptr;
-    TreeNode* ans = nullptr;
-    int kk;
-public:
-    void inorder(TreeNode* root) {
-        if (!root) 
-            return;
-
-        inorder(root->left);
 
         pre = root;
         
-        kk--;
-        if (kk == 0) {
-            ans = pre;
+        if (--kk==0) {
+            ans = root;
             return;
         }
 
-        inorder(root->right);
+        dfs(root->right);
     }
     int kthSmallest(TreeNode* root, int k) {
         kk = k;
-        inorder(root);
+        dfs(root);
         return ans->val;
     }
 };
