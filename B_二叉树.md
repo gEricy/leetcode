@@ -673,20 +673,25 @@ public:
 
     TreeNode* pre=NULL;
     void dfs(TreeNode* root) {
+        if (ans) return; // 如果已经找到了，直接退出
+
         if (!root) return;
+
         dfs(root->left);
+        if (ans) return; // 如果已经找到了，直接退出
 
         if (!pre) {
             // do nothing
         } else {
             if (pre == pp) { // 当pre指向p时，则root指向p的后继
                 ans = root;
-                // return; // 这行必须注释!!!
+                return; // 如果已经找到了，直接退出
             }
         }
         pre = root;
 
         dfs(root->right);
+        if (ans) return; // 如果已经找到了，直接退出
     }
 
     TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
