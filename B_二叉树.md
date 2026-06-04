@@ -667,26 +667,31 @@ public:
 
 ```c++
 class Solution {
-    TreeNode* pre = NULL;
-    TreeNode* ans = NULL;
 public:
-    void inOrder(TreeNode* root, TreeNode* p) {
+    TreeNode* ans=NULL;
+    TreeNode* pp; // 临时存放p(简化代码编写)
+
+    TreeNode* pre=NULL;
+    void dfs(TreeNode* root) {
         if (!root) return;
+        dfs(root->left);
 
-        inOrder(root->left, p);
-
-        if (pre == p) { // 当pre指向p时，则root指向p的后继
-            ans = root;
-            // return;
+        if (!pre) {
+            // do nothing
+        } else {
+            if (pre == pp) { // 当pre指向p时，则root指向p的后继
+                ans = root;
+                // return; // 这行必须注释!!!
+            }
         }
         pre = root;
 
-        inOrder(root->right, p);
+        dfs(root->right);
     }
 
     TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
-        if (!root) return NULL;
-        inOrder(root, p);
+        pp = p;
+        dfs(root);
         return ans;
     }
 };
