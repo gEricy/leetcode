@@ -102,49 +102,49 @@ public:
 注意: 为了防止陆地格子在深度优先搜索中被重复遍历导致死循环，需要将遍历过的陆地格子标记为已经遍历过，下面的代码中我们设定值为 2 的格子为已经遍历过的陆地格子
 
 
-- 当 grid[x][y] 的`坐标非法` or `是大海`时，说明碰到边界，return 1
-- 当 grid[x][y] `是岛屿`时，将 grid[x][y]设置为2，表示已经访问过，继续递归
+- 当 grid[x][y] 的`越界` or `大海`时，说明碰到了岛屿的边界，return 1
+- 当 grid[x][y] `是岛屿=1`时，将 grid[x][y]设置为2，涂上颜色(表示已经访问过)，继续递归
 - 当 grid[x][y] `已经被访问过(=2)`时，不在重复访问，返回0
 
 ```c++
 class Solution {
-private:
+public:
     int m;
     int n;
-public:
     int dfs(vector<vector<int>>& grid, int x, int y) {
-        if (x < 0 || x >= m || y < 0 || y >= n)  // 不在岛屿内
-            return 1;
 
-        if (grid[x][y] == 0)  // 节点是大海
-            return 1;
+        { // 遇到了边 --> 周长+1
+            if (x<0 || x>=m || y<0 || y>=n) return 1; // 越界
+            if (grid[x][y] == 0) return 1; // 0 不是岛屿
+        }
 
-        if (grid[x][y] == 2) // 已经遍历过的陆地，不在重复执行了，直接返回0
-            return 0;
+        // 2 岛屿已涂上颜色 --> 不重复累加
+        if (grid[x][y] == 2) return 0;
 
-        grid[x][y] = 2; // 遍历过的陆地，标记为2，表示已经遍历过
+        grid[x][y] = 2; // 岛屿 --> 涂上颜色
 
-        return dfs(grid, x, y+1)
-                 + dfs(grid, x+1, y)
-                 + dfs(grid, x, y-1)
-                 + dfs(grid, x-1, y);
+        return
+            dfs(grid, x+1, y) +
+            dfs(grid, x-1, y) +
+            dfs(grid, x, y+1) +
+            dfs(grid, x, y-1);
     }
 
     int islandPerimeter(vector<vector<int>>& grid) {
-        m = grid.size();
-        n = grid[0].size();
-
         int ans = 0;
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
+        m = grid.size();
+        n = grid[0].size();
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (grid[i][j]==1) { // 是岛屿
                     ans += dfs(grid, i, j);
                 }
             }
         }
 
         return ans;
+        
     }
 };
 ```
