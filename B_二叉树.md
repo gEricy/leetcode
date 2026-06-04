@@ -871,6 +871,44 @@ public:
 class Solution {
 public:
     int ans = INT_MIN;
+
+    int count(TreeNode* root) { // 从当前节点出发，向下走一条链的最大和
+        if (!root) return 0;
+
+        int L = max(0, count(root->left));
+        int R = max(0, count(root->right));
+
+        return root->val + max(L, R);
+    }
+
+    void dfs(TreeNode* root) {
+        if (!root) return;
+
+        int RootVal = root->val;
+        int L = max(0, count(root->left));
+        int R = max(0, count(root->right));
+
+        ans = max(ans, RootVal);
+        ans = max(ans, RootVal + L);
+        ans = max(ans, RootVal + R);
+        ans = max(ans, RootVal + L + R);
+
+        dfs(root->left);
+        dfs(root->right);
+    }
+
+    int maxPathSum(TreeNode* root) {
+        if (!root) return 0;
+        dfs(root);
+        return ans;
+    }
+};
+```
+
+```c++
+class Solution {
+public:
+    int ans = INT_MIN;
     
     // maxGain: 计算二叉树中一个节点的最大贡献值，即以该节点为根，寻找“一条”路径，使得该路径上的节点值之和最大
     int maxGain(TreeNode* root) {
