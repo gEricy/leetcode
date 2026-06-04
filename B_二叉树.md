@@ -1174,19 +1174,31 @@ public:
 class Solution {
 public:
     Node* connect(Node* root) {
-        if (!root) return root;
+        if(!root) return root;
 
-        queue<Node*> Q; Q.push(root);
+        queue<Node*> Q;
+        Q.push(root);
 
         while (!Q.empty()) {
             int size = Q.size();
             Node* pre = NULL;
-            while (size--) {
+
+            while(size--) {
                 Node* cur = Q.front(); Q.pop();
-                if (pre) pre->next = cur; // 连接
-                pre = cur;
-                if (cur->left) Q.push(cur->left);
-                if (cur->right) Q.push(cur->right);
+
+                if (!pre) {
+                    pre = cur;
+                } else {
+                    pre->next = cur; // 连接
+                    pre = cur;
+                }
+
+                if (cur->left) {
+                    Q.push(cur->left);
+                }
+                if (cur->right) {
+                    Q.push(cur->right);
+                }
             }
         }
 
