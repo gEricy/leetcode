@@ -1267,6 +1267,30 @@ public:
 
 # 8. 路径 
 
+```c++
+// 查询所有路径
+
+vector<vector<TreeNode*>> allPath;
+void dfs(TreeNode* root, vector<TreeNode*> path) {
+    if (!root) return;
+
+    path.push_back(root);
+    if (!root->left && !root->right) { // root是叶子节点 --> 找到一个路径path
+        allPath.push_back(path); // 
+    }
+    dfs(root->left);
+    dfs(root->right);
+}
+
+void func(TreeNode* root) {
+    if (!root) return;
+
+    vector<TreeNode*> path;
+    dfs(root, path);
+}
+
+```
+
 ### 8.1. [112] 路径总和
 
 给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
@@ -1274,16 +1298,37 @@ public:
 ```c++
 class Solution {
 public:
-    bool dfs(TreeNode* root, int targetSum) {
-        if (!root) return false;
-        if (!root->left && !root->right && root->val == targetSum) { // 叶子节点
-            return true;
+    bool flag = false;
+    int m_targetSum;
+//    vector<vector<int>> allPath;
+    int path_sum(vector<int> path) {
+        int sum = 0;
+        for (auto v : path) {
+            sum += v;
         }
-        return dfs(root->left, targetSum-root->val) || dfs(root->right, targetSum-root->val);
+        return sum;
+    }
+    void dfs(TreeNode* root, vector<int> path) {
+        if (!root) return;
+
+        path.push_back(root->val);
+        if (!root->left && !root->right) { // 叶子节点，保存结果
+//            allPath.push_back(path);
+            if ( path_sum(path) == m_targetSum ) {
+                flag = true;
+                return;
+            }
+        }
+        dfs(root->left, path);
+        dfs(root->right, path);
     }
     bool hasPathSum(TreeNode* root, int targetSum) {
         if (!root) return false;
-        return dfs(root, targetSum);
+        m_targetSum = targetSum;
+        vector<int> path;
+        dfs(root, path);
+
+        return flag;
     }
 };
 ```
@@ -1294,22 +1339,35 @@ public:
 
 ```c++
 class Solution {
-    vector<vector<int>> ans;
 public:
-    void dfs(TreeNode* root, vector<int> path, int targetSum) {
-        if (!root) return;
-        path.push_back(root->val);
-        if (!root->left && !root->right && root->val == targetSum) {
-            ans.push_back(path);
+    int m_targetSum;
+    vector<vector<int>> allPath;
+    int path_sum(vector<int> path) {
+        int sum = 0;
+        for (auto v : path) {
+            sum += v;
         }
-        dfs(root->left, path, targetSum-root->val);
-        dfs(root->right, path, targetSum-root->val);
+        return sum;
+    }
+    void dfs(TreeNode* root, vector<int> path) {
+        if (!root) return;
+
+        path.push_back(root->val);
+        if (!root->left && !root->right) { // 叶子节点，保存结果
+            if ( path_sum(path) == m_targetSum ) {
+                allPath.push_back(path);
+                return;
+            }
+        }
+        dfs(root->left, path);
+        dfs(root->right, path);
     }
     vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
-        if (!root) return ans;
+        if (!root) return allPath;
+        m_targetSum = targetSum;
         vector<int> path;
-        dfs(root, path, targetSum);
-        return ans;
+        dfs(root, path);
+        return allPath;
     }
 };
 ```
@@ -1325,30 +1383,43 @@ public:
 ```c++
 class Solution {
 public:
-
-    vector<string> allpath; 
-
-    void dfs(TreeNode* root, string path) {
+    vector<vector<int>> allPath;
+    void dfs(TreeNode* root, vector<int> path) {
         if (!root) return;
 
-        if (path == "") {
-            path = to_string(root->val);
-        } else {
-            path = path + "->" + to_string(root->val);
-        }
-        
-        if (!root->left && !root->right) {
-            allpath.push_back(path);
+        path.push_back(root->val);
+        if (!root->left && !root->right) { // 叶子节点，保存结果
+            allPath.push_back(path);
             return;
         }
-
         dfs(root->left, path);
         dfs(root->right, path);
     }
 
     vector<string> binaryTreePaths(TreeNode* root) {
-        dfs(root, "");
-        return allpath;
+        vector<string> ans;
+        if (!root) return ans;
+
+        vector<int> path;
+        dfs(root, path);
+
+        // 上面[套模板]找到了allPath ---> 后续就是构造结果
+        for (auto p : allPath) {
+            ans.push_back(deal_path(p));
+        }
+
+        return ans;
+    }
+
+    string deal_path(vector<int> path) {
+        string ans;
+        for (auto p : path) {
+            if (ans != "") {
+                ans += "->";
+            }
+            ans += to_string(p);
+        }
+        return ans;
     }
 };
 ```
@@ -1375,24 +1446,40 @@ public:
 
 ```c++
 class Solution {
-    int ans = 0;
 public:
-    void dfs(TreeNode* root, int path) {
+    vector<vector<int>> allPath;
+    void dfs(TreeNode* root, vector<int> path) {
         if (!root) return;
 
-        path = path * 10 + root->val;
-
-        if (!root->left && !root->right) {
-            ans += path;
+        path.push_back(root->val);
+        if (!root->left && !root->right) { // 叶子节点，保存结果
+            allPath.push_back(path);
             return;
         }
-
         dfs(root->left, path);
         dfs(root->right, path);
     }
+
     int sumNumbers(TreeNode* root) {
-        dfs(root, 0);
+        int ans = 0;
+        if (!root) return ans;
+
+        vector<int> path;
+        dfs(root, path);
+
+        // 构造结果
+        for (auto p : allPath) {
+            ans += count_path(p);
+        }
         return ans;
+    }
+
+    int count_path(vector<int> path) {
+        int sum = 0;
+        for (auto v : path) {
+            sum = sum * 10 + v;
+        }
+        return sum;
     }
 };
 ```
