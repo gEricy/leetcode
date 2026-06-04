@@ -581,63 +581,41 @@ public:
 };
 ```
 
-### 4.2. [530] 二叉搜索树的最小绝对差 
+### 4.2. [530] 二叉搜索树的最小绝对差   [783] 二叉搜索树节点最小距离
 
 分析：二叉搜索树任意两个节点的最小绝对值差，一定是中序遍历相邻两个节点的差
 
 ```c++
 class Solution {
-    int ans = INT_MAX;
-    TreeNode* pre = NULL;
 public:
-    void inOrder(TreeNode* root) {
+    int ans=INT_MAX;
+
+    TreeNode* pre;
+    void dfs(TreeNode* root) {
         if (!root) return;
 
-        inOrder(root->left);
-
-        if (pre) {
-            ans = min(ans, abs(pre->val - root->val));
+        dfs(root->left);
+        if (!pre) {
+            // do nothing
+        } else {
+            int diff = root->val - pre->val;
+            if (diff < ans) {
+                ans = diff;
+            }
         }
+
         pre = root;
 
-        inOrder(root->right);
+        dfs(root->right);
     }
     int getMinimumDifference(TreeNode* root) {
-        inOrder(root);
+        pre = NULL;
+        dfs(root);
         return ans;
     }
 };
 ```
 
-### 4.3. [783] 二叉搜索树节点最小距离
-
-```c++
-class Solution {
-public:
-    int ans = INT_MAX;
-    TreeNode* pre = nullptr;
-    
-    void inOrder(TreeNode* root) {
-        if (!root) 
-            return;
-
-        inOrder(root->left);
-
-        if (pre) {
-            ans = min(ans, abs(pre->val - root->val));
-        }
-        
-        pre = root;
-
-        inOrder(root->right);
-    }
-    
-    int minDiffInBST(TreeNode* root) {
-        inOrder(root);
-        return ans;
-    }
-};
-```
 
 ### 4.4. 面试题 17.12. BiNode
 
@@ -647,30 +625,30 @@ public:
 
 ```c++
 class Solution {
-    TreeNode* head = NULL; // 链表的头结点
-    TreeNode* pre = NULL;
 public:
-    void inOrder(TreeNode* root) {
+    TreeNode* head = NULL;
+
+    TreeNode* pre = NULL;
+    void dfs(TreeNode* root) {
         if (!root) return;
 
-       inOrder(root->left);
+        dfs(root->left);
 
-       if (!pre) {
+        if (!pre) { // 之前还没有节点: 给head初始化
             head = root;
-       } else {
-            pre->left = NULL;
-            pre->right = root;
-       }
-       pre = root;
+        } else {
+            pre->right = root; // right链表连接
+            pre->left = NULL;  // left设置为NULL
+        }
+        pre = root;
 
-       inOrder(root->right);
+        dfs(root->right);
     }
     TreeNode* convertBiNode(TreeNode* root) {
         if (!root) return NULL;
 
-        inOrder(root);
-        
-        // 最后一个节点设置为NULL
+        dfs(root);
+
         pre->left = NULL;
         pre->right = NULL;
 
