@@ -12,7 +12,7 @@
 
 
 ```python
-class Solution:
+class Solution(object):
     def orangesRotting(self, grid):
         m = len(grid)
         n = len(grid[0])
@@ -34,7 +34,8 @@ class Solution:
         # BFS
         while queue:
             size = len(queue)
-            for _ in range(size):
+            while size>0:
+                size -= 1;
                 i, j = queue.pop(0)
                 for x,y in [(1,0), (-1,0), (0,1), (0,-1)]:
                     i_next = i+x
