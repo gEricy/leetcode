@@ -1044,6 +1044,11 @@ public:
 
 层序遍历，queue中保存的元素是 <TreeNode*, index>
 
+- 恶心的点：index要使用 unsigned int
+
+- 最左边的节点  l_index==0
+- 最右边的节点  size==0
+
 ```cpp
 struct IndexTreeNode {
     TreeNode* node;
