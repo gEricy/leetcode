@@ -392,6 +392,53 @@ int main(){
 }
 ```
 
+### 2.5.🔥 [347]. 前 K 个高频元素
+
+```
+给你一个整数数组 nums 和一个整数 k ，请你返回其中出现频率前 k 高的元素。你可以按 任意顺序 返回答案。
+示例 1：
+	输入：nums = [1,1,1,2,2,3], k = 2
+	输出：[1,2]
+```
+
+```c++
+class Solution {
+public:
+    struct cmp {
+        bool operator()(pair<int, int>& m, pair<int, int>& n) {
+            return m.second > n.second; // 次数比较
+        }
+    };
+
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        // 词频统计
+        map<int, int> hash;
+        for (auto& v : nums) { 
+            hash[v]++;
+        }
+
+        // 大根堆
+        priority_queue<pair<int, int>, vector<pair<int, int>>, cmp> q;
+        for (auto& [num, count] : hash) {
+            if (q.size() == k) { // 堆满了: 插入堆，再弹出堆 ---> (堆中还是保存最大的k个数据)
+                q.emplace(pair<int, int>(num, count));
+                q.pop();
+            } else { // 堆没满，直接插入
+                q.emplace(pair<int, int>(num, count));
+            }
+        }
+
+        // 依次取出堆的头，就是词频最多的数
+        vector<int> ret;
+        while (!q.empty()) {
+            ret.emplace_back(q.top().first);
+            q.pop();
+        }
+
+        return ret;
+    }
+};
+```
 
 ---
 
