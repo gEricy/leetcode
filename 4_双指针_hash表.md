@@ -275,32 +275,9 @@ public:
 ---
 
 
-### 8. 两数之和
+### 8. hash表
 
-#### 🔥[49] 字母异位词分组
-
-hash表的应用
-
-```python
-class Solution(object):
-    def groupAnagrams(self, strs):
-        """
-        :type strs: List[str]
-        :rtype: List[List[str]]
-        """
-        hash = {} # {排序后的str, []}
-
-        for s in strs:
-            key = "".join(sorted(s))  # 字符串排序
-            if key in hash: # 找到，存入结果集
-                hash[key].append(s)
-            else: # 未找到，初始化结果集
-                hash[key] = [s]
-        
-        return hash.values()
-```
-
-#### 8.1. [1] 两数之和  
+#### 🔥[1] 两数之和  
 
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -326,6 +303,38 @@ class Solution(object):
         
         return [-1,-1]
 ```
+
+#### 🔥[49] 字母异位词分组
+
+hash表的应用
+
+```python
+class Solution(object):
+    def groupAnagrams(self, strs):
+        """
+        :type strs: List[str]
+        :rtype: List[List[str]]
+        """
+        hash = {} # {排序后的str, []}
+
+        for s in strs:
+            key = "".join(sorted(s))  # 字符串排序
+            if key in hash: # 找到，存入结果集
+                hash[key].append(s)
+            else: # 未找到，初始化结果集
+                hash[key] = [s]
+        
+        return hash.values()
+```
+
+#### 🔥【128】最长连续序列
+
+```python
+```
+
+---
+---
+---
 
 
 #### 8.2. [167] 两数之和 II - 输入有序数组
