@@ -327,6 +327,52 @@ class Solution(object):
         return hash.values()
 ```
 
+#### 🔥 [438]. 找到字符串中所有字母异位词
+
+滑动窗口 + hash表
+
+```python
+
+class Solution(object): # [a,z] 一共26个字符
+    def findAnagrams(self, s, p):
+        """
+        :type s: str
+        :type p: str
+        :rtype: List[int]
+        """
+        
+        pLen = len(p)
+        sLen = len(s)
+
+        if pLen > sLen:
+            return []
+
+        def char_index(ch):
+            return ord(ch) - ord('a')
+        
+        count_p = [0] * 26 # 替代hash表  
+        count_s = [0] * 26
+
+
+        # 初始化窗口
+        for i in range(pLen):            
+            count_p[char_index(p[i])] += 1
+            count_s[char_index(s[i])] += 1
+        
+        ans = []
+
+        if count_p == count_s:
+            ans.append(0)
+        
+        for i in range(pLen, sLen): 
+            count_s[char_index(s[i])] += 1
+            count_s[char_index(s[i-pLen])] -= 1
+            if count_p == count_s:
+                ans.append(i-pLen+1)
+        
+        return ans
+```
+
 #### 🔥【128】最长连续序列
 
 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
