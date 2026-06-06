@@ -350,7 +350,7 @@ class Solution(object): # [a,z] 一共26个字符
         def char_index(ch):
             return ord(ch) - ord('a')
         
-        count_p = [0] * 26 # 替代hash表  
+        count_p = [0] * 26 # 替代hash表: 统计词频个数
         count_s = [0] * 26
 
 
@@ -365,8 +365,8 @@ class Solution(object): # [a,z] 一共26个字符
             ans.append(0)
         
         for i in range(pLen, sLen): 
-            count_s[char_index(s[i])] += 1
-            count_s[char_index(s[i-pLen])] -= 1
+            count_s[char_index(s[i])] += 1       # 新元素进入窗口(个数+1)
+            count_s[char_index(s[i-pLen])] -= 1  # 旧元素弹出窗口(个数-1)
             if count_p == count_s:
                 ans.append(i-pLen+1)
         
